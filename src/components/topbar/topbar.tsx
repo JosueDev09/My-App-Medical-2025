@@ -42,7 +42,7 @@ export default function TopBar() {
             <div className="relative cursor-pointer">
               <Bell className="w-6 h-6 text-gray-700" />
               {notifications > 0 && (
-                <span className="absolute -top-2 -left-3 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                <span className="absolute -top-2 -left-3 bg-red-500 text-white text-xs  px-1.5 py-0.5">
                   {notifications}
                 </span>
               )}
@@ -81,9 +81,6 @@ export default function TopBar() {
             <DropdownMenuLabel>Usuario</DropdownMenuLabel>
             <DropdownMenuItem>
               <User className="w-4 h-4 mr-2" /> Perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell className="w-4 h-4 mr-2" /> Notificaciones
             </DropdownMenuItem>
             <DropdownMenuItem>
               <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión

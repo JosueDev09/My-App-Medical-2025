@@ -9,7 +9,6 @@ const routes = [
   { name: 'Citas', path: '/citas', icon: <Calendar size={20} /> },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} /> },
   { name: 'Médicos', path: '/medicos', icon: <Stethoscope  size={20} /> },
-  { name: 'Perfil', path: '/perfil', icon: <User size={20} /> },
 ];
 
 export default function Sidebar() {

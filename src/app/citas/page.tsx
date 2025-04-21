@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table/table";
 //import { Button } from "@/components/ui/button";
-import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock } from "lucide-react";
+import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity } from "lucide-react";
 
 const citas = [
   {
@@ -16,6 +16,7 @@ const citas = [
     fecha: "2025-04-22",
     hora: "10:00 AM",
     doctor: "Dr. Gómez",
+    especialidad:"Medico Familiar",
     estado: "Confirmada",
   },
   {
@@ -24,6 +25,7 @@ const citas = [
     fecha: "2025-04-23",
     hora: "2:00 PM",
     doctor: "Dra. Ramírez",
+    especialidad:"Pediatra",
     estado: "Pendiente",
   },
 ];
@@ -66,6 +68,12 @@ export default function CitasPage() {
             </TableHead>
             <TableHead className="text-left font-semibold border-r border-gray-200">
             <div className="flex items-center gap-2">
+              <Activity  className="w-4 h-4 text-muted-foreground" />
+                 Especialidad
+            </div>
+            </TableHead>
+            <TableHead className="text-left font-semibold border-r border-gray-200">
+            <div className="flex items-center gap-2">
               <Eye  className="w-4 h-4 text-muted-foreground" />
                  Estado
             </div>
@@ -80,6 +88,7 @@ export default function CitasPage() {
                 <TableCell className="border-r  border-gray-200">{cita.fecha}</TableCell>
                 <TableCell className="border-r  border-gray-200">{cita.hora}</TableCell>
                 <TableCell className="border-r  border-gray-200">{cita.doctor}</TableCell>
+                <TableCell className="border-r  border-gray-200">{cita.especialidad}</TableCell>
                 <TableCell className="border-r  border-gray-200">
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${
