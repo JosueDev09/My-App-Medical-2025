@@ -2,15 +2,21 @@
 
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
-import {LayoutDashboard,Calendar,Users,Stethoscope,User} from "lucide-react";
+import {LayoutDashboard,Calendar,Users,Stethoscope,User, Activity} from "lucide-react";
+
+const userRole = 'doctor';  // Este valor debe provenir del sistema de autenticación
 
 const routes = [
-  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
-  { name: 'Citas', path: '/citas', icon: <Calendar size={20} /> },
-  { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} /> },
-  { name: 'Médicos', path: '/medicos', icon: <Stethoscope  size={20} /> },
+  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['admin', 'doctor'] },
+  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['admin', 'doctor'] },
+  { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['admin', 'doctor'] },
+  { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['admin'] },
+  { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['admin'] },
+  { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor'] },
 ];
 
+// Filtra las rutas según el rol del usuario
+const filteredRoutes = routes.filter(route => route.roles.includes(userRole));
 export default function Sidebar() {
   const pathname = usePathname();
 
@@ -18,7 +24,7 @@ export default function Sidebar() {
     <aside className="w-64 h-screen fixed bg-gray-950 border-r px-4 py-6">
       <h1 className="text-2xl text-white font-bold mb-8">Esymbel Health</h1>
       <nav className="flex flex-col gap-8">
-        {routes.map(route => (
+        {filteredRoutes.map(route => (
           <NavLink
             key={route.path}
             href={route.path}
