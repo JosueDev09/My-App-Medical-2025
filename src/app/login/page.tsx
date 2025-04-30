@@ -1,12 +1,11 @@
-'use client';
+"use client";
 import { useState } from 'react';
 import Image from 'next/image';
-import { signIn } from "next-auth/react";
+
+import { SignIn } from "@/components/ui/signin-google/signin-google"; 
 
 export default function LoginPage() {
-  const handleLogin = () => {
-    signIn("google"); // Esto abrirá la ventana emergente de Google para autenticar al usuario
-  };
+
   const [isLogin, setIsLogin] = useState(true);
 
   return (
@@ -59,12 +58,8 @@ export default function LoginPage() {
                 >
                   Entrar
                 </button>
-                <button
-                  onClick={handleLogin}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
-                >
-                  Iniciar sesión con Google
-                </button>
+               <SignIn  />
+               
               </form>
               <button
                 className="mt-4 text-sm text-blue-800 underline"

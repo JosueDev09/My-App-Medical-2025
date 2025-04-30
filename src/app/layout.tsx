@@ -4,7 +4,9 @@ import '../styles/globals.css';
 import TopBar from "@/components/topbar/topbar";
 import Sidebar from '@/components/sidebar';
 import { usePathname } from "next/navigation";
-import { SessionProvider } from "next-auth/react";
+import "@/lib/fontawesome"; // asegúrate que la ruta sea correcta
+
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
