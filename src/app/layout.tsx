@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Ocultar sidebar y topbar si estamos en login
   const hideLayout = pathname === "/login";
   return (
-    <SessionProvider>
+   
     <html lang="es">
       <body className={hideLayout ? "min-h-screen w-full" : "min-h-screen flex"}>
         {!hideLayout && <Sidebar />}
@@ -33,6 +33,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
       </body>
     </html>
-    </SessionProvider>
+   
   );
 }

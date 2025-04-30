@@ -1,4 +1,6 @@
-import { db } from '@/lib/db.js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { db } from '@/lib/db'; // Asegúrate de que la ruta sea correcta
 import { NextRequest, NextResponse } from 'next/server';
 // Ajusta esta ruta según tu proyecto
 
