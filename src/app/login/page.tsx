@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 import { SignIn } from "@/components/ui/signin-google/signin-google"; 
+import { RegisterGoogle } from "@/components/ui/register-google/register-google";
 
 export default function LoginPage() {
 
@@ -10,16 +11,16 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen justify-center items-center px-4">
-      <div className="relative bg-white rounded shadow-lg overflow-hidden max-w-4xl w-full h-[600px] flex">
+  <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto md:h-[600px] flex flex-col md:flex-row">
         
         {/* Panel de imagen fijo (25%) */}
-        <div className="w-1/2 bg-blue-950 text-white flex flex-col justify-center items-center p-8">
+        <div className="md:w-1/2 w-full bg-blue-950 text-white flex flex-col justify-center items-center p-8">
           <Image
             src={isLogin ? "/doct.svg" : "/loginDoct.png"}
             alt="Bienvenido"
             width={380}
             height={380}
-            className="mb-4"
+            className="mb-4 float-animation"
           />
           <h2 className="text-xl font-semibold mb-2 text-center">
             {isLogin ? 'Bienvenido' : '¡Únete ahora!'}
@@ -32,7 +33,7 @@ export default function LoginPage() {
         </div>
 
         {/* Panel deslizante (75%) */}
-        <div className="relative w-3/4 overflow-hidden">
+        <div className="relative md:w-1/2 w-full overflow-hidden">
           <div
             className={`flex w-[200%] h-full transition-transform duration-700 ease-in-out ${
               isLogin ? 'translate-x-0' : '-translate-x-1/2'
@@ -45,12 +46,12 @@ export default function LoginPage() {
                 <input
                   type="email"
                   placeholder="Correo"
-                  className="w-full p-2 border rounded"
+                   className="w-full p-3 border rounded text-sm"
                 />
                 <input
                   type="password"
                   placeholder="Contraseña"
-                  className="w-full p-2 border rounded"
+                   className="w-full p-3 border rounded text-sm"
                 />
                 <button
                   type="submit"
@@ -99,6 +100,7 @@ export default function LoginPage() {
                 >
                   Registrarse
                 </button>
+                <RegisterGoogle />
               </form>
               <button
                 className="mt-4 text-sm text-blue-800 underline"
