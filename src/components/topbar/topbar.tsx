@@ -33,8 +33,8 @@ export default function TopBar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white border-b shadow-md">
-      <h1 className="text-2xl font-bold text-gray-900">Esymbel Health</h1>
+    <div className="flex items-center justify-between p-4">
+      <h1 className="text-2xl font-bold text-gray-900 ml-10">Esymbel Health</h1>
       <div className="flex items-center gap-4">
         {/* Notificaciones */}
         <DropdownMenu>

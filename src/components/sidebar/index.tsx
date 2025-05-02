@@ -1,5 +1,5 @@
 'use client';
-
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
 import {LayoutDashboard,Calendar,Users,Stethoscope,User, Activity} from "lucide-react";
@@ -17,12 +17,13 @@ const routes = [
 
 // Filtra las rutas según el rol del usuario
 const filteredRoutes = routes.filter(route => route.roles.includes(userRole));
-export default function Sidebar() {
+export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;onToggle: () => void; sidebarRef: React.RefObject<HTMLDivElement | null>;}) {
   const pathname = usePathname();
-
+ 
   return (
-    <aside className="w-64 h-screen fixed bg-gray-950 border-r px-4 py-6">
-      <h1 className="text-2xl text-white font-bold mb-8">Esymbel Health</h1>
+    <aside  ref={sidebarRef} className={`w-64 h-screen fixed bg-gray-950 border-r px-4 py-6 transition-transform duration-300 ease-in-out z-50  ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+     md:translate-x-0 `}>
+      <h1 className="text-2xl text-white font-bold mb-8 ml-12 lg:mr-1">Esymbel Health</h1>
       <nav className="flex flex-col gap-8">
         {filteredRoutes.map(route => (
           <NavLink
