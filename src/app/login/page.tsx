@@ -11,7 +11,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen justify-center items-center px-4">
-  <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto md:h-[600px] flex flex-col md:flex-row">
+       <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto flex flex-col md:flex-row">
         
         {/* Panel de imagen fijo (25%) */}
         <div className="md:w-1/2 w-full bg-blue-950 text-white flex flex-col justify-center items-center p-8">
@@ -40,9 +40,9 @@ export default function LoginPage() {
             }`}
           >
             {/* Formulario de Login */}
-            <div className="w-1/2 p-8 flex flex-col justify-center bg-white">
+            <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
               <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
-              <form className="space-y-4">
+              <form className="space-y-4 w-full max-w-sm">
                 <input
                   type="email"
                   placeholder="Correo"
@@ -63,7 +63,7 @@ export default function LoginPage() {
                
               </form>
               <button
-                className="mt-4 text-sm text-blue-800 underline"
+                className="mt-4 text-sm text-blue-800 underline cursor-pointer"
                 onClick={() => setIsLogin(false)}
               >
                 ¿No tienes cuenta? Regístrate
@@ -71,9 +71,9 @@ export default function LoginPage() {
             </div>
 
             {/* Formulario de Registro */}
-            <div className="w-1/2 p-8 flex flex-col justify-center bg-white">
+            <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
               <h1 className="text-2xl font-bold mb-4 text-center">Registrarse</h1>
-              <form className="space-y-4">
+              <form className="space-y-4 w-full max-w-sm">
                 <input
                   type="text"
                   placeholder="Nombre completo"
@@ -103,7 +103,7 @@ export default function LoginPage() {
                 <RegisterGoogle />
               </form>
               <button
-                className="mt-4 text-sm text-blue-800 underline"
+                className="mt-4 text-sm text-blue-800 underline cursor-pointer"
                 onClick={() => setIsLogin(true)}
               >
                 ¿Ya tienes cuenta? Inicia sesión
