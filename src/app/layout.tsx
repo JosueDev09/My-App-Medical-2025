@@ -12,10 +12,11 @@ import {Menu} from "lucide-react";
 
 
 
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-
+  
   const pathname = usePathname();
   const hideLayout = ['/login', '/registro'].includes(pathname)
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="min-h-screen w-full bg-gray-100">
+   
         {/* Sidebar */}
         {!hideLayout && (
           <Sidebar
@@ -76,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </div>
+        
       </body>
     </html>
   );

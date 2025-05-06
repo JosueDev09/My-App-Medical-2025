@@ -7,8 +7,8 @@ import {LayoutDashboard,Calendar,Users,Stethoscope,User, Activity} from "lucide-
 const userRole = 'doctor';  // Este valor debe provenir del sistema de autenticación
 
 const routes = [
-  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['admin', 'doctor'] },
-  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['admin', 'doctor'] },
+  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['admin', 'doctor','paciente'] },
+  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['admin', 'doctor','paciente'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['admin', 'doctor'] },
   { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['admin'] },
   { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['admin'] },

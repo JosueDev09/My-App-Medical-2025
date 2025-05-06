@@ -30,21 +30,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           strNombre: user.name,
         }),
       });
-      
-      const { tipo } = await res.json(); // 'registro' o 'login'
 
-      // Llama a la API para registrar el log (sin usar headers() aquí)
-      await fetch(`${process.env.NEXT_PUBLIC_URL}/api/log-acceso`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          strCorreo: user.email,
-          strNombre: user.name,
-          tipo: tipoAccion,
-        }),
-      });
+      const data = await res.json();
+
+      (user as any).rol = data.rol; // 'doctor'
+      (user as any).id = data.id;   // 5
+      
+      // const { tipo } = await res.json(); // 'registro' o 'login'
+
+      // // Llama a la API para registrar el log (sin usar headers() aquí)
+      // await fetch(`${process.env.NEXT_PUBLIC_URL}/api/log-acceso`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     strCorreo: user.email,
+      //     strNombre: user.name,
+      //     tipo: tipoAccion,
+      //   }),
+      // });
 
       return true;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.rol = (user as any).rol;
+        token.id = (user as any).id;
+      }
+      return token;
+    },
   },
-});
+}); 

@@ -27,16 +27,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [rows1]: any = await db.query(
-      "SELECT strTipo_Accion AS tipo FROM tbUsuarios WHERE strCorreo = ?",
+    const [userRows]: any = await db.query(
+      "SELECT id, strTipo_Accion AS tipo, intRol FROM tbUsuarios WHERE strCorreo = ?",
       [strCorreo]
     );
-    const tipo = rows1[0]?.tipo || "LOGIN";
 
+    const user = userRows[0];
 
-    return Response.json({ success: true, tipo });
+    if (!user) {
+      return new Response("Usuario no encontrado", { status: 404 });
+    }
+
+    return Response.json({
+      success: true,
+      tipo: user.tipo || "LOGIN",
+      rol: mapRol(user.intRol), // ← para que te dé 'doctor', 'admin', etc.
+      id: user.id,
+    });
   } catch (error) {
     console.error("Error en guardar-usuario:");
     return new Response("Error interno", { status: 500 });
+  }
+}
+
+// Mapea el número a un texto entendible
+function mapRol(intRol: number): string {
+  switch (intRol) {
+    case 1: return "Super Administrador";
+    case 2: return "Administrador";
+    case 3: return "Paciente";
+    case 4: return "Doctor";
+    default: return "Paciente";
   }
 }
