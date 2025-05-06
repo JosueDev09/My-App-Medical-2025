@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
 import {LayoutDashboard,Calendar,Users,Stethoscope,User, Activity} from "lucide-react";
+import { useSession } from 'next-auth/react';
 
-const userRole = 'doctor';  // Este valor debe provenir del sistema de autenticación
+ // Este valor debe provenir del sistema de autenticación
 
 const routes = [
-  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['admin', 'doctor','paciente'] },
-  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['admin', 'doctor','paciente'] },
+  { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['admin', 'doctor','Paciente'] },
+  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['admin', 'doctor','Paciente'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['admin', 'doctor'] },
   { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['admin'] },
   { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['admin'] },
@@ -16,10 +17,11 @@ const routes = [
 ];
 
 // Filtra las rutas según el rol del usuario
-const filteredRoutes = routes.filter(route => route.roles.includes(userRole));
+
 export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;onToggle: () => void; sidebarRef: React.RefObject<HTMLDivElement | null>;}) {
   const pathname = usePathname();
- 
+  const { data: session, status } = useSession();
+  const filteredRoutes = routes.filter(route => route.roles.includes(session?.user.rol as string));
   return (
     <aside  ref={sidebarRef} className={`w-64 h-screen fixed bg-gray-950 border-r px-4 py-6 transition-transform duration-300 ease-in-out z-50  ${isOpen ? 'translate-x-0' : '-translate-x-full'}
      md:translate-x-0 `}>

@@ -1,8 +1,9 @@
-// src/components/topbar/TopBar.tsx
+'use client'
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,DropdownMenuSeparator } from "@/components/ui/dropdown-menu/dropdown-menu";
 import { Bell, User, LogOut, CalendarCheck, Clock, UserX2, } from "lucide-react";
-import { signOut } from "@/auth";
+import { signOut } from "next-auth/react";
+import { use } from "react";
 export default function TopBar() {
   const notifications = 3;
   const notificationList = [
@@ -82,7 +83,7 @@ export default function TopBar() {
             <DropdownMenuItem>
               <User className="w-4 h-4 mr-2" /> Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' } as any)}>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
               <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

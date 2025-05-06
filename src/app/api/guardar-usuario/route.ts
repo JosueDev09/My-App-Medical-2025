@@ -1,15 +1,33 @@
 // ✅ API para guardar usuario (registro o login)
 // Archivo: app/api/guardar-usuario/route.ts
 
-import { NextRequest } from "next/server";
+
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+
 
 export async function POST(req: NextRequest) {
   try {
-    const { strCorreo, strNombre } = await req.json();
+    const { strCorreo, strNombre, strUsuario, strContra } = await req.json();
 
+     // Validaciones básicas
+    //  if (!strCorreo || !strNombre || !strUsuario || !strContra) {
+    //   return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
+    // }
+
+    // Verificar si ya existe el correo o username
+    // const existe = await db.query( "SELECT id FROM tbUsuarios WHERE strCorreo = ? OR strUsername = ?",[strCorreo, strUsuario]);
+    
+
+    // if (existe.length > 0) {
+    //   return new Response(
+    //     JSON.stringify({ success: false, message: "El correo o usuario ya existe." }),
+    //     { status: 409 }
+    //   );
+    // }
+
+   // const params = [strCorreo, strNombre,strUsuario, strContra];
     const params = [strCorreo, strNombre];
-
     // console.log("strCorreo", strCorreo);
     // console.log("strNombre", strNombre);
 
@@ -40,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     return Response.json({
       success: true,
-      tipo: user.tipo || "LOGIN",
+      tipo: user.tipo,
       rol: mapRol(user.intRol), // ← para que te dé 'doctor', 'admin', etc.
       id: user.id,
     });
@@ -48,7 +66,7 @@ export async function POST(req: NextRequest) {
     console.error("Error en guardar-usuario:");
     return new Response("Error interno", { status: 500 });
   }
-}
+} 
 
 // Mapea el número a un texto entendible
 function mapRol(intRol: number): string {

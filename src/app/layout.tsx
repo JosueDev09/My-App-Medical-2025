@@ -9,6 +9,7 @@ import Sidebar from '@/components/sidebar';
 import { usePathname } from "next/navigation";
 import "@/lib/fontawesome"; // asegúrate que la ruta sea correcta
 import {Menu} from "lucide-react";
+import { SessionProvider } from 'next-auth/react';
 
 
 
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="min-h-screen w-full bg-gray-100">
-   
+      <SessionProvider>
         {/* Sidebar */}
         {!hideLayout && (
           <Sidebar
@@ -78,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </div>
-        
+        </SessionProvider>
       </body>
     </html>
   );
