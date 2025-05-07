@@ -4,7 +4,6 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { db } from "@/lib/db"; // tu conexión MySQL
 import CredentialsProvider from "next-auth/providers/credentials";
-export const runtime = "nodejs";
  
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

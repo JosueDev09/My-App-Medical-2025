@@ -5,18 +5,45 @@ import Image from 'next/image';
 import Swal from 'sweetalert2';
 import { SignIn } from "@/components/ui/signin-google/signin-google"; 
 import { RegisterGoogle } from "@/components/ui/register-google/register-google";
-
+import { useRouter } from 'next/navigation';
 export default function LoginPage() {
 
   const [isLogin, setIsLogin] = useState(true);
 
   const { data: session, status } = useSession({ required: false });
   const [alertShown, setAlertShown] = useState(false);
+  const [strUsuario, setUsuario] = useState("");
+  const [strContra, setContra] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+ 
 
-   // Login form state
-  //  const [identificador, setIdentificador] = useState('');
-  //  const [password, setPassword] = useState('');
-  //  const [loginError, setLoginError] = useState('');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ strUsuario, strContra }),
+    });
+    console.log("res", res);
+
+    const data = await res.json();
+
+    
+    if (res.ok && data?.token) {
+      console.log("entro", data.token);
+      router.push("/dashboard");
+     // window.location.href = '/dashboard';
+    } else {
+      // ❌ Error de login
+     // window.location.href = '/login';
+      setError(data?.error || "Error al iniciar sesión.");
+    }
+  };
+
+   
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user && !alertShown) {
@@ -35,23 +62,6 @@ export default function LoginPage() {
     }
   }, [session, status, alertShown]);
 
-  // Manejador de login
-  // const handleLogin = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setLoginError('');
-
-  //   const res = await signIn('credentials', {
-  //     redirect: false,
-  //     identificador,
-  //     password,
-  //   });
-
-  //   if (res?.ok) {
-  //     window.location.href = '/dashboard';
-  //   } else {
-  //     setLoginError('Usuario o contraseña incorrectos');
-  //   }
-  // };
 
   return (
     <div className="flex min-h-screen justify-center items-center px-4">
@@ -86,17 +96,21 @@ export default function LoginPage() {
             {/* Formulario de Login */}
             <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
               <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
-              <form  className="space-y-4 w-full max-w-sm"> {/* //onSubmit={handleLogin} } */}
-              {/* {loginError && <div className="text-red-600 text-sm">{loginError}</div>} */}
+              <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
+                {error && <div className="text-red-600 text-sm">{error}</div>}
                 <input
                   type="text"
                   placeholder="Correo o Usuario"
                    className="w-full p-3 border rounded text-sm"
+                   value={strUsuario}
+                   onChange={(e) => setUsuario(e.target.value)}
                 />
                 <input
                   type="password"
                   placeholder="Contraseña"
-                   className="w-full p-3 border rounded text-sm"
+                  className="w-full p-3 border rounded text-sm"
+                  value={strContra}
+                  onChange={(e) => setContra(e.target.value)}
                 />
                 <button
                   type="submit"
