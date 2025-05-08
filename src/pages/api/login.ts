@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SignJWT } from 'jose';
 import { db } from '@/lib/db';
+import bcrypt from 'bcrypt';
 
 const JWT_SECRET = process.env.AUTH_SECRET || 'secret';
 const getJwtSecret = () => new TextEncoder().encode(JWT_SECRET);
@@ -13,6 +14,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Validar usuario (SP o lógica personalizada)
   const [spRows]: any = await db.query("CALL sp_ValidarLoginUsuario (?)", [strUsuario]);
   const user = spRows[0]?.[0];
+
+  const isvalidPassword = await bcrypt.compare(strContra, user.strContra);
+  if (!isvalidPassword) {
+    return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+  }
 
   if (!user) {
     return res.status(404).json({ error: 'Usuario no encontrado' });

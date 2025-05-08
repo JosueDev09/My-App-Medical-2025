@@ -6,16 +6,19 @@ import Swal from 'sweetalert2';
 import { SignIn } from "@/components/ui/signin-google/signin-google"; 
 import { RegisterGoogle } from "@/components/ui/register-google/register-google";
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from "lucide-react";
+import { LoginImage } from "@/components/images/loginImage";
 export default function LoginPage() {
 
   const [isLogin, setIsLogin] = useState(true);
-
+  const [showPassword, setShowPassword] = useState(false);
   const { data: session, status } = useSession({ required: false });
   const [alertShown, setAlertShown] = useState(false);
   const [strUsuario, setUsuario] = useState("");
   const [strContra, setContra] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
  
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -73,23 +76,8 @@ export default function LoginPage() {
        <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto flex flex-col md:flex-row">
         
         {/* Panel de imagen fijo (25%) */}
-        <div className="md:w-1/2 w-full bg-blue-950 text-white flex flex-col justify-center items-center p-8">
-          <Image
-            src={isLogin ? "/doct.svg" : "/loginDoct.png"}
-            alt="Bienvenido"
-            width={380}
-            height={380}
-            className="mb-4 float-animation"
-          />
-          <h2 className="text-xl font-semibold mb-2 text-center">
-            {isLogin ? 'Bienvenido' : '¡Únete ahora!'}
-          </h2>
-          <p className="text-center text-sm">
-            {isLogin
-              ? 'Gestiona tus citas de forma simple y eficiente.'
-              : 'Crea tu cuenta para comenzar a gestionar tus citas.'}
-          </p>
-        </div>
+        
+        <LoginImage isLogin={isLogin} />  
 
         {/* Panel deslizante (75%) */}
         <div className="relative md:w-1/2 w-full overflow-hidden">
@@ -111,12 +99,19 @@ export default function LoginPage() {
                    onChange={(e) => setUsuario(e.target.value)}
                 />
                 <input
-                  type="password"
-                  placeholder="Contraseña"
-                  className="w-full p-3 border rounded text-sm"
-                  value={strContra}
-                  onChange={(e) => setContra(e.target.value)}
-                />
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Contraseña"
+                    className="w-full p-3 border rounded text-sm pr-10"
+                    value={strContra}
+                    onChange={(e) => setContra(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute mt-[-17px] ml-[-30px]  top-1/2  transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 <button
                   type="submit"
                   className="w-full bg-blue-950 text-white py-2 rounded cursor-pointer"
