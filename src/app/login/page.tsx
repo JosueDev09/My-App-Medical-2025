@@ -1,57 +1,21 @@
 "use client";
 import { useState,useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import Image from 'next/image';
+import { useSession} from 'next-auth/react';
 import Swal from 'sweetalert2';
-import { SignIn } from "@/components/ui/signin-google/signin-google"; 
 import { RegisterGoogle } from "@/components/ui/register-google/register-google";
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff } from "lucide-react";
 import { LoginImage } from "@/components/images/loginImage";
+import { FormLogin } from "@/components/formLogin/formLogin";
+
+
 export default function LoginPage() {
 
   const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+
   const { data: session, status } = useSession({ required: false });
   const [alertShown, setAlertShown] = useState(false);
-  const [strUsuario, setUsuario] = useState("");
-  const [strContra, setContra] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
 
- 
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-  
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ strUsuario, strContra })
-      });
-  
-      console.log("res", res);
-  
-      if (!res.ok) {
-        const errorData = await res.json();
-        setError(errorData.error || "Error al iniciar sesión.");
-        return;
-      }
-  
-      const data = await res.json();
-      console.log("Token:", data.token);
-      router.push("/dashboard");
-    } catch (err) {
-      console.error("Error al hacer login:", err);
-      setError("Error inesperado al iniciar sesión.");
-    }
-  };
-
-   
 
   // useEffect(() => {
   //   if (status === 'authenticated' && session?.user && !alertShown) {
@@ -89,38 +53,7 @@ export default function LoginPage() {
             {/* Formulario de Login */}
             <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
               <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
-              <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
-                {error && <div className="text-red-600 text-sm">{error}</div>}
-                <input
-                  type="text"
-                  placeholder="Correo o Usuario"
-                   className="w-full p-3 border rounded text-sm"
-                   value={strUsuario}
-                   onChange={(e) => setUsuario(e.target.value)}
-                />
-                <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Contraseña"
-                    className="w-full p-3 border rounded text-sm pr-10"
-                    value={strContra}
-                    onChange={(e) => setContra(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute mt-[-17px] ml-[-30px]  top-1/2  transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-950 text-white py-2 rounded cursor-pointer"
-                >
-                  Entrar
-                </button>
-               <SignIn  />
-               
-              </form>
+              <FormLogin/>
               <button
                 className="mt-4 text-sm text-blue-800 underline cursor-pointer"
                 onClick={() => setIsLogin(false)}

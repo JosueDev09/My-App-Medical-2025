@@ -7,7 +7,7 @@ export function SignIn() {
         <button
         type="button"
         onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-        className="w-[300px] m-auto   text-black py-2 rounded justify-center hover:bg-gray-200 transition cursor-pointer flex items-center gap-2 border border-gray-300"
+        className="w-[300px] m-auto mt-[15px]   text-black py-2 rounded justify-center hover:bg-gray-200 transition cursor-pointer flex items-center gap-2 border border-gray-300"
       >
          <Image
         src="/icono-google.svg"
