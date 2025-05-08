@@ -2,45 +2,76 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth'; // Asegúrate de apuntar a tu archivo correcto
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 
-const JWT_SECRET = process.env.AUTH_SECRET! || 'secret'; // Asegúrate de que esto esté definido en tu entorno
+
+const encoder = new TextEncoder();
+const secret = encoder.encode(process.env.AUTH_SECRET || 'secret');
 //Rutas base y los roles permitidos
 const accessControl: Record<string, string[]> = {
-  '/dashboard': ['admin','Paciente','Doctor'],
-  '/medicos': ['admin','Doctor'],
-  '/especialidad': ['admin','Doctor'],
-  '/citas': ['admin', 'Doctor', 'Paciente'],
-  '/calendario-doctor': ['Doctor'],
-  '/pacientes': ['Doctor','admin']
+  '/dashboard': ['SuperAdmin','Paciente','Doctor'],
+  '/medicos': ['SuperAdmin','Doctor'],
+  '/especialidad': ['SuperAdmin','Doctor'],
+  '/citas': ['SuperAdmin', 'Doctor', 'Paciente'],
+  '/calendario-doctor': ['Doctor','SuperAdmin'],
+  '/pacientes': ['Doctor','SuperAdmin']
 };
 
 
 export async function middleware(req: NextRequest) {
-  
-  const session = await auth();
   const token = req.cookies.get('token')?.value;
+  const pathname = req.nextUrl.pathname;
 
-  if (!token) {
+  let userRole: string | null = null;
+  let authType: 'credenciales' | 'google' | null = null;
+
+  // 1. Validar token personalizado si existe
+  if (token) {
+    try {
+      const { payload } = await jwtVerify(token, secret);
+      userRole = payload.rol as string;
+      authType = payload.authType === 'credenciales' ? 'credenciales' : 'credenciales'; // por compatibilidad
+      console.log('🔐 Token válido (credenciales). Rol:', userRole);
+    } catch (err: any) {
+      if (err.code === 'ERR_JWT_EXPIRED') {
+        console.warn('⚠️ Token expirado');
+      } else {
+        console.warn('❌ Token inválido:', err);
+      }
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+  }
+
+  // 2. Si no hay token válido, intentar con sesión de NextAuth (Google)
+  if (!userRole) {
+    const session = await auth();
+
+    if (session?.user) {
+      userRole = session.user.rol as string;
+      authType = 'google';
+      console.log('✅ Sesión con Google. Rol:', userRole);
+    }
+  }
+
+  // 3. Si no hay sesión válida → login
+  if (!userRole) {
+    console.log('⛔ Sin sesión, redireccionando a login');
     return NextResponse.redirect(new URL('/login', req.url));
   }
- 
-  //console.log("session", session);
-  const userRole = session?.user?.rol; // Asegúrate de que 'role' exista en el tipo 'User'
-  const { pathname } = req.nextUrl;
-  const payload = jwt.verify(token, JWT_SECRET) as { rol: string };
 
-  // Verifica si la ruta actual necesita control de acceso
+  // 4. Verificar acceso según ruta y rol
   for (const path in accessControl) {
     if (pathname.startsWith(path)) {
       const allowedRoles = accessControl[path];
-      if (!allowedRoles.includes(userRole as string) || !allowedRoles.includes(payload.rol  as string)) {
+      if (!allowedRoles.includes(userRole)) {
+        console.warn(`🚫 Rol "${userRole}" no autorizado para acceder a "${pathname}"`);
         return NextResponse.redirect(new URL('/no-autorizado', req.url));
       }
     }
   }
 
+  console.log(`🟢 Acceso permitido a "${pathname}" como "${authType}"`);
   return NextResponse.next();
 }
 

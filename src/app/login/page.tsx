@@ -21,46 +21,51 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ strUsuario, strContra }),
-    });
-    console.log("res", res);
-
-    const data = await res.json();
-
-    
-    if (res.ok && data?.token) {
-      console.log("entro", data.token);
+  
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ strUsuario, strContra })
+      });
+  
+      console.log("res", res);
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || "Error al iniciar sesión.");
+        return;
+      }
+  
+      const data = await res.json();
+      console.log("Token:", data.token);
       router.push("/dashboard");
-     // window.location.href = '/dashboard';
-    } else {
-      // ❌ Error de login
-     // window.location.href = '/login';
-      setError(data?.error || "Error al iniciar sesión.");
+    } catch (err) {
+      console.error("Error al hacer login:", err);
+      setError("Error inesperado al iniciar sesión.");
     }
   };
 
    
 
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user && !alertShown) {
-      setAlertShown(true);
+  // useEffect(() => {
+  //   if (status === 'authenticated' && session?.user && !alertShown) {
+  //     setAlertShown(true);
 
-      Swal.fire({
-        icon: 'warning',
-        title: 'Sesión activa',
-        text: 'Ya tienes una sesión iniciada.',
-        confirmButtonText: 'Entendido',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      }).then(() => {
-        window.location.href = '/dashboard'; // 👈 Redirección después de dar click en "Entendido"
-      });
-    }
-  }, [session, status, alertShown]);
+  //     Swal.fire({
+  //       icon: 'warning',
+  //       title: 'Sesión activa',
+  //       text: 'Ya tienes una sesión iniciada.',
+  //       confirmButtonText: 'Entendido',
+  //       allowOutsideClick: false,
+  //       allowEscapeKey: false,
+  //     }).then(() => {
+  //       window.location.href = '/dashboard'; // 👈 Redirección después de dar click en "Entendido"
+  //     });
+  //   }
+  // }, [session, status, alertShown]);
 
 
   return (

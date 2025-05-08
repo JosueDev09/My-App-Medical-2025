@@ -3,8 +3,29 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar/avat
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,DropdownMenuSeparator } from "@/components/ui/dropdown-menu/dropdown-menu";
 import { Bell, User, LogOut, CalendarCheck, Clock, UserX2, } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 import { use } from "react";
+
+
 export default function TopBar() {
+  const router = useRouter(); 
+
+  const handleLogout = () => { 
+    
+  
+    const cookies = document.cookie;
+    const hasCustomToken = cookies.includes("token=");
+  
+    if (hasCustomToken) {
+      // 🔐 Logout con JWT: borrar cookies
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      router.push('/login');
+    } else {
+      // 🔐 Logout con NextAuth (Google)
+      signOut({ callbackUrl: '/login' });
+    }
+  };
   const notifications = 3;
   const notificationList = [
     {
@@ -83,7 +104,7 @@ export default function TopBar() {
             <DropdownMenuItem>
               <User className="w-4 h-4 mr-2" /> Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

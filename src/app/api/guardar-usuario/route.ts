@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 // Mapea el número a un texto entendible
 function mapRol(intRol: number): string {
   switch (intRol) {
-    case 1: return "Super Administrador";
+    case 1: return "SuperAdmin";
     case 2: return "Administrador";
     case 3: return "Paciente";
     case 4: return "Doctor";

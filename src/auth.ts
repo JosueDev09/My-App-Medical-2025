@@ -81,6 +81,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         //console.log("USER en jwt:", user);
         token.id = (user as any).id;
         token.rol = (user as any).rol;
+        token.authType = 'google';
       }
       //console.log("JWT token:", token); // 👈 aquí debes ver id y rol
       return token;
@@ -89,6 +90,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       //console.log("SESSION antes:", session);
       (session.user.id as any) = token.id as number;
       (session.user.rol as any) = token.rol as string;
+      (session.user.authType as any) = token.authType as string;
      // console.log("SESSION después:", session);
       return session;
     }
