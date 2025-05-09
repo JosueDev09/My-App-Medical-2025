@@ -15,6 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const [spRows]: any = await db.query("CALL sp_ValidarLoginUsuario (?)", [strUsuario]);
   const user = spRows[0]?.[0];
 
+  //console.log("user", user);
   const isvalidPassword = await bcrypt.compare(strContra, user.strContra);
   if (!isvalidPassword) {
     return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
@@ -42,13 +43,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // 🧁 Guardar en cookie HttpOnly
   res.setHeader('Set-Cookie', [
-    // Cookie segura y HttpOnly para el middleware
     `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=7200`,
-  
-    // Cookie visible para el frontend (solo UI)
     `role=${payload.rol}; Path=/; SameSite=Strict; Max-Age=7200`,
   ]);
-
+  
   return res.status(200).json({ success: true, token }); 
 }  
 

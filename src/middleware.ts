@@ -20,28 +20,55 @@ const accessControl: Record<string, string[]> = {
 
 
 export async function middleware(req: NextRequest) {
+
+  console.log("🛡️ Middleware ejecutado en:", req.nextUrl.pathname);
   const token = req.cookies.get('token')?.value;
   const pathname = req.nextUrl.pathname;
 
   let userRole: string | null = null;
   let authType: 'credenciales' | 'google' | null = null;
 
-  // 1. Validar token personalizado si existe
-  if (token) {
-    try {
-      const { payload } = await jwtVerify(token, secret);
-      userRole = payload.rol as string;
-      authType = payload.authType === 'credenciales' ? 'credenciales' : 'credenciales'; // por compatibilidad
-      console.log('🔐 Token válido (credenciales). Rol:', userRole);
-    } catch (err: any) {
-      if (err.code === 'ERR_JWT_EXPIRED') {
-        console.warn('⚠️ Token expirado');
-      } else {
+  // // 1. Validar token personalizado si existe
+  //   if (token) {
+  //     try {
+  //       const { payload } = await jwtVerify(token, secret);
+  //       userRole = payload.rol as string;
+  //       authType = payload.authType === 'credenciales' ? 'credenciales' : 'credenciales'; // por compatibilidad
+  //       console.log('🔐 Token válido (credenciales). Rol:', userRole);
+  //     } catch (err: any) {
+  //       if (err.code === 'ERR_JWT_EXPIRED') {
+  //         console.warn('⚠️ Token expirado');
+  //       } else {
+  //         console.warn('❌ Token inválido:', err);
+  //       }
+  //       return NextResponse.redirect(new URL('/login', req.url));
+  //     }
+  //   }
+    
+    if (token) {
+      try {
+        const { payload } = await jwtVerify(token, secret);
+    
+        // 🔒 Validar expiración manualmente
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          console.warn("⚠️ Token expirado");
+          const url = req.nextUrl.clone();
+          url.pathname = "/login";
+          url.searchParams.set("msg", "auth");
+          return NextResponse.redirect(url);
+        }
+    
+        userRole = payload.rol as string;
+        authType = 'credenciales';
+        console.log('🔐 Token válido (credenciales). Rol:', userRole);
+      } catch (err: any) {
         console.warn('❌ Token inválido:', err);
+        const url = req.nextUrl.clone();
+        url.pathname = "/login";
+        url.searchParams.set("msg", "auth");
+        return NextResponse.redirect(url);
       }
-      return NextResponse.redirect(new URL('/login', req.url));
     }
-  }
 
   // 2. Si no hay token válido, intentar con sesión de NextAuth (Google)
   if (!userRole) {
@@ -56,8 +83,11 @@ export async function middleware(req: NextRequest) {
 
   // 3. Si no hay sesión válida → login
   if (!userRole) {
-    console.log('⛔ Sin sesión, redireccionando a login');
-    return NextResponse.redirect(new URL('/login', req.url));
+    console.log('⛔ Sin sesión, redireccionando a login con mensaje');
+    const url = req.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("msg", "auth");
+    return NextResponse.redirect(url);
   }
 
   // 4. Verificar acceso según ruta y rol

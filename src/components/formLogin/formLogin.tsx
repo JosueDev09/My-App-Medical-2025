@@ -66,6 +66,7 @@ export function FormLogin(){
   };
 
   return (
+    
     <form onSubmit={handleLogin} className="w-full max-w-sm mx-auto">
       
       <div className="mb-4">
@@ -88,6 +89,9 @@ export function FormLogin(){
           placeholder="Usuario / Correo"
           required
         />
+        {errorUsuario && (
+          <p className="text-red-500 text-xs italic mt-1">{errorUsuario}</p>
+        )}
       </div>
       <div className="mb-4">
         <label htmlFor="strContra" className="block text-gray-700 text-sm font-bold mb-2">
@@ -107,6 +111,9 @@ export function FormLogin(){
           placeholder="Contraseña"
           required
         />
+         {errorUsuario && (
+            <p className="text-red-500 text-xs italic mt-1">{errorUsuario}</p>
+          )}
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
@@ -115,9 +122,11 @@ export function FormLogin(){
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
+    
       {errorContra && (
     <p className="text-red-500 text-xs italic mt-1 mb-[15px]">{errorContra}</p>
   )}
+  
       <button
           type="submit"
           className="w-full bg-blue-950 text-white py-2 rounded cursor-pointer"

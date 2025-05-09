@@ -2,10 +2,11 @@
 import { useState,useEffect } from 'react';
 import { useSession} from 'next-auth/react';
 import Swal from 'sweetalert2';
-import { RegisterGoogle } from "@/components/ui/register-google/register-google";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from 'next/navigation';
 import { LoginImage } from "@/components/images/loginImage";
 import { FormLogin } from "@/components/formLogin/formLogin";
+import { FormRegister } from "@/components/formRegister/formRegister";
 
 
 export default function LoginPage() {
@@ -15,7 +16,19 @@ export default function LoginPage() {
   const { data: session, status } = useSession({ required: false });
   const [alertShown, setAlertShown] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  useEffect(() => {
+    const msg = searchParams?.get("msg");
+    if (msg === "auth") {
+      Swal.fire({
+        icon: "warning",
+        title: "Debes iniciar sesión",
+        text: "Para acceder a esta sección, inicia sesión primero.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  }, [searchParams]);
 
   // useEffect(() => {
   //   if (status === 'authenticated' && session?.user && !alertShown) {
@@ -38,11 +51,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen justify-center items-center px-4">
        <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto flex flex-col md:flex-row">
-        
-        {/* Panel de imagen fijo (25%) */}
-        
-        <LoginImage isLogin={isLogin} />  
 
+        <LoginImage isLogin={isLogin} />  
         {/* Panel deslizante (75%) */}
         <div className="relative md:w-1/2 w-full overflow-hidden">
           <div
@@ -65,41 +75,14 @@ export default function LoginPage() {
             {/* Formulario de Registro */}
             <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
               <h1 className="text-2xl font-bold mb-4 text-center">Registrarse</h1>
-              <form className="space-y-4 w-full max-w-sm">
-                <input
-                  type="text"
-                  placeholder="Nombre completo"
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="email"
-                  placeholder="Correo"
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="password"
-                  placeholder="Contraseña"
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="password"
-                  placeholder="Confirmar contraseña"
-                  className="w-full p-2 border rounded"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-blue-950 text-white py-2 rounded"
-                >
-                  Registrarse
-                </button>
-                <RegisterGoogle />
-              </form>
+             
+              <FormRegister/>
               <button
                 className="mt-4 text-sm text-blue-800 underline cursor-pointer"
                 onClick={() => setIsLogin(true)}
               >
                 ¿Ya tienes cuenta? Inicia sesión
-              </button>
+              </button>  
             </div>
           </div>
         </div>

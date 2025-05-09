@@ -1,32 +1,70 @@
-'use client'
+"use client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,DropdownMenuSeparator } from "@/components/ui/dropdown-menu/dropdown-menu";
 import { Bell, User, LogOut, CalendarCheck, Clock, UserX2, } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import { use } from "react";
+import { use, useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { log } from "console";
 
+
+interface DecodedToken {
+  rol: string;
+  exp: number;
+}
 
 export default function TopBar() {
-  const router = useRouter(); 
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  const handleLogout = () => { 
+  
+
+  const handleLogout = async () => { 
+
+    console.log("Entro al handleLogout");
+
     
-  
     const cookies = document.cookie;
-    const hasCustomToken = cookies.includes("token=");
+
+    console.log("cookies", cookies);
+
+    const hasCustomToken = document.cookie.includes("role=");
+    // const hasCustomToken = cookies.includes("token=");
+    console.log("hasCustomToken", hasCustomToken);
   
-    if (hasCustomToken) {
-      // 🔐 Logout con JWT: borrar cookies
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      router.push('/login');
-    } else {
-      // 🔐 Logout con NextAuth (Google)
-      signOut({ callbackUrl: '/login' });
-    }
-  };
+    
+
+      if (hasCustomToken) {
+        try {
+         
+          // Llama al endpoint para eliminar cookies HttpOnly
+          await fetch("/api/logout", { method: "GET" });
+        } catch (error) {
+          console.error("Error al cerrar sesión:", error);
+        }
+        
+        router.push("/login"); // ✅ correcto // Redirige a la página de inicio de sesión
+      } else {
+        // 🔐 Logout con NextAuth (Google)
+        signOut({ callbackUrl: '/login' });
+      }
+    };
+
+    useEffect(() => {
+      if (session?.user?.rol) {
+        setUserRole(session.user.rol.toLowerCase());
+      } else {
+        const roleMatch = document.cookie.match(/(^| )role=([^;]+)/);
+        const role = roleMatch?.[2];
+        if (role) {
+          setUserRole(role.toLowerCase());
+        }
+      }
+    }, [session]);
   const notifications = 3;
+
   const notificationList = [
     {
       tipo: "confirmada",
@@ -58,6 +96,7 @@ export default function TopBar() {
     <div className="flex items-center justify-between p-4">
       <h1 className="text-2xl font-bold text-gray-900 ml-10">Esymbel Health</h1>
       <div className="flex items-center gap-4">
+      <label className="font-bold text-gray-500 text-l mr-[90px]">{userRole?.toUpperCase() || "Cargando rol..."}</label>
         {/* Notificaciones */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -95,17 +134,17 @@ export default function TopBar() {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar>
-              <AvatarImage src="/path-to-avatar.jpg" alt="User Avatar" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage className="cursor-pointer" src="/path-to-avatar.jpg" alt="User Avatar" />
+              <AvatarFallback className="cursor-pointer">U</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>Usuario</DropdownMenuLabel>
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
               <User className="w-4 h-4 mr-2" /> Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <LogOut className="w-4 h-4 mr-2 " /> Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
