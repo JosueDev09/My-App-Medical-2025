@@ -2,13 +2,11 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
-import {LayoutDashboard,Calendar,Users,Stethoscope,User, Activity} from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Stethoscope, User, Activity, Wallet, BarChart2, ClipboardList } from "lucide-react";
 import { useSession } from 'next-auth/react';
-import { jwtDecode } from 'jwt-decode'; // ✅ CORRECTO
+import { jwtDecode } from 'jwt-decode';
 
-
- // Este valor debe provenir del sistema de autenticación
- interface DecodedToken {
+interface DecodedToken {
   rol: string;
   exp: number;
   [key: string]: any;
@@ -21,15 +19,21 @@ const routes = [
   { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['SuperAdmin'] },
   { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
   { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
+  {
+    name: 'Contabilidad',
+    icon: <Wallet size={20} />,
+    roles: ['SuperAdmin', 'doctor'],
+    children: [
+      { name: 'Resumen', path: '/contabilidad/resumen', icon: <BarChart2 size={16} /> },
+      { name: 'Pagos', path: '/contabilidad/pagos', icon: <ClipboardList size={16} /> },
+    ]
+  },
 ];
-
-// Filtra las rutas según el rol del usuario
 
 export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;onToggle: () => void; sidebarRef: React.RefObject<HTMLDivElement | null>;}) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
-
 
   useEffect(() => {
     if (session?.user?.rol) {
@@ -44,9 +48,11 @@ export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;
       }
     }
   }, [session]);
+
   const filteredRoutes = routes.filter(route =>
     route.roles.map(r => r.toLowerCase()).includes((userRole || '').toLowerCase())
   );
+
   return (
     <aside
       ref={sidebarRef}
@@ -55,15 +61,33 @@ export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;
       <h1 className="text-2xl text-white font-bold mb-8 ml-12 lg:mr-1">Esymbel Health</h1>
       <nav className="flex flex-col gap-8">
         {filteredRoutes.map(route => (
-          <NavLink key={route.path} href={route.path} active={pathname === route.path}>
-            <div className="flex items-center gap-2">
-              {route.icon}
-              <span>{route.name}</span>
+          route.children ? (
+            <div key={route.name}>
+              <div className="flex items-center gap-2 text-sm text-gray-400 uppercase">
+                {route.icon}
+                <span>{route.name}</span>
+              </div>
+              <div className="ml-6 space-y-2 mt-2">
+                {route.children.map(sub => (
+                  <NavLink key={sub.path} href={sub.path} active={pathname === sub.path}>
+                    <div className="flex items-center gap-2 text-gray-300 hover:text-white">
+                      {sub.icon}
+                      <span>{sub.name}</span>
+                    </div>
+                  </NavLink>
+                ))}
+              </div>
             </div>
-          </NavLink>
+          ) : (
+            <NavLink key={route.path} href={route.path} active={pathname === route.path}>
+              <div className="flex items-center gap-2">
+                {route.icon}
+                <span>{route.name}</span>
+              </div>
+            </NavLink>
+          )
         ))}
       </nav>
     </aside>
   );
-
 }
