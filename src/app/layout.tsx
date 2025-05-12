@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import "@/lib/fontawesome"; // asegúrate que la ruta sea correcta
 import {Menu} from "lucide-react";
 import { SessionProvider } from 'next-auth/react';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 
 
@@ -41,8 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="es">
-      <body className="min-h-screen w-full bg-gray-100">
+      <body className="min-h-screen w-full bg-gray-100">  
       <SessionProvider>
+      <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
         {/* Sidebar */}
         {!hideLayout && (
           <Sidebar
@@ -79,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         </div>
+        </PayPalScriptProvider>
         </SessionProvider>
       </body>
     </html>
