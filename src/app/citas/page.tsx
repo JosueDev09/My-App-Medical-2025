@@ -12,11 +12,13 @@ import {
 } from "@/components/ui/table/table";
 //import { Button } from "@/components/ui/button";
 import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity } from "lucide-react";
+import { Button } from "@/components/ui/button/button";
+import { useRouter } from "next/navigation";
 
 
 
 export default function CitasPage() {
-  
+  const router = useRouter();
   const [citas, setCitas] = useState<Cita[]>([]);
 
     /* ---------- Cargar citas al montar ---------- */
@@ -35,12 +37,17 @@ export default function CitasPage() {
       fetchCitas();
     }, []);
 
+    const handleAgregarCita = async () => {
+     
+     await router.push("/citas/alta-citas");
+    }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">📅 Citas Programadas</h1>
       <div className="w-full overflow-x-auto">
 
-     
+     <Button variant="outline" onClick={handleAgregarCita} className="mb-4 cursor-pointer bg-blue-500 text-white hover:bg-blue-400 hover:text-white">Agendar cita </Button> 
       <div className="rounded-xl border shadow-sm overflow-hidden  border-gray-200">
         <Table>
           <TableHeader>

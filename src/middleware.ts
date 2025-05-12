@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // middleware.ts
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
@@ -15,7 +16,10 @@ const accessControl: Record<string, string[]> = {
   '/especialidad': ['SuperAdmin','Doctor'],
   '/citas': ['SuperAdmin', 'Doctor', 'Paciente'],
   '/calendario-doctor': ['Doctor','SuperAdmin'],
-  '/pacientes': ['Doctor','SuperAdmin']
+  '/pacientes': ['Doctor','SuperAdmin'],
+  '/contabilidad': ['SuperAdmin'],
+  '/contabilidad/pagos': ['SuperAdmin'],
+  '/contabilidad/resumen': ['SuperAdmin'],
 };
 
 
@@ -28,22 +32,7 @@ export async function middleware(req: NextRequest) {
   let userRole: string | null = null;
   let authType: 'credenciales' | 'google' | null = null;
 
-  // // 1. Validar token personalizado si existe
-  //   if (token) {
-  //     try {
-  //       const { payload } = await jwtVerify(token, secret);
-  //       userRole = payload.rol as string;
-  //       authType = payload.authType === 'credenciales' ? 'credenciales' : 'credenciales'; // por compatibilidad
-  //       console.log('🔐 Token válido (credenciales). Rol:', userRole);
-  //     } catch (err: any) {
-  //       if (err.code === 'ERR_JWT_EXPIRED') {
-  //         console.warn('⚠️ Token expirado');
-  //       } else {
-  //         console.warn('❌ Token inválido:', err);
-  //       }
-  //       return NextResponse.redirect(new URL('/login', req.url));
-  //     }
-  //   }
+
     
     if (token) {
       try {
@@ -114,5 +103,8 @@ export const config = {
     '/citas/:path*',
     '/calendario-doctor/:path*',
     '/pacientes/:path*',
+    '/contabilidad/:path*',
+    '/contabilidad/pagos/:path*',
+    '/contabilidad/resumen/:path*',
   ]
 };

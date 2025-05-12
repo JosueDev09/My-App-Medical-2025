@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const sidebarRef = useRef<HTMLDivElement>(null);
   
   const pathname = usePathname();
-  const hideLayout = ['/login', '/registro'].includes(pathname)
+  const hideLayout = ['/login', '/registro'].includes(pathname as string);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

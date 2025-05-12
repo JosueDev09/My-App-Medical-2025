@@ -2,15 +2,10 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
-import { LayoutDashboard, Calendar, Users, Stethoscope, User, Activity, Wallet, BarChart2, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Stethoscope, Activity, Wallet, BarChart2, ClipboardList } from "lucide-react";
 import { useSession } from 'next-auth/react';
-import { jwtDecode } from 'jwt-decode';
 
-interface DecodedToken {
-  rol: string;
-  exp: number;
-  [key: string]: any;
-}
+
 
 const routes = [
   { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
@@ -22,7 +17,7 @@ const routes = [
   {
     name: 'Contabilidad',
     icon: <Wallet size={20} />,
-    roles: ['SuperAdmin', 'doctor'],
+    roles: ['SuperAdmin', 'Administrador'],
     children: [
       { name: 'Resumen', path: '/contabilidad/resumen', icon: <BarChart2 size={16} /> },
       { name: 'Pagos', path: '/contabilidad/pagos', icon: <ClipboardList size={16} /> },
@@ -30,9 +25,9 @@ const routes = [
   },
 ];
 
-export default function Sidebar({isOpen,onToggle,sidebarRef,}: {isOpen: boolean;onToggle: () => void; sidebarRef: React.RefObject<HTMLDivElement | null>;}) {
+export default function Sidebar({isOpen,sidebarRef,}: {isOpen: boolean;onToggle: () => void; sidebarRef: React.RefObject<HTMLDivElement | null>;}) {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {

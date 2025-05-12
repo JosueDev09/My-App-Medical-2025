@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // ✅ API para guardar usuario (registro o login)
 // Archivo: app/api/guardar-usuario/route.ts
 
@@ -9,17 +11,19 @@ import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { strCorreo, strNombre, strUsuario, strContra } = await req.json();
+    const { strCorreo, strNombre } = await req.json();
 
     
     const params = [strCorreo, strNombre];
 
-
+    console.log("params", params);
     // Ejecutar el procedimiento y obtener si fue registro o login
     await db.query("CALL sp_tbUsuarios_Login(?, ?, @estatus)", params);
 
     const [rows]: any = await db.query("SELECT @estatus AS estatus");
     const estatus = rows[0]?.estatus;
+
+    //console.log("estatus", estatus);
     
     if (estatus === "NO_EXISTE") {
       
@@ -35,6 +39,8 @@ export async function POST(req: NextRequest) {
     );
 
     const user = userRows[0];
+
+    //console.log("user", user);  
 
     if (!user) {
       return new Response("Usuario no encontrado", { status: 404 });

@@ -1,4 +1,4 @@
-import mysql, { Pool, PoolConnection } from 'mysql2/promise';
+import mysql from 'mysql2/promise';
 
  const pool = mysql.createPool({ 
   user: process.env.DB_USER || 'root',
