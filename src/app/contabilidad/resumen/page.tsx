@@ -1,10 +1,40 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card/card";
+import { Card, CardContent, CardHeader, CardTitle  } from "@/components/ui/card/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { BarChart2, DollarSign, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select/select";
+import { Bar, BarChart, CartesianGrid, XAxis,YAxis,ResponsiveContainer } from "recharts"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/charts/chart"
+
+
+const chartData = [
+  { month: "Enero", ingresos: 186, egresos: 80 },
+  { month: "Febrero", ingresos: 305, egresos: 200 },
+  { month: "Marzo", ingresos: 237, egresos: 120 },
+  { month: "Abril", ingresos: 73, egresos: 190 },
+  { month: "Mayo", ingresos: 209, egresos: 130 },
+  { month: "Junio", ingresos: 214, egresos: 140 },
+];
+
+const chartConfig = {
+  ingresos: {
+    label: "Ingresos",
+    color: "#4ade80",
+  },
+  egresos: {
+    label: "Egresos",
+    color: "#f87171",
+  },
+} satisfies ChartConfig
 
 export default function ContabilidadResumen() {
   const [doctorSeleccionado, setDoctorSeleccionado] = useState<string | null>(null);
@@ -52,14 +82,58 @@ export default function ContabilidadResumen() {
         </TabsList>
 
         <TabsContent value="mensual">
-          <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-            [Gráfica mensual aquí]
+          <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 mt-[120px]">
+          <ChartContainer config={chartConfig} className=" w-full  max-w-4xl mx-auto">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart accessibilityLayer data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Bar dataKey="ingresos" fill="var(--color-ingresos)" radius={4} />
+                  <Bar dataKey="egresos" fill="var(--color-egresos)" radius={4} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </TabsContent>
 
         <TabsContent value="especialidad">
-          <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-            [Gráfica por especialidad aquí]
+          <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400  mt-[120px]">
+          <ChartContainer config={chartConfig} className="w-full  max-w-4xl mx-auto">
+              <BarChart accessibilityLayer data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) =>  value}
+                  />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Bar dataKey="ingresos" fill="var(--color-ingresos)" radius={4} />
+                  <Bar dataKey="egresos" fill="var(--color-egresos)" radius={4} />
+              </BarChart>
+          </ChartContainer>
           </div>
         </TabsContent>
 

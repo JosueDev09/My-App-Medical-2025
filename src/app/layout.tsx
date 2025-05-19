@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="es">
-      <body className="min-h-screen w-full bg-gray-100">  
+      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto">  
       <SessionProvider>
       <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
         {/* Sidebar */}
