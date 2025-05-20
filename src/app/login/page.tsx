@@ -24,7 +24,7 @@ export default function LoginPage() {
       Swal.fire({
         icon: "warning",
         title: "Debes iniciar sesión",
-        text: "Para acceder a esta sección, inicia sesión primero.",
+        text: "Tu sesion ha caducado.",
         confirmButtonText: "Entendido",
       });
     }

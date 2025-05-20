@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="es">
-      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto">  
+      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto ">  
       <SessionProvider>
       <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
         {/* Sidebar */}
@@ -61,14 +61,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="sticky top-0 z-40 bg-white flex items-center justify-between px-4 py-2 border-b">
             {/* Botón hamburger en móviles */}
             <button
-              className="md:hidden p-2 rounded bg-gray-100 hover:bg-gray-200"
+              className="md:hidden p-2 rounded bg-gray-100 hover:bg-gray-200 print:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
              <Menu size={20} className="text-gray-800" />
             </button>
 
             {/* TopBar ocupa el resto del espacio */}
-            <div className="flex-1">
+            <div className="flex-1 print:hidden">
               <TopBar />
             </div>
           </div>

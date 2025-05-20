@@ -93,7 +93,7 @@ export default function TopBar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex items-center justify-between p-4 print:hidden">
       <h1 className="text-2xl font-bold text-gray-900 ml-10">Esymbel Health</h1>
       <div className="flex items-center gap-4">
       <label className="font-bold text-gray-500 text-l mr-[90px]">{userRole?.toUpperCase() || "Cargando rol..."}</label>

@@ -51,10 +51,10 @@ export default function Sidebar({isOpen,sidebarRef,}: {isOpen: boolean;onToggle:
   return (
     <aside
       ref={sidebarRef}
-      className={`w-64 h-screen fixed bg-gray-950 border-r px-4 py-6 transition-transform duration-300 ease-in-out z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+      className={`w-64 h-screen fixed bg-gray-950 border-r px-4 py-6 transition-transform duration-300 ease-in-out z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 `}
     >
       <h1 className="text-2xl text-white font-bold mb-8 ml-12 lg:mr-1">Esymbel Health</h1>
-      <nav className="flex flex-col gap-8">
+      <nav className="flex flex-col gap-8 ">
         {filteredRoutes.map(route => (
           route.children ? (
             <div key={route.name}>
