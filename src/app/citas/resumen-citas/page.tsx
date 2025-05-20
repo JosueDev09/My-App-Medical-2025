@@ -56,7 +56,7 @@ export default function ResumenCita({ datos, onPagoCompletado }: ResumenCitaProp
           <h3 className="text-md font-semibold mb-2 text-gray-800">Pagar consulta ($500 MXN)</h3>
           <div className="border rounded-lg p-4 shadow-sm">
          
-            <Button className="w-full mb-4 bg-green-500 text-white  text-[20px] hover:bg-green-300 hover:text-white" variant="outline" onClick={handlePago}>
+            <Button className="w-full mb-4 bg-green-500 text-white cursor-pointer  text-[20px] hover:bg-green-300 hover:text-white" variant="outline" onClick={handlePago}>
             <DollarSignIcon className="w-6 h-" /> Efectivo
             </Button>
             <PayPalButtons
