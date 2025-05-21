@@ -5,18 +5,10 @@ import { Separator } from '@/components/ui/separator/separator';
 import { Button } from '@/components/ui/button/button';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
+import { ReciboPagoProps } from '@/types/recibo-pago';
 
-interface ReciboPagoProps {
-  paciente: string;
-  fecha: string;
-  hora: string;
-  especialidad: string;
-  medico: string;
-  metodoPago: 'efectivo' | 'transferencia';
-  estatusPago: 'pendiente' | 'pagado';
-  total: number;
-  folio: string;
-}
+
+
 
 export default function ReciboPago({
   paciente,
@@ -31,11 +23,12 @@ export default function ReciboPago({
 }: ReciboPagoProps) {
   const [url, setUrl] = useState('');
 
+
   useEffect(() => {
     setUrl(`${window.location.origin}/recibo/${folio}`);
   }, [folio]);
 
-  const enviarQRporCorreo = async () => {
+  const enviarQRporCorreo = async (folio : any) => {
     try {
       const res = await fetch(`/api/citas/${folio}/enviar-qr`, {
         method: 'POST',
@@ -50,6 +43,9 @@ export default function ReciboPago({
       alert('Ocurrió un error al intentar enviar el QR');
     }
   };
+
+
+  
 
   return (
     <div className="p-4 print:p-0 print:m-0 print:w-full print:max-w-none print:bg-white print:shadow-none">

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label/label';
 
 import { Textarea } from '@/components/ui/textarea/textarea';
 import { Button } from '@/components/ui/button/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/select';
@@ -20,12 +20,15 @@ import  BreadcrumbSteps   from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 import { agendarCita } from '@/app/citas/alta-citas/agendarCita';
 
 export default function altaCitas () {
+  const [especialidades, setEspecialidades] = useState<any[]>([]);
+  const [doctores, setDoctores] = useState<any[]>([]);
+
 
     const {
         openAntecedentes,
         setOpenAntecedentes,
-        antecedentes,
-        setAntecedentes,
+        // antecedentes,
+        // setAntecedentes,
         form,
         setForm,
         errores,
@@ -34,6 +37,33 @@ export default function altaCitas () {
         handleSubmit,
         handleChangeCampo
       } = agendarCita();
+
+          useEffect(() => {
+            const cargarEspecialidades = async () => {
+              const res = await fetch('/api/citas?tipo=especialidades');
+              const data = await res.json();
+              setEspecialidades(data[0 ]); // usa tu estado aquí
+            };
+          
+            cargarEspecialidades();
+          }, []);
+
+          useEffect(() => {
+            const cargarDoctores = async () => {
+              if (!form.idEspecialidad) return;
+          
+              try {
+                const res = await fetch(`/api/citas?tipo=doctores&idEspecialidad=${form.idEspecialidad}`);
+                if (!res.ok) throw new Error('Error al cargar doctores');
+                const data = await res.json();
+                setDoctores(data);
+              } catch (error) {
+                console.error(error);
+              }
+            };
+          
+            cargarDoctores();
+          }, [form.idEspecialidad]);
   
   return (
   <div className="flex flex-col items-center justify-center min-h-screen ">
@@ -47,8 +77,8 @@ export default function altaCitas () {
           <div>
             <Label className='mb-2'>Nombre completo</Label>
             <Input
-              value={form.nombre}
-              onChange={(e) => handleChangeCampo('nombre', e.target.value)}
+              value={form.strNombrePaciente}
+              onChange={(e) => handleChangeCampo('strNombrePaciente', e.target.value)}
               className={errores.nombre ? 'border-red-500 overflow-auto' : ''}
             />
             {errores.nombre && <p className="text-red-500 text-sm">{errores.nombre}</p>}
@@ -58,24 +88,24 @@ export default function altaCitas () {
               <Label className='mb-2'>Edad</Label>
               <Input
                 type="number"
-                value={form.edad}
-                onChange={(e) => handleChangeCampo('edad', e.target.value)}
+                value={form.intEdad}
+                onChange={(e) => handleChangeCampo('intEdad', e.target.value)}
                 className={errores.edad ? 'border-red-500 overflow-auto' : ''}
               />
               {errores.edad && <p className="text-red-500 text-sm">{errores.edad}</p>}
             </div>
             <div>
-              <Label className='mb-2'>Sexo</Label>
+              <Label className='mb-2'>Genero</Label>
               <Select
-             onValueChange={(value) => handleChangeCampo('sexo', value)}
-              value={form.sexo}          
+             onValueChange={(value) => handleChangeCampo('strGenero', value)}
+              value={form.strGenero}          
                >
               <SelectTrigger  className={`w-[150px] h-10 ${errores.especialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}>
                 <SelectValue  placeholder="Género" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="M">Masculino</SelectItem>
-                <SelectItem value="F">Femenino</SelectItem>
+                <SelectItem value="Masculino">Masculino</SelectItem>
+                <SelectItem value="Femenino">Femenino</SelectItem>
                 {/* Agrega más si lo deseas */}
               </SelectContent>
             </Select>
@@ -87,21 +117,21 @@ export default function altaCitas () {
             <div>
               <Label className='mb-2'>Teléfono</Label>
               <Input
-                value={form.telefono}
-                onChange={(e) => handleChangeCampo('telefono', e.target.value)}
-                className={errores.telefono ? 'border-red-500 overflow-auto' : ''}
+                value={form.strTelefonoPaciente}
+                onChange={(e) => handleChangeCampo('strTelefonoPaciente', e.target.value)}
+                className={errores.strTelefonoPaciente ? 'border-red-500 overflow-auto' : ''}
               />
-              {errores.telefono && <p className="text-red-500 text-sm overflow-auto">{errores.telefono}</p>}
+              {errores.strTelefonoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strTelefonoPaciente}</p>}
             </div>
             <div>
               <Label className='mb-2'>Correo electrónico</Label>
               <Input
                 type="email"
-                value={form.correo}
-                onChange={(e) => handleChangeCampo('correo', e.target.value)}
+                value={form.strCorreoPaciente}
+                onChange={(e) => handleChangeCampo('strCorreoPaciente', e.target.value)}
                 className={errores.correo ? 'border-red-500' : ''}
               />
-              {errores.correo && <p className="text-red-500 text-sm overflow-auto">{errores.correo}</p>}
+              {errores.strCorreoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strCorreoPaciente}</p>}
             </div>
           </div>
         </div>
@@ -110,45 +140,55 @@ export default function altaCitas () {
           <div>
             <Label className='mb-2'>Especialidad</Label>
             
-          <Select
-           onValueChange={(value) => handleChangeCampo('especialidad', value)}
-            value={form.especialidad}
-          >
-            <SelectTrigger  className={`w-full h-10 ${errores.especialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer `}> 
-              <SelectValue placeholder="Selecciona una especialidad" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Medicina general">Medicina general</SelectItem>
-              <SelectItem value="Pediatría">Pediatría</SelectItem>
-              <SelectItem value="Ginecología">Ginecología</SelectItem>
-              <SelectItem value="Dermatología">Dermatología</SelectItem>
-              <SelectItem value="Traumatología">Traumatología</SelectItem>
-              <SelectItem value="Psiquiatría">Psiquiatría</SelectItem>
-              <SelectItem value="Cardiología">Cardiología</SelectItem>
-              {/* Agrega más si lo deseas */}
-            </SelectContent>
-          </Select>
-           
+            <Select
+            
+                onValueChange={(value) => handleChangeCampo('idEspecialidad', value)}
+                value={form.idEspecialidad.toString()}
+              >
+                <SelectTrigger
+                  className={`w-full h-10 ${errores.idEspecialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}
+                >
+                 <SelectValue  placeholder="Selecciona una especialidad" />
+                </SelectTrigger>
+
+                <SelectContent>
+                <SelectItem value="0" disabled>
+                    Selecciona una especialidad
+                    </SelectItem>
+                  {especialidades.map((esp: any) => (
+                    <SelectItem key={esp.idEspecialidad} value={esp.idEspecialidad.toString()}>
+                     {esp.idEspecialidad} - {esp.strNombreEspecialidad}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             {errores.especialidad && <p className="text-red-500 text-sm overflow-auto">{errores.especialidad}</p>}
           </div>
           <div>
             <Label className='mb-2'>Médico</Label>
             <Select
-           onValueChange={(value) => handleChangeCampo('medico', value)}
-            value={form.medico}
-          >
-            <SelectTrigger  className={`w-full h-10 ${errores.medico ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}> 
-              <SelectValue placeholder="Selecciona a tu médico" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Dr. Juan Pérez">Dr. Juan Pérez</SelectItem>
-              <SelectItem value="Dra. María López">Dra. María López</SelectItem>
-              <SelectItem value="Dr. Carlos García">Dr. Carlos García</SelectItem>
-              <SelectItem value="Dra. Ana Torres">Dra. Ana Torres</SelectItem>
-              <SelectItem value="Dr. Luis Martínez">Dr. Luis Martínez</SelectItem>
-              {/* Agrega más si lo deseas */}
-            </SelectContent>
-          </Select>
+                disabled={!form.idEspecialidad}
+                onValueChange={(value) => handleChangeCampo('intDoctor', value)}
+                value={form.intDoctor ? form.intDoctor.toString() : ''}
+              >
+                <SelectTrigger
+                  className={`w-full h-10 ${errores.intDoctor ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}
+                >
+                  <SelectValue placeholder="Selecciona a tu médico" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="0" disabled>
+                    Selecciona a tu médico
+                  </SelectItem>
+
+                  {doctores.map((doct: any) => (
+                    <SelectItem key={doct.intDoctor} value={doct.intDoctor.toString()}>
+                      {doct.strNombreDoctor}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
           
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -156,36 +196,36 @@ export default function altaCitas () {
               <Label className='mb-2'>Fecha preferida</Label>
               <Input
                 type="date"
-                value={form.fecha}
-                onChange={(e) => handleChangeCampo('fecha', e.target.value)}
-                className={errores.fecha ? 'border-red-500 overflow-auto' : ''}
+                value={form.datFecha}
+                onChange={(e) => handleChangeCampo('datFecha', e.target.value)}
+                className={errores.datFecha ? 'border-red-500 overflow-auto' : ''}
               />
-              {errores.fecha && <p className="text-red-500 text-sm ">{errores.fecha}</p>}
+              {errores.datFecha && <p className="text-red-500 text-sm ">{errores.datFecha}</p>}
             </div>
             <div>
               <Label className='mb-2'>Hora preferida</Label>
               <Input
                 type="time"
-                value={form.hora}
-                onChange={(e) => handleChangeCampo('hora', e.target.value)}
+                value={form.intHora}
+                onChange={(e) => handleChangeCampo('intHora', e.target.value)}
                 className={errores.hora ? 'border-red-500 overflow-auto' : ''}
               />
-              {errores.hora && <p className="text-red-500 text-sm">{errores.hora}</p>}
+              {errores.intHora && <p className="text-red-500 text-sm">{errores.intHora}</p>}
             </div>
           </div>
           <div>
             <Label className='mb-2'>Motivo de consulta</Label>
             <Textarea
-              value={form.motivo}
-              onChange={(e) => handleChangeCampo('motivo', e.target.value)}
+              value={form.strMotivo}
+              onChange={(e) => handleChangeCampo('strMotivo', e.target.value)}
               className={errores.motivo ? 'border-red-500 overflow-auto' : ''}
             />
-            {errores.motivo && <p className="text-red-500 text-sm">{errores.motivo}</p>}
+            {errores.strMotivo && <p className="text-red-500 text-sm">{errores.strMotivo}</p>}
           </div>
         </div>
 
         {/* Botón para abrir antecedentes médicos */}
-        <div className="flex justify-end">
+        {/* <div className="flex justify-end">
           <Dialog open={openAntecedentes} onOpenChange={setOpenAntecedentes}>
             <DialogTrigger asChild>
               <Button variant="outline" className='bg-yellow-500 text-white hover:bg-amber-300 hover:text-white cursor-pointer'>Agregar Antecedentes Médicos</Button>
@@ -196,7 +236,7 @@ export default function altaCitas () {
                     </DialogHeader>
                     <div className="space-y-4">
                       {/* Medicamentos actuales */}
-                      <div>
+                      {/* <div>
                         <Label className="flex items-center justify-between p-2">
                           Medicamentos actuales                         
                         </Label>
@@ -206,8 +246,8 @@ export default function altaCitas () {
                           onChange={(e) =>
                             setAntecedentes({ ...antecedentes, medicamentos: e.target.value })
                           }
-                        />
-                         <input
+                        /> */}
+                         {/* <input
                               type="checkbox"
                               id="na-medicamentos"
                               className='ml-2'
@@ -220,10 +260,10 @@ export default function altaCitas () {
                               }
                             />
                             <label className='text-[13px] ml-2' htmlFor="na-medicamentos">No aplica.</label>
-                      </div>
+                      </div> */}
 
                       {/* Enfermedades crónicas */}
-                      <div>
+                      {/* <div>
                         <Label className="flex items-center justify-between p-2">
                           Enfermedades crónicas                     
                         </Label>
@@ -247,10 +287,10 @@ export default function altaCitas () {
                               }
                             />
                             <label  className='text-[13px] ml-2' htmlFor="na-enfermedades">No aplica.</label>
-                      </div>
+                      </div> */}
 
                       {/* Repite esta lógica para: alergias, cirugías, embarazo, antecedentes familiares */}
-                      <div>
+                      {/* <div>
                         <Label className="flex items-center justify-between p-2">
                         Embarazo                       
                         </Label>
@@ -274,10 +314,10 @@ export default function altaCitas () {
                               }
                             />
                             <label  className='text-[13px] ml-2' htmlFor="na-medicamentos">No aplica.</label>
-                      </div>
+                      </div> */}
 
                       {/* Cirugías previas */}
-                      <div>
+                      {/* <div>
                         <Label className="flex items-center justify-between p-2">
                         Cirugias Previas                       
                         </Label>
@@ -301,10 +341,10 @@ export default function altaCitas () {
                               }
                             />
                             <label  className='text-[13px] ml-2' htmlFor="na-medicamentos">No aplica.</label>
-                      </div>
+                      </div> */}
 
                       {/* Ejemplo para alergias */}
-                      <div>
+                      {/* <div>
                         <Label className="flex items-center justify-between p-2">
                           Alergias
                           
@@ -330,15 +370,15 @@ export default function altaCitas () {
                             />
                             <label  className='text-[13px] ml-2' htmlFor="na-alergias">No aplica.</label>
                       </div>
-                    </div>
+                    </div> */}
 
-                    <DialogFooter className="pt-4">
+                    {/* <DialogFooter className="pt-4">
                       <Button className='bg-blue-500' onClick={() => setOpenAntecedentes(false)}>Guardar y cerrar</Button>
                     </DialogFooter>
                   </DialogContent>
 
-          </Dialog>
-        </div>
+          </Dialog> */}
+        {/* </div> */} 
 
         {/* Botón final */}
         <div className="text-center pt-1">

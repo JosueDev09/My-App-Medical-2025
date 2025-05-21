@@ -1,9 +1,18 @@
 export interface Cita {
-    id: string | number;
-    strPaciente: string;
-    datFecha: string;          // o Date
-    intHora: string;
-    strDoctor: string;
-    strEspecialidad: string;
-    strEstatus: "Confirmada" | "Pendiente" | "Cancelada";
+  intCita: number,
+    strNombrePaciente:'',
+    intEdad: 0 ,
+    strGenero:'' ,
+    strCorreoPaciente:'' ,
+    strTelefonoPaciente:'' ,
+    idEspecialidad: '0' ,
+    intDoctor: '0' ,
+    strNombreEspecialidad: '' ,
+    strNombreDoctor: '' ,
+    datFecha:'' ,
+    intHora:'' ,
+   // dblTotal:'',
+   // strFolio:'' ,
+    strMotivo:'' ,
+    strEstatusPago:string
   }

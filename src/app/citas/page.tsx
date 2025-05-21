@@ -21,11 +21,12 @@ export default function CitasPage() {
   const router = useRouter();
   const [citas, setCitas] = useState<Cita[]>([]);
 
+
     /* ---------- Cargar citas al montar ---------- */
     useEffect(() => {
       async function fetchCitas() {
         try {
-          const response = await fetch("/api/citas");
+          const response = await fetch('/api/citas?tipo=lista-citas');
           if (!response.ok) throw new Error("Network response was not ok");
           const data: Cita[] = await response.json();
           console.log("Datos recibidos:", data[0]);
@@ -37,9 +38,10 @@ export default function CitasPage() {
       fetchCitas();
     }, []);
 
+   
     const handleAgregarCita = async () => {
      
-     await router.push("/citas/alta-citas");
+    await router.push("/citas/alta-citas");
     }
 
   return (
@@ -86,7 +88,7 @@ export default function CitasPage() {
             <TableHead className="text-left font-semibold border-r border-gray-200">
             <div className="flex items-center gap-2">
               <Eye  className="w-4 h-4 text-muted-foreground" />
-                 Estado
+                 Estatus de pago
             </div>
             </TableHead>
               <TableHead className="text-left font-semibold">Acciones</TableHead>
@@ -96,11 +98,11 @@ export default function CitasPage() {
               {citas.length > 0 ? (
                 citas.map((cita) => (
                   <TableRow
-                    key={cita.id ?? `${cita.datFecha}-${cita.intHora}`}
+                    key={cita.intCita ?? `${cita.datFecha}-${cita.intHora}`}
                     className="hover:bg-muted/10 transition border-gray-200"
                   >
                     <TableCell className="font-medium border-r border-gray-200">
-                      {cita.strPaciente}
+                      {cita.strNombrePaciente}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
                       {cita.datFecha}
@@ -109,22 +111,22 @@ export default function CitasPage() {
                       {cita.intHora}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
-                      {cita.strDoctor}
+                      {cita.strNombreDoctor}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
-                      {cita.strEspecialidad}
+                      {cita.strNombreEspecialidad}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          cita.strEstatus === "Confirmada"
+                          cita.strEstatusPago === "PAGADO"
                             ? "bg-green-100 text-green-700"
-                            : cita.strEstatus === "Cancelada"
+                            : cita.strEstatusPago === "PENDIENTE"
                             ? "bg-red-100 text-red-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {cita.strEstatus}
+                        {cita.strEstatusPago}
                       </span>
                     </TableCell>
                     <TableCell>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
 
@@ -10,27 +10,28 @@ export function agendarCita() {
   const router = useRouter();
   const [pasoActual, setPasoActual] = useState(0);
 
-  const [antecedentes, setAntecedentes] = useState({
-    medicamentos: '',
-    enfermedades: '',
-    alergias: '',
-    cirugias: '',
-    embarazo: '',
-    antecedentesFamiliares: '',
-  });
+  // const [antecedentes, setAntecedentes] = useState({
+  //   medicamentos: '',
+  //   enfermedades: '',
+  //   alergias: '',
+  //   cirugias: '',
+  //   embarazo: '',
+  //   antecedentesFamiliares: '',
+  // });
 
   const [form, setForm] = useState({
-    nombre: '',
-    edad: '',
-    sexo: '',
-    telefono: '',
-    correo: '',
-    especialidad: '',
-    medico: '',
-    fecha: '',
-    hora: '',
-    motivo: '',
-    antecedentes,
+  
+    strNombrePaciente:'',
+    intEdad: 0 ,
+    strGenero:'' ,
+    strCorreoPaciente:'' ,
+    strTelefonoPaciente:'' ,
+    idEspecialidad: 0 ,
+    intDoctor: 0 ,
+    datFecha:'' ,
+    intHora: '0' ,
+    //dblTotal:'',
+    strMotivo:'' 
   });
 
   const [errores, setErrores] = useState<{ [key: string]: string }>({});
@@ -38,15 +39,15 @@ export function agendarCita() {
   const validarFormulario = () => {
     const nuevosErrores: { [key: string]: string } = {};
 
-    if (!form.nombre.trim()) nuevosErrores.nombre = 'Nombre requerido';
-    if (!form.edad || isNaN(Number(form.edad))) nuevosErrores.edad = 'Edad inválida';
-    if (!form.sexo.trim()) nuevosErrores.sexo = 'Sexo requerido';
-    if (!form.telefono.trim() || form.telefono.length < 10) nuevosErrores.telefono = 'Teléfono inválido';
-    if (!form.correo.trim() || !/\S+@\S+\.\S+/.test(form.correo)) nuevosErrores.correo = 'Correo inválido';
-    if (!form.especialidad.trim()) nuevosErrores.especialidad = 'Especialidad requerida';
-    if (!form.fecha) nuevosErrores.fecha = 'Fecha requerida';
-    if (!form.hora) nuevosErrores.hora = 'Hora requerida';
-    if (!form.motivo.trim()) nuevosErrores.motivo = 'Motivo requerido';
+    if (!form.strNombrePaciente.trim()) nuevosErrores.strNombrePaciente = 'Nombre requerido';
+    if (!form.intEdad || isNaN(Number(form.intEdad))) nuevosErrores.intEdad = 'Edad inválida';
+    if (!form.strGenero.trim()) nuevosErrores.strGenero = 'Sexo requerido';
+    if (!form.strTelefonoPaciente.trim() || form.strTelefonoPaciente.length < 10) nuevosErrores.strTelefonoPaciente = 'Teléfono inválido';
+    if (!form.strCorreoPaciente.trim() || !/\S+@\S+\.\S+/.test(form.strCorreoPaciente)) nuevosErrores.strCorreoPaciente = 'Correo inválido';
+    if (!form.idEspecialidad) nuevosErrores.idEspecialidad = 'Especialidad requerida';
+    if (!form.datFecha) nuevosErrores.datFecha = 'Fecha requerida';
+    if (!form.intHora) nuevosErrores.intHora = 'Hora requerida';
+    if (!form.strMotivo.trim()) nuevosErrores.strMotivo = 'Motivo requerido';
 
     setErrores(nuevosErrores);
     return Object.keys(nuevosErrores).length === 0;
@@ -55,13 +56,16 @@ export function agendarCita() {
   const handleSubmit = async () => {
     if (!validarFormulario()) return;
 
-    const cita = { ...form, antecedentes };
+    const cita = { ...form }; //antecedentes
 
-    const res = await fetch('/api/citas/crear', {
+    const res = await fetch('/api/citas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cita),
     });
+
+
+
 
     if (res.ok) {
       Swal.fire({
@@ -72,36 +76,30 @@ export function agendarCita() {
         confirmButtonColor: '#3085d6',
       }).then(() => {
         setForm({
-          nombre: '',
-          edad: '',
-          sexo: '',
-          telefono: '',
-          correo: '',
-          especialidad: '',
-          medico: '',
-          fecha: '',
-          hora: '',
-          motivo: '',
-          antecedentes: {
-            medicamentos: '',
-            enfermedades: '',
-            alergias: '',
-            cirugias: '',
-            embarazo: '',
-            antecedentesFamiliares: '',
-          },
+          strNombrePaciente: '0',
+          intEdad: 0,
+          strGenero: '0',
+          strTelefonoPaciente: '0',
+          strCorreoPaciente: '0',
+          idEspecialidad: 0,
+          intDoctor: 0,
+          datFecha: '0',
+          intHora: '0',
+          strMotivo: '0',
+      //    dblTotal: '0', // agrega este campo
+      //    strFolio: '',  // agrega este campo también
         });
 
-        setAntecedentes({
-          medicamentos: '',
-          enfermedades: '',
-          alergias: '',
-          cirugias: '',
-          embarazo: '',
-          antecedentesFamiliares: '',
-        });
+        // setAntecedentes({
+        //   medicamentos: '',
+        //   enfermedades: '',
+        //   alergias: '',
+        //   cirugias: '',
+        //   embarazo: '',
+        //   antecedentesFamiliares: '',
+        // });
 
-        router.push('/resumen-citas');
+        router.push('/citas/resumen-citas');
       });
     } else {
       alert('Error al agendar la cita');
@@ -120,8 +118,8 @@ export function agendarCita() {
   return {
     openAntecedentes,
     setOpenAntecedentes,
-    antecedentes,
-    setAntecedentes,
+    // antecedentes,
+    // setAntecedentes,
     form,
     setForm,
     errores,
