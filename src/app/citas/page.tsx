@@ -21,6 +21,22 @@ export default function CitasPage() {
   const router = useRouter();
   const [citas, setCitas] = useState<Cita[]>([]);
 
+  
+  function formatearFechaLarga(fechaISO: string): string {
+    const fecha = new Date(fechaISO);
+  
+    // Opciones de formato en español
+    const opciones: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    };
+  
+    // Formatear con locale 'es-MX' o 'es-ES'
+    return fecha.toLocaleDateString('es-MX', opciones);
+  }
+
 
     /* ---------- Cargar citas al montar ---------- */
     useEffect(() => {
@@ -104,8 +120,8 @@ export default function CitasPage() {
                     <TableCell className="font-medium border-r border-gray-200">
                       {cita.strNombrePaciente}
                     </TableCell>
-                    <TableCell className="border-r border-gray-200">
-                      {cita.datFecha}
+                    <TableCell className="border-r border-gray-200 uppercase">
+                      {formatearFechaLarga(cita.datFecha)}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
                       {cita.intHora}
@@ -133,6 +149,7 @@ export default function CitasPage() {
                       <div className="flex gap-2">
                         <Pencil className="w-4 h-4 cursor-pointer" />
                         <Trash2 className="w-4 h-4 cursor-pointer" />
+                        <Eye className="w-4 h-4 cursor-pointer" />
                       </div>
                     </TableCell>
                   </TableRow>
