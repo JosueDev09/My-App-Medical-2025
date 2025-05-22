@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button/button';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ReciboPagoProps } from '@/types/recibo-pago';
+import { useParams } from 'next/navigation';
 
 
 
@@ -18,10 +19,11 @@ export default function ReciboPago({
   medico,
   metodoPago,
   estatusPago,
-  total,
-  folio,
+  total
 }: ReciboPagoProps) {
   const [url, setUrl] = useState('');
+  const { folio } : any = useParams();
+  const [datosCita, setDatosCita] = useState<ReciboPagoProps | null>(null);
 
 
   useEffect(() => {
@@ -43,9 +45,35 @@ export default function ReciboPago({
       alert('Ocurrió un error al intentar enviar el QR');
     }
   };
-
-
   
+  useEffect(() => {
+    const obtenerCita = async () => {
+      if (!folio) return;
+
+      const res = await fetch(`/api/citas/${folio}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Ajusta los nombres de campo si tu backend no devuelve exactamente los que espera ReciboPago
+        setDatosCita({
+          paciente: data.strNombrePaciente,
+          fecha: data.datFecha,
+          hora: data.intHora,
+          especialidad: data.strNombreEspecialidad,
+          medico: data.strNombreDoctor,
+          metodoPago: data.strMetodoPago,
+          estatusPago: data.strEstatusPago,
+          total: data.dblTotal,
+          folio: data.strFolio,
+        });
+      } else {
+        console.error('No se pudo cargar la cita');
+      }
+    };
+
+    obtenerCita();
+  }, [folio]);
+
+  if (!datosCita) return <p className="text-center mt-10">Cargando recibo...</p>;
 
   return (
     <div className="p-4 print:p-0 print:m-0 print:w-full print:max-w-none print:bg-white print:shadow-none">

@@ -68,6 +68,8 @@ export function agendarCita() {
 
 
     if (res.ok) {
+      const nuevaCita = await res.json(); // 👈 obtén la cita
+      const folio = nuevaCita.strFolio;
       Swal.fire({
         icon: 'success',
         title: 'Cita agendada',
@@ -99,7 +101,7 @@ export function agendarCita() {
         //   antecedentesFamiliares: '',
         // });
 
-        router.push('/citas/resumen-citas');
+        router.push(`/citas/resumen-citas?folio=${folio}`);
       });
     } else {
       alert('Error al agendar la cita');

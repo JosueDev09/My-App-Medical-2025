@@ -12,7 +12,7 @@ export interface Cita {
     datFecha:'' ,
     intHora:'' ,
    // dblTotal:'',
-   // strFolio:'' ,
+    //strFolio:'' ,
     strMotivo:'' ,
     strEstatusPago:string
   }
