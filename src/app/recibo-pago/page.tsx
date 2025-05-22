@@ -6,28 +6,54 @@ import { Button } from '@/components/ui/button/button';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ReciboPagoProps } from '@/types/recibo-pago';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 
 
 
 
 export default function ReciboPago({
-  paciente,
-  fecha,
-  hora,
-  especialidad,
-  medico,
-  metodoPago,
-  estatusPago,
-  total
+  intCita: number,
+    strNombrePaciente,
+    intEdad,
+    strGenero ,
+    strCorreoPaciente ,
+    strTelefonoPaciente,
+    idEspecialidad,
+    intDoctor,
+    strNombreEspecialidad,
+    strNombreDoctor,
+    datFecha,
+    intHora,
+    dblTotal,
+    strFolio,
+    strMotivo,
+    strEstatusPago,
+    strMetodoPago,
 }: ReciboPagoProps) {
   const [url, setUrl] = useState('');
-  const { folio } : any = useParams();
+  const searchParams = useSearchParams();
+  const folio = searchParams?.get('folio');
   const [datosCita, setDatosCita] = useState<ReciboPagoProps | null>(null);
+
+  function formatearFechaLarga(fechaISO: string): string {
+    const fecha = new Date(fechaISO);
+  
+    // Opciones de formato en español
+    const opciones: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    };
+  
+    // Formatear con locale 'es-MX' o 'es-ES'
+    return fecha.toLocaleDateString('es-MX', opciones);
+  }
+  
 
 
   useEffect(() => {
-    setUrl(`${window.location.origin}/recibo/${folio}`);
+    setUrl(`${window.location.origin}/recibo-pago/${folio}`);
   }, [folio]);
 
   const enviarQRporCorreo = async (folio : any) => {
@@ -49,24 +75,16 @@ export default function ReciboPago({
   useEffect(() => {
     const obtenerCita = async () => {
       if (!folio) return;
+      console.log('Folio:', folio);
+      const res = await fetch(`/api/citas/${folio}`,{
+        method: 'GET',
+      });
 
-      const res = await fetch(`/api/citas/${folio}`);
       if (res.ok) {
         const data = await res.json();
-        // Ajusta los nombres de campo si tu backend no devuelve exactamente los que espera ReciboPago
-        setDatosCita({
-          paciente: data.strNombrePaciente,
-          fecha: data.datFecha,
-          hora: data.intHora,
-          especialidad: data.strNombreEspecialidad,
-          medico: data.strNombreDoctor,
-          metodoPago: data.strMetodoPago,
-          estatusPago: data.strEstatusPago,
-          total: data.dblTotal,
-          folio: data.strFolio,
-        });
-      } else {
-        console.error('No se pudo cargar la cita');
+        setDatosCita(data[0]);
+        
+       // console.log('Datos de la cita:', data);
       }
     };
 
@@ -85,29 +103,29 @@ export default function ReciboPago({
 
         <CardContent className="text-sm space-y-3">
           <div>
-            <p><span className="font-semibold">Paciente:</span> {paciente}</p>
-            <p><span className="font-semibold">Fecha:</span> {fecha}</p>
-            <p><span className="font-semibold">Hora:</span> {hora}</p>
+            <p><span className="font-semibold">Paciente:</span> {datosCita.strNombrePaciente}</p>
+            <p><span className="font-semibold">Fecha:</span> {formatearFechaLarga(datosCita.datFecha)}</p>
+            <p><span className="font-semibold">Hora:</span> {datosCita.intHora}</p>
           </div>
 
           <Separator />
 
           <div>
-            <p><span className="font-semibold">Especialidad:</span> {especialidad}</p>
-            <p><span className="font-semibold">Médico:</span> {medico}</p>
+            <p><span className="font-semibold">Especialidad:</span> {datosCita.strNombreEspecialidad}</p>
+            <p><span className="font-semibold">Médico:</span> {datosCita.strNombreDoctor}</p>
           </div>
 
           <Separator />
 
           <div>
-            <p><span className="font-semibold">Método de pago:</span> {metodoPago === 'efectivo' ? 'Efectivo' : 'Transferencia'}</p>
+            <p><span className="font-semibold">Método de pago:</span> {datosCita.strMetodoPago }</p>
             <p>
               <span className="font-semibold">Estatus de pago:</span>{' '}
-              <span className={estatusPago === 'pagado' ? 'text-green-600 font-semibold' : 'text-orange-500 font-semibold'}>
-                {estatusPago === 'pagado' ? 'Pagado' : 'Pendiente'}
+              <span className={datosCita.strEstatusPago === 'PAGADO' ? 'text-green-600 font-semibold' : 'text-orange-500 font-semibold'}>
+                {datosCita.strEstatusPago === 'PAGADO' ? 'Pagado' : 'Pendiente'}
               </span>
             </p>
-            <p><span className="font-semibold">Total pagado:</span> ${Number(total || 0).toFixed(2)} MXN</p>
+            <p><span className="font-semibold">Total pagado:</span> ${Number(datosCita.dblTotal || 0).toFixed(2)} MXN</p>
           </div>
 
           <Separator />

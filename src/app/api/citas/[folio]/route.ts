@@ -2,15 +2,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { folio: string } }
-): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    const folio = params.folio;
+    const folio =  req.nextUrl.pathname.split('/').pop();
 
-    const [rows]: any = await db.query('SELECT * FROM tbCitas WHERE strFolio = ?', [folio]);
 
+  //  console.log('Folio recibido:', folio);
+
+    const [rows]: any = await db.query('CALL sp_tbCitas_Get_Cita(?)', [folio]);
+   
     if (rows.length === 0) {
       return new NextResponse('Cita no encontrada', { status: 404 });
     }
