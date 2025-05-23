@@ -1,6 +1,6 @@
 'use client';
 
-
+import {PayPalScriptProvider} from '@paypal/react-paypal-js';
 import { Button } from '@/components/ui/button/button';
 import  BreadcrumbSteps   from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 import { usePagoCita } from './resumen-citas';
