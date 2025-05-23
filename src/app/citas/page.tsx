@@ -21,11 +21,6 @@ import formatearFechaLarga from '@/lib/formatterFecha';
 export default function CitasPage() {
   const router = useRouter();
   const [citas, setCitas] = useState<Cita[]>([]);
-
-  
-
-
-
     /* ---------- Cargar citas al montar ---------- */
     useEffect(() => {
       async function fetchCitas() {
@@ -33,7 +28,7 @@ export default function CitasPage() {
           const response = await fetch('/api/citas?tipo=lista-citas');
           if (!response.ok) throw new Error("Network response was not ok");
           const data: Cita[] = await response.json();
-          console.log("Datos recibidos:", data[0]);
+          //console.log("Datos recibidos:", data);
           setCitas(data);
         } catch (error) {
           console.error("Error al obtener las citas:", error);
@@ -42,11 +37,32 @@ export default function CitasPage() {
       fetchCitas();
     }, []);
 
-   
     const handleAgregarCita = async () => {
      
     await router.push("/citas/alta-citas");
     }
+
+    const handleVerCita = async (strFolio: string) => {
+      try {
+       const res: any = await fetch(`/api/citas/${strFolio}`,{
+        method: 'GET',
+      });
+    
+        const data: any = await res.json();
+        // console.log("Datos recibidos:", data[0]);
+        // console.log("Estatus de pago:", data[0].strEstatusPago);
+         if(data[0].strEstatusPago === "pagado"){
+           await router.push(`/recibo-pago?folio=${strFolio}`);
+         }
+         if(data[0].strEstatusPago === "pendiente"){
+            await  router.push(`/citas/resumen-citas?folio=${strFolio}`);
+          }
+      } catch (error) {
+        console.error("Error al obtener la cita:", error);
+      }
+     
+    }
+
 
   return (
     <div className="p-6">
@@ -122,10 +138,10 @@ export default function CitasPage() {
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          cita.strEstatusPago === "PAGADO"
+                        className={`px-2 py-1 text-xs font-medium rounded-full uppercase ${
+                          cita.strEstatusPago === "pagado"
                             ? "bg-green-100 text-green-700"
-                            : cita.strEstatusPago === "PENDIENTE"
+                            : cita.strEstatusPago === "pendiente"
                             ? "bg-red-100 text-red-700"
                             : "bg-yellow-100 text-yellow-700"
                         }`}
@@ -137,7 +153,10 @@ export default function CitasPage() {
                       <div className="flex gap-2">
                         <Pencil className="w-4 h-4 cursor-pointer" />
                         <Trash2 className="w-4 h-4 cursor-pointer" />
-                        <Eye className="w-4 h-4 cursor-pointer" />
+                        <a onClick={() => handleVerCita(cita.strFolio)}>
+                         <Eye className="w-4 h-4 cursor-pointer"  />
+                        </a>   
+
                       </div>
                     </TableCell>
                   </TableRow>

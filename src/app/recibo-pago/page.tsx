@@ -109,8 +109,8 @@ export default function ReciboPago({
             <p><span className="font-semibold">Método de pago:</span> {datosCita.strMetodoPago }</p>
             <p>
               <span className="font-semibold">Estatus de pago:</span>{' '}
-              <span className={datosCita.strEstatusPago === 'PAGADO' ? 'text-green-600 font-semibold' : 'text-orange-500 font-semibold'}>
-                {datosCita.strEstatusPago === 'PAGADO' ? 'Pagado' : 'Pendiente'}
+              <span className={datosCita.strEstatusPago === 'pagado' ? 'text-green-600 font-semibold' : 'text-orange-500 font-semibold'}>
+                {datosCita.strEstatusPago === 'pagado' ? 'Pagado' : 'Pendiente'}
               </span>
             </p>
             <p><span className="font-semibold">Total pagado:</span> ${Number(datosCita.dblTotal || 0).toFixed(2)} MXN</p>
