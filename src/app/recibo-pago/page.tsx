@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ReciboPagoProps } from '@/types/recibo-pago';
 import { useParams, useSearchParams } from 'next/navigation';
+import formatearFechaLarga from '@/lib/formatterFecha';
 
 
 
@@ -35,20 +36,7 @@ export default function ReciboPago({
   const folio = searchParams?.get('folio');
   const [datosCita, setDatosCita] = useState<ReciboPagoProps | null>(null);
 
-  function formatearFechaLarga(fechaISO: string): string {
-    const fecha = new Date(fechaISO);
-  
-    // Opciones de formato en español
-    const opciones: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    };
-  
-    // Formatear con locale 'es-MX' o 'es-ES'
-    return fecha.toLocaleDateString('es-MX', opciones);
-  }
+
   
 
 

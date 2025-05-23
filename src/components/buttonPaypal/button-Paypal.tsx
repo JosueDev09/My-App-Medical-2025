@@ -1,6 +1,7 @@
 'use client';
 
 import { PayPalButtons } from '@paypal/react-paypal-js';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 interface BotonPaypalProps {
   folio: string;
@@ -9,6 +10,7 @@ interface BotonPaypalProps {
 
 export default function BotonPaypal({ folio, onPagoVerificado }: BotonPaypalProps) {
   return (
+    // <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
     <PayPalButtons
       createOrder={(data, actions) => {
         return actions.order.create({
@@ -43,5 +45,6 @@ export default function BotonPaypal({ folio, onPagoVerificado }: BotonPaypalProp
         alert('Error en el pago. Intenta nuevamente.');
       }}
     />
+    // </PayPalScriptProvider>
   );
 }

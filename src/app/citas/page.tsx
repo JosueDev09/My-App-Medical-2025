@@ -14,6 +14,7 @@ import {
 import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { useRouter } from "next/navigation";
+import formatearFechaLarga from '@/lib/formatterFecha';
 
 
 
@@ -22,20 +23,7 @@ export default function CitasPage() {
   const [citas, setCitas] = useState<Cita[]>([]);
 
   
-  function formatearFechaLarga(fechaISO: string): string {
-    const fecha = new Date(fechaISO);
-  
-    // Opciones de formato en español
-    const opciones: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    };
-  
-    // Formatear con locale 'es-MX' o 'es-ES'
-    return fecha.toLocaleDateString('es-MX', opciones);
-  }
+
 
 
     /* ---------- Cargar citas al montar ---------- */

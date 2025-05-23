@@ -8,6 +8,7 @@ import { DollarSignIcon } from "lucide-react";
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import BotonPaypal from '@/components/buttonPaypal/button-Paypal';
+import formatearFechaLarga from '@/lib/formatterFecha';
 
 interface ResumenCitaProps {
   datos: {
@@ -57,7 +58,7 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
       const res = await fetch(`/api/citas/${folio}`);
       if (res.ok) {
         const data = await res.json();
-        setCita(data);
+        setCita(data[0]);
       }
     };
 
@@ -78,13 +79,13 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
         <p><span className="font-medium">Nombre:</span>{cita.strNombrePaciente || 'Cargando nombre...'} </p>
-        <p><span className="font-medium">Edad:</span> {cita.intEdad || 'Cargando Edad...'}</p>
+        <p><span className="font-medium">Edad:</span> {cita.intEdad + ' ' + 'años' || 'Cargando Edad...'}</p>
         <p><span className="font-medium">Genero:</span> {cita.strGenero|| 'Cargando Genero...'}</p>
         <p><span className="font-medium">Teléfono:</span> {cita.strTelefonoPaciente || 'Cargando Teléfono...'}</p>
         <p><span className="font-medium">Correo:</span> {cita.strCorreoPaciente || 'Cargando Correo...'}</p>
         <p><span className="font-medium">Especialidad:</span> {cita.strNombreEspecialidad || 'Cargando Especialidad...'}</p>
         <p><span className="font-medium">Médico:</span> {cita.strNombreDoctor || 'Cargando Médico...'}</p>
-        <p><span className="font-medium">Fecha:</span> {cita.datFecha || 'Cargando Fecha...'}</p>
+        <p><span className="font-medium ">Fecha:</span> {formatearFechaLarga(cita.datFecha) || 'Cargando Fecha...'}</p>
         <p><span className="font-medium">Hora:</span> {cita.intHora || 'Cargando Hora...'}</p>
         <p className="col-span-2"><span className="font-medium">Motivo:</span> {cita.strMotivo || 'Cargando Motivo...'}</p>
       </div>
@@ -98,9 +99,9 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
             <DollarSignIcon className="w-6 h-" /> Efectivo
             </Button>
             {/* Componente de pago PayPal */}
-            {cita?.strFolio && (
-              <BotonPaypal folio={cita.strFolio} onPagoVerificado={handlePago} />
-            )}
+            <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
+                <BotonPaypal folio={cita.strFolio} onPagoVerificado={handlePago} />
+            </PayPalScriptProvider>
           </div>
         </div>
         ) : (
