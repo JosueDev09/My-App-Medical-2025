@@ -29,7 +29,7 @@ export default function BotonPaypal({ folio, onPagoVerificado }: BotonPaypalProp
       onApprove={async (data) => {
         const orderID = data.orderID;
 
-        const res = await fetch('/api/citas/pago', {
+        const res = await fetch(`/api/citas/pago/${folio}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
