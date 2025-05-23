@@ -2,6 +2,7 @@
 
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { useSearchParams } from 'next/navigation';
 
 interface BotonPaypalProps {
   folio: string;
@@ -9,6 +10,9 @@ interface BotonPaypalProps {
 }
 
 export default function BotonPaypal({ folio, onPagoVerificado }: BotonPaypalProps) {
+  const searchParams = useSearchParams();
+  const folio1 = searchParams?.get('folio');
+ 
   return (
     // <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
     <PayPalButtons
@@ -30,10 +34,13 @@ export default function BotonPaypal({ folio, onPagoVerificado }: BotonPaypalProp
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderID,
-            folio,
+            folio1,
           }),
         });
-
+      
+        console.log('Folio:', folio1);
+      
+        console.log('Respuesta de PayPal:', res);
         if (res.ok) {
           onPagoVerificado(); // notifica al componente padre
         } else {

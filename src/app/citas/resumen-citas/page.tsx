@@ -51,14 +51,17 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
 
   const { pagoRealizado, handlePago } = usePagoCita( onPagoCompletado);
 
+  //console.log('Folio desde el componente:', folio);
+
   useEffect(() => {
     const fetchCita = async () => {
       if (!folio) return;
-
+     // console.log('Folio en useEffect:', folio);
       const res = await fetch(`/api/citas/${folio}`);
       if (res.ok) {
         const data = await res.json();
         setCita(data[0]);
+        //console.log('Datos de la cita:', data[0]);
       }
     };
 

@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { Console } from 'console';
 
 async function obtenerTokenPaypal() {
   const auth = Buffer.from(`${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
@@ -40,23 +41,25 @@ async function verificarOrdenPaypal(orderID: string, token: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderID, folio, metodo  } = await req.json();
+    const { orderID, folio1, metodo  } = await req.json();
 
-    //console.log('Datos recibidos:', { orderID, folio });
+    console.log('Datos recibidos:', { orderID, folio1 });
 
-    if (!orderID || !folio) {
+    if (!orderID || !folio1) {
       return new NextResponse('Faltan datos', { status: 400 });
     }
+    console.log('Folio:', folio1);
+    console.log('Método de pago:', metodo);
 
     const token = await obtenerTokenPaypal();
     const orden = await verificarOrdenPaypal(orderID, token);
-    //console.log('Token de PayPal:', token);
-    //console.log('Orden verificada:', orden);
+    console.log('Token de PayPal:', token);
+    console.log('Orden verificada:', orden);
     console.log('Datos de la orden:', orden);
 
 
     await db.query(
-      'UPDATE tbCitas SET strEstatusPago = "PAGADO",strMetodoPago= ? WHERE strFolio = ?',[metodo || 'Efectivo', folio]
+      'UPDATE tbCitas SET strEstatusPago = "PAGADO",strMetodoPago= ? WHERE strFolio = ?',[metodo || 'Efectivo', folio1]
     );
 
     return NextResponse.json({ message: 'Pago verificado y registrado correctamente' });
