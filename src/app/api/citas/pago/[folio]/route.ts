@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     const orden = await verificarOrdenPaypal(orderID, token);
     //console.log('Token de PayPal:', token);
     //console.log('Orden verificada:', orden);
+    console.log('Datos de la orden:', orden);
 
 
     await db.query(

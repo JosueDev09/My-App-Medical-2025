@@ -100,10 +100,10 @@ export default function CitasPage() {
           </TableHeader>
            <TableBody>
               {citas.length > 0 ? (
-                citas.map((cita) => (
+                citas.map((cita,index) => (
                   <TableRow
-                    key={cita.intCita ?? `${cita.datFecha}-${cita.intHora}`}
-                    className="hover:bg-muted/10 transition border-gray-200"
+                   key={cita.intCita ?? `${cita.datFecha}-${cita.intHora}-${index}`}
+                   className="hover:bg-muted/10 transition border-gray-200"
                   >
                     <TableCell className="font-medium border-r border-gray-200">
                       {cita.strNombrePaciente}
