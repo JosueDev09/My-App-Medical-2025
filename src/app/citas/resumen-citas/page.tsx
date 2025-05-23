@@ -1,6 +1,6 @@
 'use client';
 
-import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+
 import { Button } from '@/components/ui/button/button';
 import  BreadcrumbSteps   from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 import { usePagoCita } from './resumen-citas';
@@ -57,7 +57,7 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
       const res = await fetch(`/api/citas/${folio}`);
       if (res.ok) {
         const data = await res.json();
-        setCita(data);
+        setCita(data[0]);
       }
     };
 
