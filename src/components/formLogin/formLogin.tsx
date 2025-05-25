@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { SignIn } from "../ui/signin-google/signin-google";
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
@@ -12,15 +11,15 @@ export function FormLogin(){
   const [strUsuario, setUsuario] = useState("");
   const [strContra, setContra] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { data: session } = useSession({ required: false });
-  const [error, setError] = useState("");
+  // const { data: session } = useSession({ required: false });
+  // const [error, setError] = useState("");
    const router = useRouter();
 
    const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorUsuario('');
     setErrorContra('');
-    setError("");
+    // setError("");
     let hasError = false;
 
     if (!strUsuario.trim()) {
@@ -34,8 +33,6 @@ export function FormLogin(){
     }
   
     if (hasError) return;
-    
-    
   
     try {
       const res = await fetch("/api/login", {
@@ -50,18 +47,23 @@ export function FormLogin(){
   
       if (!res.ok) {
         const errorData = await res.json();
-        setError(errorData.error || "Error al iniciar sesión.");
+        // setError(errorData.error || "Error al iniciar sesión.");
         setErrorContra(errorData.error || 'Error al iniciar sesión');
      
         return;
       }
   
       const data = await res.json();
+
+      if (data.error) {
+        setErrorContra(data.error);
+        return;
+      } 
      // console.log("Token:", data.token);
       router.push("/dashboard");
     } catch (err) {
-     // console.error("Error al hacer login:", err);
-      setError("Error inesperado al iniciar sesión.");
+      console.error("Error al hacer login:", err);
+      // setError("Error inesperado al iniciar sesión.");
     }
   };
 

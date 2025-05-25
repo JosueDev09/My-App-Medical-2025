@@ -1,9 +1,9 @@
 "use client";
 import { useState,useEffect } from 'react';
-import { useSession} from 'next-auth/react';
+// import { useSession} from 'next-auth/react';
 import Swal from 'sweetalert2';
 import { useSearchParams } from "next/navigation";
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { LoginImage } from "@/components/images/loginImage";
 import { FormLogin } from "@/components/formLogin/formLogin";
 import { FormRegister } from "@/components/formRegister/formRegister";
@@ -13,9 +13,9 @@ export default function LoginPage() {
 
   const [isLogin, setIsLogin] = useState(true);
 
-  const { data: session, status } = useSession({ required: false });
-  const [alertShown, setAlertShown] = useState(false);
-  const router = useRouter();
+  // const { data: session, status } = useSession({ required: false });
+  // const [alertShown, setAlertShown] = useState(false);
+  // const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {

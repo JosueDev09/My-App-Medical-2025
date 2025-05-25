@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card/card';
@@ -6,51 +7,40 @@ import { Button } from '@/components/ui/button/button';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { ReciboPagoProps } from '@/types/recibo-pago';
-import { useParams, useSearchParams } from 'next/navigation';
+import {  useSearchParams } from 'next/navigation';
 import formatearFechaLarga from '@/lib/formatterFecha';
+import Swal from 'sweetalert2';
 
 
 
 
-export default function ReciboPago({
-  intCita: number,
-    strNombrePaciente,
-    intEdad,
-    strGenero ,
-    strCorreoPaciente ,
-    strTelefonoPaciente,
-    idEspecialidad,
-    intDoctor,
-    strNombreEspecialidad,
-    strNombreDoctor,
-    datFecha,
-    intHora,
-    dblTotal,
-    strFolio,
-    strMotivo,
-    strEstatusPago,
-    strMetodoPago,
-}: ReciboPagoProps) {
+export default function ReciboPago({}: ReciboPagoProps) {
   const [url, setUrl] = useState('');
   const searchParams = useSearchParams();
   const folio = searchParams?.get('folio');
   const [datosCita, setDatosCita] = useState<ReciboPagoProps | null>(null);
 
 
-  
-
-
   useEffect(() => {
     setUrl(`${window.location.origin}/recibo-pago/${folio}`);
   }, [folio]);
 
-  const enviarQRporCorreo = async (folio : any) => {
+  const enviarQRporCorreo = async (folio: string) => {
     try {
-      const res = await fetch(`/api/citas/${folio}/enviar-qr`, {
-        method: 'POST',
+      console.log('folio', folio);
+  
+      const res = await fetch(`/api/citas/correoQR/${folio}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       });
+  
       if (res.ok) {
-        alert('QR enviado al correo del paciente');
+        Swal.fire({
+          title: 'QR enviado',
+          text: 'El QR ha sido enviado al correo del paciente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+        });
       } else {
         alert('Error al enviar el QR');
       }
@@ -59,6 +49,7 @@ export default function ReciboPago({
       alert('Ocurrió un error al intentar enviar el QR');
     }
   };
+  
   
   useEffect(() => {
     const obtenerCita = async () => {
@@ -132,7 +123,7 @@ export default function ReciboPago({
         <Button onClick={() => window.print()} variant="outline" className='cursor-pointer'>
           Imprimir recibo
         </Button>
-        <Button onClick={enviarQRporCorreo} variant="default" className='cursor-pointer'>
+        <Button onClick={() => enviarQRporCorreo(datosCita.strFolio)} variant="default" className='cursor-pointer'>
           Generar QR de cita y enviarlo por correo
         </Button>
       </div>

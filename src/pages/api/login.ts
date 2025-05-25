@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { strUsuario, strContra } = req.body;
 
+  
   // Validar usuario (SP o lógica personalizada)
   const [spRows]: any = await db.query("CALL sp_ValidarLoginUsuario (?)", [strUsuario]);
   const user = spRows[0]?.[0];

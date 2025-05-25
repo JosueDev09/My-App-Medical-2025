@@ -44,7 +44,10 @@ export async function POST(req: NextRequest,context: { params: { folio: string }
 
     //console.log('Datos recibidos:', { orderID, folio1 });
     const folio =  req.nextUrl.pathname.split('/').pop();
-
+    if (!folio) {
+      return new NextResponse('Folio no proporcionado', { status: 400 });
+    }
+    
    
 
     if (!orderID || !folio1) {
