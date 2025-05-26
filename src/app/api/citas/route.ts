@@ -28,8 +28,18 @@ export async function GET(req: NextRequest): Promise<NextResponse>  {
       const [rows]: any = await db.query('SELECT intDoctor, strNombreDoctor FROM tbDoctores');
       return NextResponse.json(rows, { status: 200 });
     }
-    if(tipo === 'lista-citas'){
-      const [rows]: any = await db.query('CALL SP_tbCitas_List'); // Puedes tipar `rows` mejor si conoces su estructura
+    if(tipo === 'lista-citas-admin'){
+      const [rows]: any = await db.query('CALL sp_tbCitas_List'); // Puedes tipar `rows` mejor si conoces su estructura
+      return NextResponse.json(rows[0], { status: 200 });
+    }
+     if(tipo === 'lista-citas-paciente'){
+       const usuario = req.nextUrl.searchParams.get("usuario");
+      // Verifica si el usuario está presente
+      console.log("Usuario:", usuario);
+      if (!usuario) {
+        return new NextResponse("Usuario no proporcionado", { status: 400 });
+      }
+      const [rows]: any = await db.query('CALL sp_tbCitas_List_Usuario(?)'); // Puedes tipar `rows` mejor si conoces su estructura
       return NextResponse.json(rows[0], { status: 200 });
     }
     return new NextResponse('Parámetro tipo inválido', { status: 400 });

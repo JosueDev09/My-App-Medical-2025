@@ -16,54 +16,19 @@ import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity } from "
 import { Button } from "@/components/ui/button/button";
 import { useRouter } from "next/navigation";
 import formatearFechaLarga from '@/lib/formatterFecha';
+import Swal from "sweetalert2";
+import { useCitas } from "@/hooks/useCitas";
+
 
 
 
 export default function CitasPage() {
-  const router = useRouter();
-  const [citas, setCitas] = useState<Cita[]>([]);
-    /* ---------- Cargar citas al montar ---------- */
-    useEffect(() => {
-      async function fetchCitas() {
-        try {
-          const response = await fetch('/api/citas?tipo=lista-citas');
-          if (!response.ok) throw new Error("Network response was not ok");
-          const data: Cita[] = await response.json();
-          //console.log("Datos recibidos:", data);
-          setCitas(data);
-        } catch (error) {
-          console.error("Error al obtener las citas:", error);
-        }
-      }
-      fetchCitas();
-    }, []);
-
-    const handleAgregarCita = async () => {
-     
-    await router.push("/citas/alta-citas");
-    }
-
-    const handleVerCita = async (strFolio: string) => {
-      try {
-       const res: any = await fetch(`/api/citas/${strFolio}`,{
-        method: 'GET',
-      });
-    
-        const data: any = await res.json();
-        // console.log("Datos recibidos:", data[0]);
-        // console.log("Estatus de pago:", data[0].strEstatusPago);
-         if(data[0].strEstatusPago === "pagado"){
-           await router.push(`/recibo-pago?folio=${strFolio}`);
-         }
-         if(data[0].strEstatusPago === "pendiente"){
-            await  router.push(`/citas/resumen-citas?folio=${strFolio}`);
-          }
-      } catch (error) {
-        console.error("Error al obtener la cita:", error);
-      }
-     
-    }
-
+ const {
+    citas,
+    handleAgregarCita,
+    handleVerCita,
+    handleEliminarCita,
+  } = useCitas();
 
   return (
     <div className="p-6">
@@ -153,7 +118,9 @@ export default function CitasPage() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Pencil className="w-4 h-4 cursor-pointer" />
-                        <Trash2 className="w-4 h-4 cursor-pointer" />
+                         <a onClick={() => handleEliminarCita(cita.strFolio)}> 
+                          <Trash2 className="w-4 h-4 cursor-pointer" />
+                         </a>
                         <a onClick={() => handleVerCita(cita.strFolio)}>
                          <Eye className="w-4 h-4 cursor-pointer"  />
                         </a>   

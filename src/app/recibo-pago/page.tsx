@@ -10,6 +10,7 @@ import { ReciboPagoProps } from '@/types/recibo-pago';
 import {  useSearchParams } from 'next/navigation';
 import formatearFechaLarga from '@/lib/formatterFecha';
 import Swal from 'sweetalert2';
+import BreadcrumbSteps from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 
 
 
@@ -74,7 +75,10 @@ export default function ReciboPago({}: ReciboPagoProps) {
 
   return (
     <div className="p-4 print:p-0 print:m-0 print:w-full print:max-w-none print:bg-white print:shadow-none">
-      <Card className="shadow-lg print:shadow-none print:border-none print:rounded-none">
+          <div className="w-full m-auto max-w-3xl">
+                  <BreadcrumbSteps pasoActual={3} />
+                  </div>
+      <Card className="w-[50%] m-auto shadow-lg print:shadow-none print:border-none print:rounded-none">
         <CardHeader className="text-center">
           <CardTitle className="text-lg font-bold">RECIBO DE PAGO</CardTitle>
           <p className="text-xs text-muted-foreground">Folio: {folio}</p>

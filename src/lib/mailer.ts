@@ -8,13 +8,16 @@ export const sendEmailWithQR = async (email: string, folio: string) => {
     const qrImage = await QRCode.toDataURL(qrData);
 
     const transporter = nodemailer.createTransport({
+    
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER, // tu correo
         pass: process.env.EMAIL_PASS  // tu contraseña o app password
       }
     });
-   // console.log("Configuración del transportador:", transporter);
+   
+
+  
 
    const html = `
   <div style="font-family: Arial, sans-serif; color: #333; background-color: #f4f6f9; padding: 20px;">
@@ -46,6 +49,8 @@ export const sendEmailWithQR = async (email: string, folio: string) => {
   </div>
 `;
 
+   
+
 
     const mailOptions = {
       from: '"Esymbel Health" <no-reply@esymbel.com>',
@@ -60,6 +65,8 @@ export const sendEmailWithQR = async (email: string, folio: string) => {
         }
       ]
     };
+
+   
 
     await transporter.sendMail(mailOptions);
     console.log("Correo enviado con QR");
