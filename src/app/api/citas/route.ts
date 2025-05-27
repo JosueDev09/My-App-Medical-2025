@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { auth } from '@/auth';
 import { db } from '@/lib/db'; // Asegúrate de que la ruta sea correcta
 import { NextRequest, NextResponse } from 'next/server';
+
 // Ajusta esta ruta según tu proyecto
 
 export async function GET(req: NextRequest): Promise<NextResponse>  {
@@ -33,13 +35,17 @@ export async function GET(req: NextRequest): Promise<NextResponse>  {
       return NextResponse.json(rows[0], { status: 200 });
     }
      if(tipo === 'lista-citas-paciente'){
-       const usuario = req.nextUrl.searchParams.get("usuario");
+      const session = await auth();
+     // console.log("Sesión obtenida:", session?.user.email);
+      const email = session?.user?.email; // Asegúrate de que el usuario esté en la sesión
+//   console.log("Tipo de usuario:", req.nextUrl);
+     
       // Verifica si el usuario está presente
-      console.log("Usuario:", usuario);
-      if (!usuario) {
+      console.log("Usuario:", email);
+      if (!email) {
         return new NextResponse("Usuario no proporcionado", { status: 400 });
       }
-      const [rows]: any = await db.query('CALL sp_tbCitas_List_Usuario(?)'); // Puedes tipar `rows` mejor si conoces su estructura
+      const [rows]: any = await db.query('CALL sp_tbCitas_List_Usuario(?)',email); // Puedes tipar `rows` mejor si conoces su estructura
       return NextResponse.json(rows[0], { status: 200 });
     }
     return new NextResponse('Parámetro tipo inválido', { status: 400 });

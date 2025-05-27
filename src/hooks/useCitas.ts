@@ -45,11 +45,13 @@ export function useCitas() {
          // console.log("Citas obtenidas:", data);
         }
         if(tipoUsuario === "Paciente") {
+         // console.log("Tipo de usuario es Paciente",);
            const response = await fetch("/api/citas?tipo=lista-citas-paciente");
 
           if (!response.ok) throw new Error("Error al obtener citas");
           const data: Cita[] = await response.json();
           setCitas(data);
+          //console.log("Citas obtenidas para Paciente:", data);
         }
        
       } catch (error) {
