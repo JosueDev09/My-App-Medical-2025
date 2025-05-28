@@ -3,6 +3,7 @@ import { useState } from "react";
 import { SignIn } from "../ui/signin-google/signin-google";
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 
 export function FormLogin(){
@@ -14,6 +15,10 @@ export function FormLogin(){
   // const { data: session } = useSession({ required: false });
   // const [error, setError] = useState("");
    const router = useRouter();
+
+   function esperar(ms:any) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
    const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +38,8 @@ export function FormLogin(){
     }
   
     if (hasError) return;
+     // Mostrar loading
+   
   
     try {
       const res = await fetch("/api/login", {
@@ -44,6 +51,8 @@ export function FormLogin(){
       });
   
       //console.log("res", res);
+
+      
   
       if (!res.ok) {
         const errorData = await res.json();
@@ -59,10 +68,29 @@ export function FormLogin(){
         setErrorContra(data.error);
         return;
       } 
+       Swal.fire({
+          title: "Autenticando datos...",
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        }); 
      // console.log("Token:", data.token);
-      router.push("/dashboard");
+        await esperar(5000); // Esperar 5 segundos para simular la autenticación
+         router.push("/dashboard");
+    
     } catch (err) {
       console.error("Error al hacer login:", err);
+       Swal.close();
+      console.error("Error al hacer login:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Hubo un problema al iniciar sesión.",
+      });
       // setError("Error inesperado al iniciar sesión.");
     }
   };
