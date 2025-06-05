@@ -32,7 +32,8 @@ export async function middleware(req: NextRequest) {
   let userRole: string | null = null;
   let authType: 'credenciales' | 'google' | null = null;
 
-
+  
+  
     
     if (token) {
       try {
