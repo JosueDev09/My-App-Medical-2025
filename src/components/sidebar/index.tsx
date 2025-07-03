@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import NavLink from './nav-link';
-import { LayoutDashboard, Calendar, Users, Stethoscope, Activity, Wallet, BarChart2, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Stethoscope, Activity, Wallet, BarChart2, ClipboardList, Plus } from "lucide-react";
 import { useSession } from 'next-auth/react';
 
 
@@ -11,7 +11,17 @@ const routes = [
   { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
   { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['SuperAdmin', 'doctor'] },
-  { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['SuperAdmin'] },
+  // { name: 'Médicos', path: '/medicos', icon: <Stethoscope size={20} />, roles: ['SuperAdmin'] },
+   {
+    name: 'Doctores',
+    icon: <Stethoscope size={20} />,
+    roles: ['SuperAdmin'],
+    children: [
+      { name: 'Alta doctor', path: '/medicos/alta-medicos', icon: <Plus size={20} /> },
+      { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={20} /> },
+      
+    ]
+  },
   { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
   { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
   {
