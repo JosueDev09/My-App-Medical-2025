@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 // Tipos opcionales para TypeScript
 interface TabsCompletados {
@@ -9,8 +10,15 @@ interface TabsCompletados {
 }
 
 interface FormData {
-  nombre: string;
-  apellidos: string;
+  strNombre: string;
+  strApellidos: string;
+  datFechaNacimiento?: string; // Opcional
+  strTelefono?: string; // Opcional
+  strEmail?: string; // Opcional
+  strSexo?: string; // Opcional
+  strCiudad?: string; // Opcional
+  strEstado?: string; // Opcional
+  strDireccion?: string; // Opcional
   // Puedes agregar más campos aquí
 }
 
@@ -26,31 +34,59 @@ export function useRegistroDoctor() {
     hAtencion: false,
     uSistema: false,
   });
+    const [activeTab, setActiveTab] = useState<string>("dPersonales");
 
   // ID del doctor
-  const [idDoctor, setIdDoctor] = useState<number | null>(null);
+  const [intDoctor, setIntDoctor] = useState<number | null>(null);
 
   // Datos del formulario
   const [form, setForm] = useState<FormData>({
-    nombre: "",
-    apellidos: "",
+    strNombre: "",
+    strApellidos: "",
+    datFechaNacimiento: "", // Puedes inicializarlo como undefined si no es obligatorio
+    strTelefono: "",
+    strEmail: "",
+    strCiudad: "",
+    strEstado: "",
+    strSexo: "",
+    strDireccion: "",
+
     // Otros campos...
   });
 
   // Errores
   const [errores, setErrores] = useState<Errores>({});
 
+  const handleTabChange = (value: string) => {
+  // Si el tab que quieren abrir está completado, no cambiar
+  if (tabsCompletados[value as keyof typeof tabsCompletados]) {
+    return;
+  }
+  setActiveTab(value);
+};
+
   // Submit Datos Personales
   const handleSubmitDatosPersonales = async () => {
     try {
-      const response = await fetch("/api/crear-doctor", {
+      const response = await fetch("/api/guardar-doctor", {
         method: "POST",
         body: JSON.stringify(form),
       });
       const data = await response.json();
 
-      if (data.idDoctor) {
-        setIdDoctor(data.idDoctor);
+
+
+      if(data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Datos guardados correctamente",
+          text: "Los datos personales del doctor se han guardado exitosamente.",
+        });
+        // Aquí podrías obtener el ID del doctor si tu API lo devuelve
+        // setIdDoctor(data.idDoctor); // Asumiendo que tu API devuelve el ID del doctor
+        if (data.intDoctor) {
+            setIntDoctor(data.intDoctor); // Asumiendo que tu API devuelve el ID del doctor
+        }
       }
 
       setTabsCompletados((prev) => ({
@@ -64,7 +100,7 @@ export function useRegistroDoctor() {
 
   // Submit Datos Profesionales
   const handleSubmitDatosProfesionales = async () => {
-    if (!idDoctor) {
+    if (!intDoctor) {
       alert("Primero guarda los Datos Personales");
       return;
     }
@@ -79,13 +115,15 @@ export function useRegistroDoctor() {
   return {
     tabsCompletados,
     setTabsCompletados,
-    idDoctor,
-    setIdDoctor,
+    intDoctor,
+    setIntDoctor,
     form,
     setForm,
     errores,
     setErrores,
     handleSubmitDatosPersonales,
     handleSubmitDatosProfesionales,
+    handleTabChange,
+    activeTab, setActiveTab
   };
 }

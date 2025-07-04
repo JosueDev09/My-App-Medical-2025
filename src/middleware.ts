@@ -12,7 +12,7 @@ const secret = encoder.encode(process.env.AUTH_SECRET || 'secret');
 //Rutas base y los roles permitidos
 const accessControl: Record<string, string[]> = {
   '/dashboard': ['SuperAdmin','Paciente','Doctor'],
-  '/medicos': ['SuperAdmin','Doctor'],
+  '/medicos/alta-medicos': ['SuperAdmin','Doctor'],
   '/especialidad': ['SuperAdmin','Doctor'],
   '/citas': ['SuperAdmin', 'Doctor', 'Paciente'],
   '/calendario-doctor': ['Doctor','SuperAdmin'],
@@ -99,7 +99,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/medicos/:path*',
+    '/medicos/alta-medicos:path*',
     '/especialidad/:path*',
     '/citas/:path*',
     '/calendario-doctor/:path*',

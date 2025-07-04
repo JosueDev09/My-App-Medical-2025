@@ -16,27 +16,22 @@ export default function altaMedicos() {
   const [especialidades, setEspecialidades] = useState<any[]>([]);
   const [doctores, setDoctores] = useState<any[]>([]);
 
+
   
     const {
             tabsCompletados,
             setTabsCompletados,
-            idDoctor,
-            setIdDoctor,
+            intDoctor,
+            setIntDoctor,
             form,
             setForm,
             errores,
             setErrores,
             handleSubmitDatosPersonales,
             handleSubmitDatosProfesionales,
+            activeTab, setActiveTab,
+            handleTabChange
             } = useRegistroDoctor();
-
-    // const {
-    //     form,
-    //     setForm,
-    //     errores,
-    //     handleSubmit,
-    //     handleChangeCampo
-    //   } = agendarCita();
 
           useEffect(() => {
             const cargarEspecialidades = async () => {
@@ -53,7 +48,7 @@ export default function altaMedicos() {
 <div className="w-full  bg-white  rounded-2xl shadow-lg p-8 space-y-2  ">
         <h1 className="text-2xl font-bold text-center mb-[60px]">REGISTRAR DOCTOR</h1>
           
-    <Tabs defaultValue="datos" className="w-full">
+    <Tabs defaultValue="datos" className="w-full" value={activeTab} onValueChange={handleTabChange}>
       <div className='flex justify-between items-center mb-4'>
          <TabsList className="mb-[20px] flex gap-4">
           <TabsTrigger
@@ -61,8 +56,8 @@ export default function altaMedicos() {
             className={cn(
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.dPersonales
-                ? "bg-green-500 text-white"
-                : "bg-yellow-200 text-black hover:bg-yellow-400"
+                ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
+                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             DATOS PERSONALES
@@ -75,8 +70,8 @@ export default function altaMedicos() {
             className={cn(
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.dProfesionales
-                ? "bg-green-500 text-white"
-                : "bg-yellow-200 text-black hover:bg-yellow-400"
+                ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
+                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             DATOS PROFESIONALES
@@ -89,8 +84,8 @@ export default function altaMedicos() {
             className={cn(
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.hAtencion
-                ? "bg-green-500 text-white"
-                : "bg-yellow-200 text-black hover:bg-yellow-400"
+                ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
+                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             HORARIOS DE ATENCIÓN
@@ -103,8 +98,8 @@ export default function altaMedicos() {
             className={cn(
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.uSistema
-                ? "bg-green-500 text-white"
-                : "bg-yellow-200 text-black hover:bg-yellow-400"
+                ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
+                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             USUARIO DEL SISTEMA
@@ -123,6 +118,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="text"
+                value={form.strNombre}
+                onChange={(e) =>
+                setForm({ ...form, strNombre: e.target.value })
+                }
                 placeholder="Ej: Juan Carlos"
                 
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -136,6 +135,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="text"
+                value={form.strApellidos}
+                onChange={(e) =>
+                setForm({ ...form, strApellidos: e.target.value })
+                }
                 placeholder="Ej: Pérez Gómez"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -148,6 +151,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="date"
+                value={form.datFechaNacimiento}
+                onChange={(e) =>
+                setForm({ ...form, datFechaNacimiento: e.target.value  })
+                }
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </div>
@@ -158,13 +165,18 @@ export default function altaMedicos() {
                 Sexo
                 </label>
                 <select
-                className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={form.strSexo}
+                    onChange={(e) =>
+                    setForm({ ...form, strSexo: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                <option value="">Seleccionar sexo</option>
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-                <option value="otro">Otro</option>
+                    <option value="">Seleccionar sexo</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="otro">Otro</option>
                 </select>
+                {/* <p className="text-sm text-gray-500 mt-2">Sexo seleccionado: {form.strSexo}</p> */}
             </div>
 
             {/* Estado */}
@@ -174,6 +186,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="text"
+                value={form.strEstado}
+                onChange={(e) =>
+                setForm({ ...form, strEstado: e.target.value })
+                }
                 placeholder="Ej: Jalisco"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -186,6 +202,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="text"
+                value={form.strCiudad}
+                onChange={(e) =>
+                setForm({ ...form, strCiudad: e.target.value })
+                }
                 placeholder="Ej: Guadalajara"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -198,6 +218,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="tel"
+                value={form.strTelefono}
+                onChange={(e) =>
+                setForm({ ...form, strTelefono: e.target.value })
+                }
                 placeholder="Ej: 3312345678"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -210,6 +234,10 @@ export default function altaMedicos() {
                 </label>
                 <input
                 type="email"
+                value={form.strEmail}
+                onChange={(e) =>
+                setForm({ ...form, strEmail: e.target.value })
+                }
                 placeholder="Ej: doctor@correo.com"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -222,6 +250,10 @@ export default function altaMedicos() {
                 </label>
                 <textarea
                 rows={3}
+                value={form.strDireccion}
+                onChange={(e) =>
+                setForm({ ...form, strDireccion: e.target.value })
+                }
                 placeholder="Calle, número, colonia, código postal"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
