@@ -112,6 +112,15 @@ export function useRegistroDoctor() {
     }));
   };
 
+    const handleChangeCampo = (campo: keyof typeof form, valor: string) => {
+    setForm({ ...form, [campo]: valor });
+  
+    // Limpia error en tiempo real si el campo es válido
+    if (valor.trim() !== '') {
+      setErrores((prev) => ({ ...prev, [campo]: '' }));
+    }
+  };
+
   return {
     tabsCompletados,
     setTabsCompletados,
@@ -124,6 +133,7 @@ export function useRegistroDoctor() {
     handleSubmitDatosPersonales,
     handleSubmitDatosProfesionales,
     handleTabChange,
-    activeTab, setActiveTab
+    activeTab, setActiveTab,
+    handleChangeCampo
   };
 }

@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/select';
 import { useRegistroDoctor } from "@/hooks/useRegistroDoctor";
 import { cn } from "@/lib/utils"; // O usa clsx si prefieres
+import {getInputValidationClasses } from "@/lib/validationsInputs"; // Asegúrate de que esta función esté definida en tu proyecto
 
 
 export default function altaMedicos() {
@@ -57,7 +58,7 @@ export default function altaMedicos() {
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.dPersonales
                 ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
-                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
+                : "bg-yellow-300 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             DATOS PERSONALES
@@ -71,7 +72,7 @@ export default function altaMedicos() {
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.dProfesionales
                 ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
-                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
+                : "bg-yellow-300 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             DATOS PROFESIONALES
@@ -85,7 +86,7 @@ export default function altaMedicos() {
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.hAtencion
                 ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
-                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
+                : "bg-yellow-300 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             HORARIOS DE ATENCIÓN
@@ -99,7 +100,7 @@ export default function altaMedicos() {
             "cursor-pointer px-4 py-2 rounded transition",
             tabsCompletados.uSistema
                 ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
-                : "bg-yellow-200 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
+                : "bg-yellow-300 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
             )}
         >
             USUARIO DEL SISTEMA
@@ -124,7 +125,7 @@ export default function altaMedicos() {
                 }
                 placeholder="Ej: Juan Carlos"
                 
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strNombre)}`}
                 />
             </div>
 
@@ -265,7 +266,7 @@ export default function altaMedicos() {
                 <div className="text-center pt-6">
                 <button
                     onClick={handleSubmitDatosPersonales}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded mt-4 cursor-pointer"
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded mt-4 cursor-pointer"
                 >
                     Guardar Datos Personales
                 </button>
