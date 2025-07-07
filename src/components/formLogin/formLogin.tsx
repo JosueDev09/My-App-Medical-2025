@@ -72,14 +72,14 @@ export function FormLogin(){
           title: "Autenticando datos...",
           allowOutsideClick: false,
           showConfirmButton: false,
-          timer: 5000,
+          timer: 3000,
           timerProgressBar: true,
           didOpen: () => {
             Swal.showLoading();
           },
         }); 
      // console.log("Token:", data.token);
-        await esperar(5000); // Esperar 5 segundos para simular la autenticación
+        await esperar(3000); // Esperar 5 segundos para simular la autenticación
          router.push("/dashboard");
     
     } catch (err) {

@@ -1,6 +1,12 @@
+export function getInputValidationClasses(
+  value: string,
+  touched: boolean,
+  options?: { minLength?: number }
+) {
+  if (!touched) {
+    return "border border-gray-300 focus:ring-blue-500"; // estilo neutral
+  }
 
-
-export function getInputValidationClasses(value: string, options?: { minLength?: number }) {
   if (value.trim() === "") {
     return "border border-red-500 focus:ring-red-500";
   }

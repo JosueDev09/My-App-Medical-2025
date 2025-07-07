@@ -12,14 +12,23 @@ interface TabsCompletados {
 interface FormData {
   strNombre: string;
   strApellidos: string;
-  datFechaNacimiento?: string; // Opcional
-  strTelefono?: string; // Opcional
-  strEmail?: string; // Opcional
-  strSexo?: string; // Opcional
-  strCiudad?: string; // Opcional
-  strEstado?: string; // Opcional
-  strDireccion?: string; // Opcional
+  datFechaNacimiento: string; // Opcional
+  strTelefono: string; // Opcional
+  strEmail: string; // Opcional
+  strSexo: string; // Opcional
+  strCiudad: string; // Opcional
+  strEstado: string; // Opcional
+  strDireccion: string; // Opcional
   // Puedes agregar más campos aquí
+}
+
+interface FormData2 {
+  idEspecialidad: number;
+  strCedulaP: string;
+  strCurpRFC: string; // Opcional
+  dblPrecioConsulta: string; // Opcional
+  strConsultorio: string; // Opcional
+  strDescripcionDoctor: string; // Opcional
 }
 
 interface Errores {
@@ -35,6 +44,7 @@ export function useRegistroDoctor() {
     uSistema: false,
   });
     const [activeTab, setActiveTab] = useState<string>("dPersonales");
+ 
 
   // ID del doctor
   const [intDoctor, setIntDoctor] = useState<number | null>(null);
@@ -54,20 +64,89 @@ export function useRegistroDoctor() {
     // Otros campos...
   });
 
+   const [form2, setForm2] = useState<FormData2>({
+    idEspecialidad: 0,
+    strCedulaP: "",
+    strCurpRFC: "",
+    dblPrecioConsulta:"", // Puedes inicializarlo como undefined si no es obligatorio
+    strConsultorio: "",
+    strDescripcionDoctor: ""
+  });
+
   // Errores
   const [errores, setErrores] = useState<Errores>({});
 
-  const handleTabChange = (value: string) => {
-  // Si el tab que quieren abrir está completado, no cambiar
-  if (tabsCompletados[value as keyof typeof tabsCompletados]) {
+//   const handleTabChange = (value: string) => {
+//   // Si el tab que quieren abrir está completado, no cambiar
+//   if (tabsCompletados[value as keyof typeof tabsCompletados]) {
+//     return;
+//   }
+//   setActiveTab(value);
+// };
+
+const handleTabChange = (nextTab: string) => {
+  if (nextTab === "dProfesionales" && !tabsCompletados.dPersonales) {
+   Swal.fire({
+      icon: "warning",
+      title: "Datos Personales Incompletos",
+      text: "Primero completa los Datos Personales del Doctor.",
+    });
     return;
   }
-  setActiveTab(value);
+
+  if (nextTab === "hAtencion" && !tabsCompletados.dProfesionales) {
+   Swal.fire({
+      icon: "warning",
+      title: "Datos Profesionales Incompletos",
+      text: "Primero completa los Datos Profesionales del Doctor.",
+    });
+    return;
+  }
+
+  if (nextTab === "uSistema" && !tabsCompletados.hAtencion) {
+   Swal.fire({
+      icon: "warning",
+      title: "Datos de Atención Incompletos",
+      text: "Primero completa los Datos de Atención del Doctor.",
+    });
+    return;
+  }
+
+  setActiveTab(nextTab);
 };
 
   // Submit Datos Personales
   const handleSubmitDatosPersonales = async () => {
     try {
+
+      // Validación simple de campos obligatorios
+      const camposObligatorios: (keyof FormData)[] = [
+        "strNombre",
+        "strApellidos",
+        "datFechaNacimiento",
+        "strTelefono",
+        "strEmail",
+        "strCiudad",
+        "strEstado",
+        "strSexo",
+        "strDireccion",
+      ];
+      const nuevosErrores: Errores = {};
+      camposObligatorios.forEach((campo) => {
+        if (!form[campo] || form[campo].trim() === "") {
+          nuevosErrores[campo] = "Este campo es obligatorio";
+        }
+      });
+      setErrores(nuevosErrores);
+      // Si hay errores, no continuar
+      if (Object.keys(nuevosErrores).length > 0) {
+        Swal.fire({
+          icon: "error",
+          title: "Error de validación",
+          text: "Por favor, completa todos los campos obligatorios.",
+        });                                                 
+        return;
+      }
       const response = await fetch("/api/guardar-doctor", {
         method: "POST",
         body: JSON.stringify(form),
@@ -121,6 +200,15 @@ export function useRegistroDoctor() {
     }
   };
 
+      const handleChangeCampo2 = (campo: keyof typeof form2, valor: string) => {
+    setForm2({ ...form2, [campo]: valor });
+  
+    // Limpia error en tiempo real si el campo es válido
+    if (valor.trim() !== '') {
+      setErrores((prev) => ({ ...prev, [campo]: '' }));
+    }
+  };
+
   return {
     tabsCompletados,
     setTabsCompletados,
@@ -134,6 +222,9 @@ export function useRegistroDoctor() {
     handleSubmitDatosProfesionales,
     handleTabChange,
     activeTab, setActiveTab,
-    handleChangeCampo
+    handleChangeCampo,
+    form2,
+    setForm2,
+    handleChangeCampo2,
   };
 }

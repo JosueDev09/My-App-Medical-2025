@@ -16,6 +16,7 @@ import {getInputValidationClasses } from "@/lib/validationsInputs"; // Asegúrat
 export default function altaMedicos() {
   const [especialidades, setEspecialidades] = useState<any[]>([]);
   const [doctores, setDoctores] = useState<any[]>([]);
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
 
   
@@ -31,7 +32,10 @@ export default function altaMedicos() {
             handleSubmitDatosPersonales,
             handleSubmitDatosProfesionales,
             activeTab, setActiveTab,
-            handleTabChange
+            handleTabChange,
+            form2,
+            setForm2,
+            handleChangeCampo2,
             } = useRegistroDoctor();
 
           useEffect(() => {
@@ -68,8 +72,9 @@ export default function altaMedicos() {
          <TabsList className="mb-[20px] flex gap-4">      
           <TabsTrigger
             value="dProfesionales"
-            className={cn(
-            "cursor-pointer px-4 py-2 rounded transition",
+           
+           className={cn(
+            "cursor-pointer px-4 py-2 rounded transition font-medium",
             tabsCompletados.dProfesionales
                 ? "bg-green-500 text-white data-[state=active]:bg-green-600 cursor-not-allowed"
                 : "bg-yellow-300 text-black hover:bg-yellow-400 data-[state=active]:bg-yellow-400"
@@ -124,8 +129,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strNombre: e.target.value })
                 }
                 placeholder="Ej: Juan Carlos"
-                
-                 className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strNombre)}`}
+                onBlur={() => setTouched({ ...touched, strNombre: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strNombre, touched.strNombre, { minLength: 3 })}`}
                 />
             </div>
 
@@ -141,7 +146,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strApellidos: e.target.value })
                 }
                 placeholder="Ej: Pérez Gómez"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strApellidos: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strApellidos, touched.strApellidos, { minLength: 3 })}`}
                 />
             </div>
 
@@ -154,9 +160,10 @@ export default function altaMedicos() {
                 type="date"
                 value={form.datFechaNacimiento}
                 onChange={(e) =>
-                setForm({ ...form, datFechaNacimiento: e.target.value  })
+                setForm({ ...form, datFechaNacimiento: e.target.value})
                 }
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, datFechaNacimiento: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.datFechaNacimiento, touched.datFechaNacimiento, { minLength: 3 })}`}
                 />
             </div>
 
@@ -170,7 +177,8 @@ export default function altaMedicos() {
                     onChange={(e) =>
                     setForm({ ...form, strSexo: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={() => setTouched({ ...touched, strSexo: true })}
+                    className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strSexo, touched.strSexo, { minLength: 3 })}`}
                 >
                     <option value="">Seleccionar sexo</option>
                     <option value="masculino">Masculino</option>
@@ -192,7 +200,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strEstado: e.target.value })
                 }
                 placeholder="Ej: Jalisco"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strEstado: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strEstado, touched.strEstado, { minLength: 3 })}`}
                 />
             </div>
 
@@ -208,7 +217,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strCiudad: e.target.value })
                 }
                 placeholder="Ej: Guadalajara"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strCiudad: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strCiudad, touched.strCiudad, { minLength: 3 })}`}
                 />
             </div>
 
@@ -224,7 +234,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strTelefono: e.target.value })
                 }
                 placeholder="Ej: 3312345678"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strTelefono: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strTelefono, touched.strTelefono, { minLength: 3 })}`}
                 />
             </div>
 
@@ -240,7 +251,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strEmail: e.target.value })
                 }
                 placeholder="Ej: doctor@correo.com"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strEmail: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strEmail, touched.strEmail, { minLength: 3 })}`}
                 />
             </div>
 
@@ -256,7 +268,8 @@ export default function altaMedicos() {
                 setForm({ ...form, strDireccion: e.target.value })
                 }
                 placeholder="Calle, número, colonia, código postal"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onBlur={() => setTouched({ ...touched, strDireccion: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form.strDireccion, touched.strDireccion, { minLength: 3 })}`}
                 ></textarea>
             </div>
             </div>
@@ -280,8 +293,8 @@ export default function altaMedicos() {
                 <Label className='mb-2'>ESPECIALIDAD</Label>
                 
                 <Select
-                    // onValueChange={(value) => handleChangeCampo('idEspecialidad', value)}
-                    // value={form.idEspecialidad.toString()}
+                     onValueChange={(value) => handleChangeCampo2('idEspecialidad', value)}
+                     value={form2.idEspecialidad.toString()}
                 >
                     <SelectTrigger
                     className={`w-full h-10 ${errores.idEspecialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}
@@ -307,53 +320,68 @@ export default function altaMedicos() {
                 <div>
                 <Label className='mb-2'>CEDULA PROFESIONAL</Label>
                 <Input
-                    // value={form.strTelefonoPaciente}
-                    // onChange={(e) => handleChangeCampo('strTelefonoPaciente', e.target.value)}
-                    className={errores.strTelefonoPaciente ? 'border-red-500 overflow-auto' : ''}
+                   type="text"
+                    value={form2.strCedulaP}
+                    onChange={(e) => handleChangeCampo2('strCedulaP', e.target.value)}
+                   onBlur={() => setTouched({ ...touched, strCedulaP: true })}
+                   className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form2.strCedulaP, touched.strCedulaP, { minLength: 3 })}`}
                 />
                 {errores.strTelefonoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strTelefonoPaciente}</p>}
                 </div>
                 <div>
                 <Label className='mb-2'>CURP O RFC</Label>
                 <Input
-                    type="email"
-                    // value={form.strCorreoPaciente}
-                    // onChange={(e) => handleChangeCampo('strCorreoPaciente', e.target.value)}
-                    className={errores.correo ? 'border-red-500' : ''}
+                    type="text"
+                     value={form2.strCurpRFC}
+                     onChange={(e) => handleChangeCampo2('strCurpRFC', e.target.value)}
+                    onBlur={() => setTouched({ ...touched, strCurpRFC: true })}
+                    className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form2.strCurpRFC, touched.strCurpRFC, { minLength: 3 })}`}
                 />
-                {errores.strCorreoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strCorreoPaciente}</p>}
+               
                 </div>
                 <div>
                 <Label className='mb-2'>COSTO POR CONSULTA - $</Label>
                 <Input
                     type="text"
-                    // value={form.strCorreoPaciente}
-                    // onChange={(e) => handleChangeCampo('strCorreoPaciente', e.target.value)}
-                    className={errores.correo ? 'border-red-500' : ''}
+                     value={form2.dblPrecioConsulta}
+                     onChange={(e) => handleChangeCampo2('dblPrecioConsulta', e.target.value)}
+                     onBlur={() => setTouched({ ...touched, dblPrecioConsulta: true })}
+                    className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form2.dblPrecioConsulta, touched.dblPrecioConsulta, { minLength: 3 })}`}
                 />
-                {errores.strCorreoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strCorreoPaciente}</p>}
+            
                 </div>
                 <div>
                 <Label className='mb-2'>CONSULTORIO</Label>
                 <Input
                     type="text"
-                    // value={form.strCorreoPaciente}
-                    // onChange={(e) => handleChangeCampo('strCorreoPaciente', e.target.value)}
-                    className={errores.correo ? 'border-red-500' : ''}
+                     value={form2.strConsultorio}
+                     onChange={(e) => handleChangeCampo2('strConsultorio', e.target.value)}
+                     onBlur={() => setTouched({ ...touched, strConsultorio: true })}
+                    className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form2.strConsultorio, touched.strConsultorio, { minLength: 3 })}`}
                 />
-                {errores.strCorreoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strCorreoPaciente}</p>}
+                
                 </div>
             </div>
             <div>
                 <Label className='mb-2'>DESCRIPCION DE PERFIL PROFESIONAL</Label>
                 <Textarea
-                // value={form.strMotivo}
-                // onChange={(e) => handleChangeCampo('strMotivo', e.target.value)}
-                className={errores.motivo ? 'border-red-500 overflow-auto' : ''}
+                 value={form2.strDescripcionDoctor}
+                 onChange={(e) => handleChangeCampo2('strDescripcionDoctor', e.target.value)}
+                 onBlur={() => setTouched({ ...touched, strDescripcionDoctor: true })}
+                className={`w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${getInputValidationClasses(form2.strDescripcionDoctor, touched.strDescripcionDoctor, { minLength: 3 })}`}
                 />
-                {errores.strMotivo && <p className="text-red-500 text-sm">{errores.strMotivo}</p>}
+                
             </div>
-            </div>     
+            </div>    
+
+              <div className="text-center pt-6">
+                <button
+                    onClick={handleSubmitDatosProfesionales}
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2 rounded mt-4 cursor-pointer"
+                >
+                    Guardar Datos Profesionales
+                </button>
+                </div> 
         </TabsContent>
 
         <TabsContent value="hAtencion">
