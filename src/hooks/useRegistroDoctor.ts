@@ -147,7 +147,7 @@ const handleTabChange = (nextTab: string) => {
         });                                                 
         return;
       }
-      const response = await fetch("/api/guardar-doctor", {
+      const response = await fetch("/api/Doctor/guardar-doctor", {
         method: "POST",
         body: JSON.stringify(form),
       });
@@ -161,9 +161,10 @@ const handleTabChange = (nextTab: string) => {
           title: "Datos guardados correctamente",
           text: "Los datos personales del doctor se han guardado exitosamente.",
         });
-        // Aquí podrías obtener el ID del doctor si tu API lo devuelve
-        // setIdDoctor(data.idDoctor); // Asumiendo que tu API devuelve el ID del doctor
-        if (data.intDoctor) {
+       
+        //console.log("Datos personales guardados:", data);
+        if (data.intDoctor > 0) {
+          console.log("ID del doctor guardado:", data.intDoctor);
             setIntDoctor(data.intDoctor); // Asumiendo que tu API devuelve el ID del doctor
         }
       }
@@ -179,9 +180,71 @@ const handleTabChange = (nextTab: string) => {
 
   // Submit Datos Profesionales
   const handleSubmitDatosProfesionales = async () => {
+   
     if (!intDoctor) {
-      alert("Primero guarda los Datos Personales");
+     Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, completa primero los Datos Personales del Doctor.",
+      });
+
+       console.log("intDoctor", intDoctor);
       return;
+    }
+      console.log("intDoctor", intDoctor);
+
+    if (!form2.idEspecialidad || form2.idEspecialidad <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        text: "Por favor, selecciona una especialidad válida.",
+      });
+      return;
+    }
+    // Validación simple de campos obligatorios
+    const camposObligatorios: (keyof FormData2)[] = [
+      "idEspecialidad",
+      "strCedulaP",
+      "strCurpRFC",
+      "dblPrecioConsulta",
+      "strConsultorio",
+      "strDescripcionDoctor",
+    ];
+    const nuevosErrores: Errores = {};
+    camposObligatorios.forEach((campo) => {
+      if (!form2[campo] || form2[campo].toString().trim() === "") {
+        nuevosErrores[campo] = "Este campo es obligatorio";
+      }
+    });
+    setErrores(nuevosErrores);
+    // Si hay errores, no continuar
+    if (Object.keys(nuevosErrores).length > 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        text: "Por favor, completa todos los campos obligatorios.",
+      });
+    } 
+    const response = await fetch("/api/Doctor/guardar-datos-profesionales", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...form2, idDoctor: intDoctor }), // Aquí envías el ID del doctor
+    });
+    const data = await response.json();
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Datos guardados correctamente",
+        text: "Los datos profesionales del doctor se han guardado exitosamente.",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error al guardar datos",
+        text: data.message || "Ocurrió un error al guardar los datos profesionales.",
+      });
     }
 
     // Aquí enviarías a tu API usando idDoctor

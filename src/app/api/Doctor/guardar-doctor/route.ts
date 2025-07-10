@@ -11,7 +11,9 @@ export async function POST(req: NextRequest) {
         // Ejecutar el procedimiento almacenado
         const result: any = await db.query("CALL sp_tbDoctores_Save(?, ?, ?, ?, ?, ?, ?, ?, ?)", params);
 
-         const intDoctor = result[0][0].intDoctor;
+         const intDoctor = result[0][0][0].intDoctor;
+
+        // console.log("Resultados:", intDoctor); 
 
           if(result) {
          return new Response(JSON.stringify({success: true, intDoctor }), {
