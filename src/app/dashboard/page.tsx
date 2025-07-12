@@ -4,13 +4,27 @@
 import React, { useState, useEffect } from "react";
 import { formatDate } from "@fullcalendar/core";
 import { Pencil, Calendar, Bell, Star } from "lucide-react"; // Ejemplo de iconos
+import { useSession } from "next-auth/react";
+
 
 const Dashboard: React.FC = () => {
-
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const { data: session } = useSession();
+      useEffect(() => {
+      if (session?.user?.rol) {
+        setUserRole(session.user.rol.toLowerCase());
+      } else {
+        const roleMatch = document.cookie.match(/(^| )role=([^;]+)/);
+        const role = roleMatch?.[2];
+        if (role) {
+          setUserRole(role.toLowerCase());
+        }
+      }
+    }, [session]);
 
   return (
     <div className="min-h-screen px-8 py-10 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard del Doctor</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard del {userRole?.toUpperCase() || "Cargando rol..."}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
         {/* Notificaciones */}
