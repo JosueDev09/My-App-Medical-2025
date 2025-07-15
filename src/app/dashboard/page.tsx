@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { formatDate } from "@fullcalendar/core";
 import { Pencil, Calendar, Bell, Star } from "lucide-react"; // Ejemplo de iconos
 import { useSession } from "next-auth/react";
+import FloatingChat from '../../components/ui/floatingChat/floatingChat';
 
 
 const Dashboard: React.FC = () => {
@@ -58,6 +59,7 @@ const Dashboard: React.FC = () => {
             <li className="text-sm text-gray-700">Aún no tienes reseñas.</li>
           </ul>
         </div>
+        <FloatingChat />
       </div>
     </div>
   );
