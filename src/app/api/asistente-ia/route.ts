@@ -9,7 +9,7 @@ import { auth } from '@/auth';
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
     const body = await req.json();
-   const { mensaje, rol, chatId: chatIdFromClient } = body;
+   const { mensaje, rol, chatId: chatIdFromClient,username } = body;
 
     const session = await auth();
      const sessionUser = session?.user;
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.log('mensaje recibido:', mensaje);
     console.log('rol del usuario:', rol);
     console.log('usuario de la sesión:', session?.user);
+    console.log('USUARIO LOGEADO:',username)
 
     const chatId =
       chatIdFromClient ||
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sessionUser?.id ||
       `anon-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
-    const respuesta = await fetch("http://localhost:5678/webhook/5ccf162d-817b-4717-8885-6b1a378061e3/chat", {
+    const respuesta = await fetch("http://localhost:5678/webhook/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -34,13 +35,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         sessionId: chatId,
         rol,
         usuario: sessionUser || null,
+        strUsuario:username
+   
 
       }),
     });
-
-      const data = await respuesta.json();
-
-     console.log('🤖 respuesta del asistente:', data);
+    const respuestaTexto = await respuesta.text();
+    console.log('respuesta 1:', respuestaTexto);
+    const data = (respuestaTexto)
+   
+    console.log('🤖 respuesta del asistente:', data);
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {

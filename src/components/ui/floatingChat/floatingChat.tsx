@@ -14,6 +14,7 @@ export default function FloatingChat() {
   const [cargando, setCargando] = useState(false);
   const [chat, setChat] = useState<MensajeChat[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
+   const [userName, setUserName] = useState<string | null>(null);
   const { data: session } = useSession();
    const chatId = generarChatId(session);
         useEffect(() => {
@@ -21,9 +22,11 @@ export default function FloatingChat() {
           setUserRole(session.user.rol.toLowerCase());
         } else {
           const roleMatch = document.cookie.match(/(^| )role=([^;]+)/);
+          const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
           const role = roleMatch?.[2];
           if (role) {
             setUserRole(role.toLowerCase());
+            setUserName(usernameMatch?.[2] || null);
           }
         }
       }, [session]);
@@ -42,12 +45,13 @@ export default function FloatingChat() {
       body: JSON.stringify({
         mensaje: pregunta,
         chatId,
-        rol: userRole // <-- aquí lo mandas
+        rol: userRole, // <-- aquí lo mandas
+        username: userName // <-- aquí lo mandas
 
       }),
     });
       const data = await res.json();
-      const respuesta = data.output || 'Sin respuesta.';
+      const respuesta = data || 'Sin respuesta.';
       setChat((prev) => [...prev, { rol: 'asistente', texto: respuesta }]);
     } catch {
       setChat((prev) => [...prev, { rol: 'asistente', texto: 'Error al contactar al asistente.' }]);
@@ -57,11 +61,11 @@ export default function FloatingChat() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-8 z-50">
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white rounded-full w-14 h-14 shadow-xl hover:bg-blue-700 text-2xl"
+          className="bg-blue-600 text-white rounded-full w-14 h-14 shadow-xl hover:bg-blue-700 text-2xl cursor-pointer float-animation"
         >
           💬
         </button>
@@ -71,7 +75,7 @@ export default function FloatingChat() {
             <h2 className="text-lg font-semibold">Asistente Médico</h2>
             <button
               onClick={() => setOpen(false)}
-              className="text-gray-500 hover:text-red-600"
+              className="text-gray-500 hover:text-red-600 cursor-pointer"
             >✖</button>
           </div>
 

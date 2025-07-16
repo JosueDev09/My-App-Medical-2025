@@ -47,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Set-Cookie', [
     `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=7200`,
     `role=${payload.rol}; Path=/; SameSite=Strict; Max-Age=7200`,
+     `username=${encodeURIComponent(payload.username)}; Path=/; SameSite=Strict; Max-Age=7200`,
   ]);
   
   return res.status(200).json({ success: true, token }); 
