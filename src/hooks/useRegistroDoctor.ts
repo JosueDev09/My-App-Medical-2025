@@ -31,6 +31,23 @@ interface FormData2 {
   strDescripcionDoctor: string; // Opcional
 }
 
+interface FormData3 {
+  horarioInicio: string;
+  horarioFin: string;
+  diasDisponibles: string[];
+
+}
+
+interface FormData4 {
+  strUsuario: string;
+  strPassword: string;
+  strConfirmPassword: string;
+  strRol: string;
+  strEstadoUsuario: string;
+}
+
+
+
 interface Errores {
   [key: string]: string;
 }
@@ -71,6 +88,21 @@ export function useRegistroDoctor() {
     dblPrecioConsulta:"", // Puedes inicializarlo como undefined si no es obligatorio
     strConsultorio: "",
     strDescripcionDoctor: ""
+  });
+
+   const [form3, setForm3] = useState<FormData3>({
+    horarioInicio:"",
+    horarioFin:"",
+    diasDisponibles: [],
+  });
+
+    const [form4, setForm4] = useState<FormData4>({
+    strUsuario: "",
+    strPassword: "",
+    strConfirmPassword: "",
+    strRol: "",
+    strEstadoUsuario: "",
+
   });
 
   // Errores
@@ -271,6 +303,23 @@ const handleTabChange = (nextTab: string) => {
       setErrores((prev) => ({ ...prev, [campo]: '' }));
     }
   };
+   const handleChangeCampo3 = (campo: keyof typeof form3, valor: string) => {
+    setForm3({ ...form3, [campo]: valor });
+  
+    // Limpia error en tiempo real si el campo es válido
+    if (valor.trim() !== '') {
+      setErrores((prev) => ({ ...prev, [campo]: '' }));
+    }
+  };
+
+   const handleChangeCampo4 = (campo: keyof typeof form4, valor: string) => {
+    setForm4({ ...form4, [campo]: valor });
+
+    // Limpia error en tiempo real si el campo es válido
+    if (valor.trim() !== '') {
+      setErrores((prev) => ({ ...prev, [campo]: '' }));
+    }
+  };
 
   return {
     tabsCompletados,
@@ -289,5 +338,11 @@ const handleTabChange = (nextTab: string) => {
     form2,
     setForm2,
     handleChangeCampo2,
+    form3,
+    setForm3,
+    handleChangeCampo3,
+    form4,
+    setForm4,
+    handleChangeCampo4
   };
 }

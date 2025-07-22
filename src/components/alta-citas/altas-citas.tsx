@@ -97,8 +97,8 @@ export default function altaCitas () {
             <div>
               <Label className='mb-2'>Genero</Label>
               <Select
-             onValueChange={(value) => handleChangeCampo('strGenero', value)}
-              value={form.strGenero}          
+                onValueChange={(value) => handleChangeCampo('strGenero', value)}
+                value={form.strGenero}          
                >
               <SelectTrigger  className={`w-[150px] h-10 ${errores.especialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}>
                 <SelectValue  placeholder="Género" />
