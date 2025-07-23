@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import "@/lib/fontawesome"; // asegúrate que la ruta sea correcta
 import {Menu} from "lucide-react";
 import { SessionProvider } from 'next-auth/react';
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+
 
 
 
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const sidebarRef = useRef<HTMLDivElement>(null);
   
   const pathname = usePathname();
-  const hideLayout = ['/login', '/registro'].includes(pathname as string);
+  const hideLayout = ['/login', '/registro','/inicio'].includes(pathname as string);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

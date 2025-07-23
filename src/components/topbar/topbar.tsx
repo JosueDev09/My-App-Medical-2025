@@ -4,15 +4,14 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Bell, User, LogOut, CalendarCheck, Clock, UserX2, } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { log } from "console";
+import {  useEffect, useState } from "react";
 
 
-interface DecodedToken {
-  rol: string;
-  exp: number;
-}
+
+// interface DecodedToken {
+//   rol: string;
+//   exp: number;
+// }
 
 export default function TopBar() {
   const router = useRouter();

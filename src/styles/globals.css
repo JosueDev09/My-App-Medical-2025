@@ -141,3 +141,40 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Animaciones de entrada (fade-up) */
+.animate-fade-up {
+  @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+}
+.animate-fade-up.appear {
+  @apply opacity-100 translate-y-0;
+}
+
+/* Botón con efecto pulse lento */
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.btn-pulse {
+  animation: pulse-slow 2s infinite;
+}
+
+/* Acordeón con transición suave */
+details summary {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+details[open] summary {
+  color: #2563eb;
+}
+
+/* Hover en tarjetas */
+.card-hover:hover {
+  @apply shadow-lg scale-[1.02] transition-transform;
+}
+
+/* Espaciado general para secciones */
+section {
+  @apply px-4 sm:px-6 md:px-8;
+}
+
+
