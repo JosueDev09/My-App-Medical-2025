@@ -49,44 +49,44 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex min-h-screen justify-center items-center px-4">
-       <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto flex flex-col md:flex-row">
+      <div className="flex min-h-screen justify-center items-center px-4">
+        <div className="relative bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl h-auto flex flex-col md:flex-row">
 
-        <LoginImage isLogin={isLogin} />  
-        {/* Panel deslizante (75%) */}
-        <div className="relative md:w-1/2 w-full overflow-hidden">
-          <div
-            className={`flex w-[200%] h-full transition-transform duration-700 ease-in-out ${
-              isLogin ? 'translate-x-0' : '-translate-x-1/2'
-            }`}
-          >
-            {/* Formulario de Login */}
-            <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
-              <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
-              <FormLogin/>
-              <button
-                className="mt-4 text-sm text-blue-800 underline cursor-pointer"
-                onClick={() => setIsLogin(false)}
-              >
-                ¿No tienes cuenta? Regístrate
-              </button>
-            </div>
+          <LoginImage isLogin={isLogin} />  
+          {/* Panel deslizante (75%) */}
+          <div className="relative md:w-1/2 w-full overflow-hidden">
+            <div
+              className={`flex w-[200%] h-full transition-transform duration-700 ease-in-out ${
+                isLogin ? 'translate-x-0' : '-translate-x-1/2'
+              }`}
+            >
+              {/* Formulario de Login */}
+              <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
+                <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
+                <FormLogin/>
+                <button
+                  className="mt-4 text-sm text-blue-800 underline cursor-pointer"
+                  onClick={() => setIsLogin(false)}
+                >
+                  ¿No tienes cuenta? Regístrate
+                </button>
+              </div>
 
-            {/* Formulario de Registro */}
-            <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
-              <h1 className="text-2xl font-bold mb-4 text-center">Registrarse</h1>
-             
-              <FormRegister/>
-              <button
-                className="mt-4 text-sm text-blue-800 underline cursor-pointer"
-                onClick={() => setIsLogin(true)}
-              >
-                ¿Ya tienes cuenta? Inicia sesión
-              </button>  
+              {/* Formulario de Registro */}
+              <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
+                <h1 className="text-2xl font-bold mb-4 text-center">Registrarse</h1>
+              
+                <FormRegister/>
+                <button
+                  className="mt-4 text-sm text-blue-800 underline cursor-pointer"
+                  onClick={() => setIsLogin(true)}
+                >
+                  ¿Ya tienes cuenta? Inicia sesión
+                </button>  
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 }

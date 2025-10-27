@@ -5,26 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-
 export function FormLogin(){
   const [errorUsuario, setErrorUsuario] = useState('');
   const [errorContra, setErrorContra] = useState('');
   const [strUsuario, setUsuario] = useState("");
   const [strContra, setContra] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  // const { data: session } = useSession({ required: false });
-  // const [error, setError] = useState("");
-   const router = useRouter();
+  const router = useRouter();
 
-   function esperar(ms:any) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+  function esperar(ms:any) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-   const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorUsuario('');
     setErrorContra('');
-    // setError("");
     let hasError = false;
 
     if (!strUsuario.trim()) {
@@ -38,8 +34,6 @@ export function FormLogin(){
     }
   
     if (hasError) return;
-     // Mostrar loading
-   
   
     try {
       const res = await fetch("/api/login", {
@@ -49,16 +43,10 @@ export function FormLogin(){
         },
         body: JSON.stringify({ strUsuario, strContra })
       });
-  
-      //console.log("res", res);
 
-      
-  
       if (!res.ok) {
         const errorData = await res.json();
-        // setError(errorData.error || "Error al iniciar sesión.");
         setErrorContra(errorData.error || 'Error al iniciar sesión');
-     
         return;
       }
   
@@ -68,43 +56,39 @@ export function FormLogin(){
         setErrorContra(data.error);
         return;
       } 
-       Swal.fire({
-          title: "Autenticando datos...",
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        }); 
-     // console.log("Token:", data.token);
-        await esperar(3000); // Esperar 5 segundos para simular la autenticación
-         router.push("/dashboard");
+      
+      Swal.fire({
+        title: "Autenticando datos...",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      }); 
+      
+      await esperar(3000);
+      router.push("/dashboard");
     
     } catch (err) {
       console.error("Error al hacer login:", err);
-       Swal.close();
-      console.error("Error al hacer login:", err);
+      Swal.close();
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Hubo un problema al iniciar sesión.",
       });
-      // setError("Error inesperado al iniciar sesión.");
     }
   };
 
   return (
-    
-    <form onSubmit={handleLogin} className="w-full max-w-sm mx-auto">
-      
-      <div className="mb-4">
-          
-        <label htmlFor="strUsuario" className="block text-gray-700 text-sm font-bold mb-2">
+    <form onSubmit={handleLogin} className="w-full mx-auto space-y-5">
+      {/* Campo Usuario */}
+      <div className="space-y-2">
+        <label htmlFor="strUsuario" className="text-xs font-medium text-slate-600 uppercase tracking-wide">
           Usuario
         </label>
-     
         <input
           type="text"
           id="strUsuario"
@@ -113,58 +97,76 @@ export function FormLogin(){
             setUsuario(e.target.value);
             setErrorUsuario('');
           }}
-          className={`w-full p-3 border rounded text-sm ${
-            errorUsuario ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 bg-slate-50 border-0 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 transition-all ${
+            errorUsuario ? 'ring-2 ring-red-400 bg-red-50' : 'focus:ring-slate-900 focus:bg-white'
           }`}
-          placeholder="Usuario / Correo"
+          placeholder="correo@ejemplo.com"
           required
         />
         {errorUsuario && (
-          <p className="text-red-500 text-xs italic mt-1">{errorUsuario}</p>
+          <p className="text-xs text-red-500 flex items-center gap-1.5">
+            <span className="inline-block w-1 h-1 bg-red-500 rounded-full"></span>
+            {errorUsuario}
+          </p>
         )}
       </div>
-      <div className="mb-4">
-        <label htmlFor="strContra" className="block text-gray-700 text-sm font-bold mb-2">
+
+      {/* Campo Contraseña */}
+      <div className="space-y-2">
+        <label htmlFor="strContra" className="text-xs font-medium text-slate-600 uppercase tracking-wide">
           Contraseña
         </label>
-        <input
-           type={showPassword ? "text" : "password"}
-          id="strContra"
-          value={strContra}
-          onChange={(e) => {
-            setContra(e.target.value);
-            setErrorContra('');
-          }}
-          className={`w-full p-3 pr-10 border rounded text-sm ${
-            errorContra ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="Contraseña"
-          required
-        />
-         {errorUsuario && (
-            <p className="text-red-500 text-xs italic mt-1">{errorUsuario}</p>
-          )}
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="relative  ml-[-35px] top-[10px] transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
-        >
-          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-        </button>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="strContra"
+            value={strContra}
+            onChange={(e) => {
+              setContra(e.target.value);
+              setErrorContra('');
+            }}
+            className={`w-full px-4 py-3 pr-12 bg-slate-50 border-0 rounded-lg text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 transition-all ${
+              errorContra ? 'ring-2 ring-red-400 bg-red-50' : 'focus:ring-slate-900 focus:bg-white'
+            }`}
+            placeholder="••••••••"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        {errorContra && (
+          <p className="text-xs text-red-500 flex items-center gap-1.5">
+            <span className="inline-block w-1 h-1 bg-red-500 rounded-full"></span>
+            {errorContra}
+          </p>
+        )}
       </div>
-    
-      {errorContra && (
-    <p className="text-red-500 text-xs italic mt-1 mb-[15px]">{errorContra}</p>
-  )}
-  
+
+      {/* Botón Submit */}
       <button
-          type="submit"
-          className="w-full bg-blue-950 text-white py-2 rounded cursor-pointer"
-        >
-           Entrar
-        </button>
-        
-      <SignIn  />
+        type="submit"
+        className="w-full bg-slate-900 text-white py-3 rounded-lg font-medium text-sm hover:bg-slate-800 active:scale-[0.99] transition-all shadow-md shadow-slate-900/20 mt-6"
+      >
+        Iniciar Sesión
+      </button>
+
+      {/* Divider */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-200"></div>
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="px-3 bg-white text-slate-500">O continúa con</span>
+        </div>
+      </div>
+
+      {/* Google Sign In */}
+      <SignIn />
     </form>
   );
 }

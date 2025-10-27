@@ -68,9 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </button>
 
             {/* TopBar ocupa el resto del espacio */}
-            <div className="flex-1 print:hidden">
-              <TopBar />
-            </div>
+            {/* <div className="flex-1 print:hidden"> */}
+              {/* <TopBar /> */}
+            {/* </div> */}
           </div>
         )}
           <main
