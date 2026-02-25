@@ -10,13 +10,6 @@ import { useRegistroDoctor } from "../../hooks/useRegistroDoctor";
 import { Label } from "../../components/ui/label/label";
 import { Input } from "../../components/ui/input/input";
 import { Textarea } from "../../components/ui/textarea/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select/select";
 import { User, Briefcase, Clock, CheckCircle,UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -235,21 +228,16 @@ export default function FormularioDoctor() {
             >
                 <div>
                 <Label className="mb-3">Especialidad</Label>
-                <Select
+                <select
                     value={String(form2.idEspecialidad)}
-                    onValueChange={(value) =>
-                    setForm2({ ...form2, idEspecialidad: Number(value) })
-                    }
+                    onChange={(e) => setForm2({ ...form2, idEspecialidad: Number(e.target.value) })}
+                    className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 >
-                    <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona una especialidad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                    <SelectItem value="1">Cardiología</SelectItem>
-                    <SelectItem value="2">Pediatría</SelectItem>
+                    <option value="">Selecciona una especialidad</option>
+                    <option value="1">Cardiología</option>
+                    <option value="2">Pediatría</option>
                     {/* Agrega más especialidades si es necesario */}
-                    </SelectContent>
-                </Select>
+                </select>
                 </div>
 
                 <div>

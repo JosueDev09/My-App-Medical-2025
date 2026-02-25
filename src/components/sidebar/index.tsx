@@ -55,6 +55,7 @@ export default function Sidebar({
   const pathname = usePathname();
   const { data: session } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
   useEffect(() => {
@@ -69,6 +70,18 @@ export default function Sidebar({
         console.warn("No se encontró cookie 'role'");
       }
     }
+
+    // Obtener el nombre del usuario
+    if (session?.user?.username) {
+      setUserName(session.user.username);
+    } else {
+      const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
+      const cookieUsername = usernameMatch?.[2];
+      if (cookieUsername) {
+        setUserName(decodeURIComponent(cookieUsername));
+      }
+    }
+    
   }, [session]);
 
   // Auto-abrir menú si una ruta hija está activa
@@ -142,17 +155,17 @@ export default function Sidebar({
               <div key={route.name} className="space-y-1">
                 <button
                   onClick={() => toggleMenu(route.name)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-all group"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-slate-300 hover:bg-gradient-to-r hover:from-slate-800 hover:to-slate-800/50 hover:text-white hover:shadow-md transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-slate-400 group-hover:text-blue-400 transition-colors">
+                    <span className="text-slate-400 group-hover:text-blue-400 transition-colors duration-200">
                       {route.icon}
                     </span>
                     <span className="text-sm font-medium">{route.name}</span>
                   </div>
                   <ChevronDown
                     size={18}
-                    className={`text-slate-500 transition-transform duration-200 ${
+                    className={`text-slate-500 group-hover:text-slate-300 transition-all duration-200 ${
                       openMenus.includes(route.name) ? 'rotate-180' : ''
                     }`}
                   />
@@ -167,32 +180,32 @@ export default function Sidebar({
                   {route.children.map(sub => (
                     <NavLink key={sub.path} href={sub.path} active={pathname === sub.path}>
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 ${
                           pathname === sub.path
-                            ? 'bg-blue-500/10 text-blue-400 font-medium'
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            ? 'bg-gradient-to-r from-blue-500/20 to-blue-500/10 text-blue-400 font-medium border-l-2 border-blue-400'
+                            : 'text-slate-400 hover:bg-slate-800/70 hover:text-white hover:translate-x-1'
                         }`}
                       >
-                        <span className={pathname === sub.path ? 'text-blue-400' : ''}>
+                        <span className={pathname === sub.path ? 'text-blue-400' : 'group-hover:text-blue-300'}>
                           {sub.icon}
                         </span>
                         <span>{sub.name}</span>
                       </div>
                     </NavLink>
-                  ))}
+                  ))}  
                 </div>
               </div>
             ) : (
               // Menú simple
               <NavLink key={route.path} href={route.path} active={pathname === route.path}>
                 <div
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 group ${
                     pathname === route.path
-                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30 font-medium'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 font-medium'
+                      : 'text-slate-300 hover:bg-gradient-to-r hover:from-slate-800 hover:to-slate-800/50 hover:text-white hover:shadow-md hover:translate-x-1'
                   }`}
                 >
-                  <span className={pathname === route.path ? 'text-white' : 'text-slate-400'}>
+                  <span className={pathname === route.path ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}>
                     {route.icon}
                   </span>
                   <span>{route.name}</span>
@@ -206,11 +219,12 @@ export default function Sidebar({
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/50">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
-              {session?.user?.name?.[0]?.toUpperCase() || 'U'}
+              {userName ? userName[0].toUpperCase() : 'U'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">
-                {session?.user?.name || 'Usuario'}
+               
+               {userName || 'Usuario'}
               </p>
               <p className="text-xs text-slate-400 truncate capitalize">
                 {userRole || 'Cargando...'}

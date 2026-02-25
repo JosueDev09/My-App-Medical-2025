@@ -177,4 +177,29 @@ section {
   @apply px-4 sm:px-6 md:px-8;
 }
 
+/* Custom scrollbar para Select y otros componentes */
+[data-slot="select-content"] {
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+[data-slot="select-content"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-slot="select-content"]::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+[data-slot="select-content"]::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+[data-slot="select-content"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
 

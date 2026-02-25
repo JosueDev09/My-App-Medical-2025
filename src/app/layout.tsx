@@ -1,88 +1,28 @@
+import '@/styles/globals.css';
+import '@/lib/fontawesome';
+import type { Metadata } from 'next';
+import LayoutClient from '@/components/layout/LayoutClient';
 
-"use client";
-
-import { useEffect, useRef } from 'react';
-import { useState } from 'react';
-import '../styles/globals.css';
-import TopBar from "@/components/topbar/topbar";
-import Sidebar from '@/components/sidebar';
-import { usePathname } from "next/navigation";
-import "@/lib/fontawesome"; // asegúrate que la ruta sea correcta
-import {Menu} from "lucide-react";
-import { SessionProvider } from 'next-auth/react';
-
-
-
-
+export const metadata: Metadata = {
+  title: 'ESYMBEL MEDICAL - Gestión Integral para Clínicas y Hospitales',
+  description: 'ESYMBEL MEDICAL es una plataforma de gestión integral diseñada para clínicas y hospitales. Ofrecemos soluciones para la administración de pacientes, citas, historial médico, facturación y contabilidad, todo en un solo lugar. Nuestra misión es optimizar los procesos administrativos y mejorar la experiencia tanto para el personal médico como para los pacientes.',
+  keywords: ['clínica', 'hospital', 'gestión médica', 'citas médicas', 'historial clínico', 'facturación', 'contabilidad médica'],
+  authors: [{ name: 'ESYMBEL MEDICAL' }],
+  viewport: 'width=device-width, initial-scale=1',
+  robots: 'index, follow',
+  openGraph: {
+    title: 'ESYMBEL MEDICAL - Gestión Integral para Clínicas y Hospitales',
+    description: 'Plataforma de gestión integral para optimizar procesos administrativos en clínicas y hospitales',
+    type: 'website',
+    locale: 'es_MX',
+  }
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  
-  const pathname = usePathname();
-  const hideLayout = ['/login', '/registro','/inicio'].includes(pathname as string);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const isMobile = window.innerWidth < 768; // Tailwind md breakpoint
-
-      if (
-        sidebarOpen &&
-        isMobile &&
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node)
-      ) {
-        setSidebarOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [sidebarOpen]);
-
   return (
     <html lang="es">
-      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto ">  
-      <SessionProvider>
-      {/* <PayPalScriptProvider options={{clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}> */}
-        {/* Sidebar */}
-        {!hideLayout && (
-          <Sidebar
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-            sidebarRef={sidebarRef} // Pasamos la referencia
-          />
-        )}
-
-        {/* Contenedor de contenido */}
-      <div className={`transition-all duration-300 ${!hideLayout ? 'md:ml-64' : ''}`}>
-        {/* Topbar + botón hamburguesa */}
-        {!hideLayout && (
-          <div className="sticky top-0 z-40 bg-white flex items-center justify-between px-4 py-2 border-b">
-            {/* Botón hamburger en móviles */}
-            <button
-              className="md:hidden p-2 rounded bg-gray-100 hover:bg-gray-200 print:hidden"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-             <Menu size={20} className="text-gray-800" />
-            </button>
-
-            {/* TopBar ocupa el resto del espacio */}
-            {/* <div className="flex-1 print:hidden"> */}
-              {/* <TopBar /> */}
-            {/* </div> */}
-          </div>
-        )}
-          <main
-            className={`min-h-screen w-full ${
-              hideLayout ? 'flex justify-center items-center' : 'p-4 overflow-auto'
-            }`}
-          >
-            {children}
-          </main>
-        </div>
-        {/* </PayPalScriptProvider> */}
-        </SessionProvider>
+      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto">
+        <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
   );

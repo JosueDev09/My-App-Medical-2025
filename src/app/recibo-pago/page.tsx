@@ -75,6 +75,11 @@ export default function ReciboPago({}: ReciboPagoProps) {
 
   return (
     <div className="p-4 print:p-0 print:m-0 print:w-full print:max-w-none print:bg-white print:shadow-none">
+        <div>
+          <Button variant="outline" className="mb-4 print:hidden" onClick={() => window.history.back()}>
+          Regresar
+          </Button>
+        </div>
           <div className="w-full m-auto max-w-3xl">
                   <BreadcrumbSteps pasoActual={3} />
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { 
   Calendar, 
   Bell, 
@@ -18,9 +18,17 @@ import FloatingChat from '../../components/ui/floatingChat/floatingChat';
 
 const Dashboard: React.FC = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>("Usuario");
   const { data: session } = useSession();
+  const [numCitasHoy, setNumCitasHoy] = useState<number>(0);
+  const [numPacientes, setNumPacientes] = useState<number>(0);
+  const [numConsultasMes, setNumConsultasMes] = useState<number>(0);
+  const [calificacion, setCalificacion] = useState<number>(0);
   
   useEffect(() => {
+    console.log("Sesión actual:", session);
+    
+    // Obtener el rol del usuario
     if (session?.user?.rol) {
       setUserRole(session.user.rol.toLowerCase());
     } else {
@@ -30,34 +38,52 @@ const Dashboard: React.FC = () => {
         setUserRole(role.toLowerCase());
       }
     }
+
+    // Obtener el nombre del usuario
+    if (session?.user?.username) {
+      setUserName(session.user.username);
+    } else {
+      const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
+      const cookieUsername = usernameMatch?.[2];
+      if (cookieUsername) {
+        setUserName(decodeURIComponent(cookieUsername));
+      }
+    }
   }, [session]);
 
+  useEffect(() => {
+    // Simular la obtención de datos para el dashboard
+    setNumCitasHoy(12);
+    setNumPacientes(120);
+    setNumConsultasMes(45);
+    setCalificacion(4.8);
+  }, []);
   // Datos de ejemplo - Estos vendrían de tu API
   const stats = [
     { 
       label: "Citas Hoy", 
-      value: "8", 
+      value: numCitasHoy.toString(), 
       change: "+12%", 
       icon: <Calendar className="text-blue-500" size={24} />,
       bgColor: "bg-blue-50"
     },
     { 
       label: "Pacientes Totales", 
-      value: "156", 
+      value: numPacientes.toString(), 
       change: "+8%", 
       icon: <Users className="text-green-500" size={24} />,
       bgColor: "bg-green-50"
     },
     { 
       label: "Consultas Mes", 
-      value: "342", 
+      value: numConsultasMes.toString(), 
       change: "+23%", 
       icon: <Activity className="text-purple-500" size={24} />,
       bgColor: "bg-purple-50"
     },
     { 
       label: "Calificación", 
-      value: "4.8", 
+      value: calificacion.toString(), 
       change: "⭐", 
       icon: <Star className="text-amber-500" size={24} />,
       bgColor: "bg-amber-50"
@@ -84,7 +110,7 @@ const Dashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                Bienvenido, {session?.user?.name || "Usuario"}
+                Bienvenido, {userName}
               </h1>
               <p className="text-slate-600 mt-1 text-sm sm:text-base capitalize">
                 Dashboard del {userRole || "Cargando..."}

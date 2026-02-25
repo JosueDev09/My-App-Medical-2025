@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button/button';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select/select';
 import  BreadcrumbSteps   from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 import { agendarCita } from '@/app/citas/alta-citas/agendarCita';
 
@@ -96,21 +95,16 @@ export default function altaCitas () {
             </div>
             <div>
               <Label className='mb-2'>Genero</Label>
-              <Select
-                onValueChange={(value) => handleChangeCampo('strGenero', value)}
-                value={form.strGenero}          
-               >
-              <SelectTrigger  className={`w-[150px] h-10 ${errores.especialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}>
-                <SelectValue  placeholder="Género" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Masculino">Masculino</SelectItem>
-                <SelectItem value="Femenino">Femenino</SelectItem>
-                {/* Agrega más si lo deseas */}
-              </SelectContent>
-            </Select>
-             
-              {errores.sexo && <p className="text-red-500 text-sm overflow-auto">{errores.sexo}</p>}
+              <select
+                onChange={(e) => handleChangeCampo('strGenero', e.target.value)}
+                value={form.strGenero}
+                className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer ${errores.sexo ? 'border-red-500' : ''}`}
+              >
+                <option value="">Selecciona género</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+              {errores.sexo && <p className="text-red-500 text-sm">{errores.sexo}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -139,57 +133,35 @@ export default function altaCitas () {
         <div className="space-y-4">
           <div>
             <Label className='mb-2'>Especialidad</Label>
-            
-            <Select
-            
-                onValueChange={(value) => handleChangeCampo('idEspecialidad', value)}
-                value={form.idEspecialidad.toString()}
-              >
-                <SelectTrigger
-                  className={`w-full h-10 ${errores.idEspecialidad ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}
-                >
-                 <SelectValue  placeholder="Selecciona una especialidad" />
-                </SelectTrigger>
-
-                <SelectContent>
-                <SelectItem value="0" disabled>
-                    Selecciona una especialidad
-                    </SelectItem>
-                  {especialidades.map((esp: any) => (
-                    <SelectItem key={esp.idEspecialidad} value={esp.idEspecialidad.toString()}>
-                     {esp.idEspecialidad} - {esp.strNombreEspecialidad}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            {errores.especialidad && <p className="text-red-500 text-sm overflow-auto">{errores.especialidad}</p>}
+            <select
+              onChange={(e) => handleChangeCampo('idEspecialidad', e.target.value)}
+              value={form.idEspecialidad.toString()}
+              className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer ${errores.idEspecialidad ? 'border-red-500' : ''}`}
+            >
+              <option value="0">Selecciona una especialidad</option>
+              {especialidades.map((esp: any) => (
+                <option key={esp.idEspecialidad} value={esp.idEspecialidad.toString()}>
+                  {esp.idEspecialidad} - {esp.strNombreEspecialidad}
+                </option>
+              ))}
+            </select>
+            {errores.especialidad && <p className="text-red-500 text-sm">{errores.especialidad}</p>}
           </div>
           <div>
             <Label className='mb-2'>Médico</Label>
-            <Select
-                disabled={!form.idEspecialidad}
-                onValueChange={(value) => handleChangeCampo('intDoctor', value)}
-                value={form.intDoctor ? form.intDoctor.toString() : ''}
-              >
-                <SelectTrigger
-                  className={`w-full h-10 ${errores.intDoctor ? 'border-red-500 overflow-auto' : ''} cursor-pointer`}
-                >
-                  <SelectValue placeholder="Selecciona a tu médico" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="0" disabled>
-                    Selecciona a tu médico
-                  </SelectItem>
-
-                  {doctores.map((doct: any) => (
-                    <SelectItem key={doct.intDoctor} value={doct.intDoctor.toString()}>
-                      {doct.strNombreDoctor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-          
+            <select
+              disabled={!form.idEspecialidad}
+              onChange={(e) => handleChangeCampo('intDoctor', e.target.value)}
+              value={form.intDoctor ? form.intDoctor.toString() : ''}
+              className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed ${errores.intDoctor ? 'border-red-500' : ''}`}
+            >
+              <option value="">Selecciona a tu médico</option>
+              {doctores.map((doct: any) => (
+                <option key={doct.intDoctor} value={doct.intDoctor.toString()}>
+                  {doct.strNombreDoctor}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

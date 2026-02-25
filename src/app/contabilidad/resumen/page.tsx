@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle  } from "@/components/ui/card/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { BarChart2, DollarSign, ClipboardList } from "lucide-react";
 import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select/select";
 import { Bar, BarChart, CartesianGrid, XAxis,YAxis,ResponsiveContainer } from "recharts"
 import {
   ChartConfig,
@@ -139,16 +138,15 @@ export default function ContabilidadResumen() {
 
         <TabsContent value="doctor">
               <div className="space-y-4">
-                <Select onValueChange={(value) => setDoctorSeleccionado(value)}>
-                  <SelectTrigger className="w-full max-w-sm cursor-pointer">
-                    <SelectValue placeholder="Selecciona un doctor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="juan">Dr. Juan Pérez</SelectItem>
-                    <SelectItem value="ana">Dra. Ana López</SelectItem>
-                    <SelectItem value="carlos">Dr. Carlos Ruiz</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  onChange={(e) => setDoctorSeleccionado(e.target.value)}
+                  className="w-full max-w-sm h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                >
+                  <option value="">Selecciona un doctor</option>
+                  <option value="juan">Dr. Juan Pérez</option>
+                  <option value="ana">Dra. Ana López</option>
+                  <option value="carlos">Dr. Carlos Ruiz</option>
+                </select>
 
                 {doctorSeleccionado && (
                   <Card className="mt-4">

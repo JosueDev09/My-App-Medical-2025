@@ -11,7 +11,7 @@ declare module "next-auth" {
     user: {
       id: number;
       rol: string;
-      name?: string | null;
+      username?: string | null;
       email?: string | null;
       image?: string | null;
       authType?: string; // 'credenciales' o 'google'
