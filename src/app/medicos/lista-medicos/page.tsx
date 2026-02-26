@@ -21,11 +21,11 @@ export default function MedicosPage() {
   useEffect(() => {
     async function fetchMedicos() {
       try {
-        const response = await fetch("/api/medicos");
+        const response = await fetch("/api/Doctor");
         if (!response.ok) throw new Error("Network response was not ok");
-        const data: Medico[] = await response.json();
-        console.log("Datos recibidos:", data[0]);
-        setMedicos(data);
+        const data: { success: boolean; data: Medico[]; message: string } = await response.json();
+       // console.log("Datos recibidos:", data);
+        setMedicos(data.data);
       } catch (error) {
         console.error("Error al obtener los medicos:", error);
       }
@@ -87,7 +87,7 @@ return (
             {medicos.length > 0 ? (
               medicos.map((medico) => (
                 <TableRow
-                  key={medico.id }
+                  key={medico.intDoctor}
                   className="hover:bg-muted/10 transition border-gray-200"
                 >
                   <TableCell className="font-medium border-r border-gray-200">
@@ -103,10 +103,10 @@ return (
                     {medico.strDireccion}
                   </TableCell>
                   <TableCell className="border-r border-gray-200">
-                    {medico.strEspecialidad}
+                    {medico.strNombreEspecialidad}
                   </TableCell>
                   <TableCell className="border-r border-gray-200">
-                    {medico.strEstatus}
+                    {medico.strEstadoUsuario}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

@@ -16,10 +16,16 @@ export async function GET(req: NextRequest) {
         SELECT 
           p.intPaciente,
           p.strNombre,
+          p.strApellidoPaterno,
+          p.strApellidoMaterno,
           p.strEmail,
           p.strTelefono,
           p.strGenero,
           p.datFechaRegistro,
+          p.strDireccion,
+          p.datFechaNacimiento,
+          p.strEstado,
+          p.strCiudad,
           COUNT(c.intCita) as totalCitas
         FROM tbpacientes p
         LEFT JOIN tbcitas c ON p.intPaciente = c.intPaciente
@@ -117,12 +123,11 @@ export async function GET(req: NextRequest) {
           c.datFecha,
           c.intHora,
           c.strMotivo,
-          c.strEstado,
-          d.strNombreDoctor,
+          d.strNombre,
           e.strNombreEspecialidad
         FROM tbcitas c
-        INNER JOIN tbdoctores d ON c.intDoctor = d.intDoctor
-        INNER JOIN tbespecialidades e ON d.idEspecialidad = e.intEspecialidad
+        LEFT JOIN tbdoctores d ON c.intDoctor = d.intDoctor
+        LEFT JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
         WHERE c.intPaciente = ?
         ORDER BY c.datFecha DESC, c.intHora DESC
         LIMIT 10
@@ -136,6 +141,54 @@ export async function GET(req: NextRequest) {
           ...paciente[0],
           historialCitas: citas,
         },
+      });
+    }
+
+    // Buscar pacientes por nombre (para autocomplete)
+    if (tipo === 'buscar') {
+      const nombre = searchParams.get('nombre');
+      
+      if (!nombre || nombre.trim().length < 2) {
+        return NextResponse.json({
+          success: true,
+          data: [],
+        });
+      }
+
+      const query = `
+        SELECT 
+          intPaciente,
+          strNombre,
+          strApellidoPaterno,
+          strApellidoMaterno,
+          strEmail,
+          strTelefono,
+          strGenero,
+          datFechaNacimiento,
+          strDireccion,
+          strEstado
+        FROM tbpacientes
+        WHERE (strNombre LIKE ? 
+          OR strApellidoPaterno LIKE ? 
+          OR strApellidoMaterno LIKE ?
+          OR CONCAT(strNombre, ' ', strApellidoPaterno, ' ', strApellidoMaterno) LIKE ?)
+          AND isEliminado = 0
+          AND strEstatus = 'ACTIVO'
+        ORDER BY strNombre ASC
+        LIMIT 10
+      `;
+
+      const searchTerm = `%${nombre}%`;
+      const [pacientes] = await db.query(query, [
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        data: pacientes,
       });
     }
 

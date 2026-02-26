@@ -4,9 +4,9 @@ import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const { strNombre, strApellidos, datFechaNacimiento,strSexo,strEstado,strCiudad, strTelefono, strEmail, strDireccion } = await req.json();
+        const { strNombre, strApellidos, datFechaNacimiento,strSexo,strEstado,strCiudad,strDireccion, strTelefono, strEmail  } = await req.json();
     
-        const params = [strNombre, strApellidos, datFechaNacimiento,strSexo,strEstado,strCiudad, strTelefono, strEmail, strDireccion];
+        const params = [strNombre, strApellidos, datFechaNacimiento,strSexo,strEstado,strCiudad,strDireccion, strTelefono, strEmail ];
     
         // Ejecutar el procedimiento almacenado
         const result: any = await db.query("CALL sp_tbDoctores_Save(?, ?, ?, ?, ?, ?, ?, ?, ?)", params);

@@ -1,13 +1,14 @@
 export interface Medico {
-    id: string | number;
+    intDoctor: string | number;
     strNombre: string;
     strTelefono: string;
     strEmail: string;
     strDireccion: string;
     datFechaNacimiento: string; // o Date
     strSexo: "Masculino" | "Femenino" | "Otro";
-    strEstatus: "Activo" | "Inactivo";
-    strEspecialidad: string;
+    strEstadoUsuario: string;
+    intEspecialidad: string;
+    strNombreEspecialidad: string;
     strHorario: string; // o Date
     strConsultorio: string;
     strTipo: "Medico" | "Enfermero" | "Otro";

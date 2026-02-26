@@ -21,7 +21,7 @@ export function agendarCita() {
   // });
 
   const [form, setForm] = useState({
-  
+    intPaciente: 0, // ID del paciente si ya existe
     strNombrePaciente:'',
     intEdad: 0 ,
     strGenero:'' ,
@@ -79,6 +79,7 @@ export function agendarCita() {
         confirmButtonColor: '#3085d6',
       }).then(() => {
         setForm({
+          intPaciente: 0,
           strNombrePaciente: '0',
           intEdad: 0,
           strGenero: '0',

@@ -23,8 +23,8 @@ interface FormData {
 }
 
 interface FormData2 {
-  idEspecialidad: number;
-  strCedulaP: string;
+  intEspecialidad: number;
+  strCedulaProfesional: string;
   strCurpRFC: string; // Opcional
   dblPrecioConsulta: string; // Opcional
   strConsultorio: string; // Opcional
@@ -82,8 +82,8 @@ export function useRegistroDoctor() {
   });
 
    const [form2, setForm2] = useState<FormData2>({
-    idEspecialidad: 0,
-    strCedulaP: "",
+    intEspecialidad: 0,
+    strCedulaProfesional: "",
     strCurpRFC: "",
     dblPrecioConsulta:"", // Puedes inicializarlo como undefined si no es obligatorio
     strConsultorio: "",
@@ -161,7 +161,6 @@ const handleTabChange = (nextTab: string) => {
         "strCiudad",
         "strEstado",
         "strSexo",
-        "strDireccion",
       ];
       const nuevosErrores: Errores = {};
       camposObligatorios.forEach((campo) => {
@@ -220,12 +219,12 @@ const handleTabChange = (nextTab: string) => {
         text: "Por favor, completa primero los Datos Personales del Doctor.",
       });
 
-       console.log("intDoctor", intDoctor);
+       console.log("intDoctor, profesionales:", intDoctor);
       return;
     }
-      console.log("intDoctor", intDoctor);
+      console.log("intDoctor profesionales:", intDoctor);
 
-    if (!form2.idEspecialidad || form2.idEspecialidad <= 0) {
+    if (!form2.intEspecialidad || form2.intEspecialidad <= 0) {
       Swal.fire({
         icon: "error",
         title: "Error de validación",
@@ -235,8 +234,8 @@ const handleTabChange = (nextTab: string) => {
     }
     // Validación simple de campos obligatorios
     const camposObligatorios: (keyof FormData2)[] = [
-      "idEspecialidad",
-      "strCedulaP",
+      "intEspecialidad",
+      "strCedulaProfesional",
       "strCurpRFC",
       "dblPrecioConsulta",
       "strConsultorio",
@@ -262,7 +261,7 @@ const handleTabChange = (nextTab: string) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...form2, idDoctor: intDoctor }), // Aquí envías el ID del doctor
+      body: JSON.stringify({ ...form2, intDoctor }), // Aquí envías el ID del doctor
     });
     const data = await response.json();
     if (data.success) {
@@ -321,6 +320,158 @@ const handleTabChange = (nextTab: string) => {
     }
   };
 
+  // Submit Horarios
+  const handleSubmitHorarios = async () => {
+    if (!intDoctor) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, completa primero los pasos anteriores.",
+      });
+      return;
+    }
+
+    // Validación
+    if (!form3.horarioInicio || !form3.horarioFin || form3.diasDisponibles.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        text: "Por favor, completa todos los campos de horarios.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/Doctor/guardar-horarios", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...form3, intDoctor }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Datos guardados correctamente",
+          text: "Los horarios del doctor se han guardado exitosamente.",
+        });
+
+        setTabsCompletados((prev) => ({
+          ...prev,
+          hAtencion: true,
+        }));
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error al guardar datos",
+          text: data.message || "Ocurrió un error al guardar los horarios.",
+        });
+      }
+    } catch (error) {
+      console.error("Error al guardar horarios", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al conectar con el servidor.",
+      });
+    }
+  };
+
+  // Submit Usuario del Sistema
+  const handleSubmitUsuarioSistema = async () => {
+    if (!intDoctor) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, completa primero los pasos anteriores.",
+      });
+      return;
+    }
+
+    // Validación
+    const camposObligatorios: (keyof FormData4)[] = [
+      "strUsuario",
+      "strPassword",
+      "strConfirmPassword",
+      "strRol",
+      "strEstadoUsuario",
+    ];
+
+    const nuevosErrores: Errores = {};
+    camposObligatorios.forEach((campo) => {
+      if (!form4[campo] || form4[campo].trim() === "") {
+        nuevosErrores[campo] = "Este campo es obligatorio";
+      }
+    });
+
+    // Validar que las contraseñas coincidan
+    if (form4.strPassword !== form4.strConfirmPassword) {
+      nuevosErrores.strConfirmPassword = "Las contraseñas no coinciden";
+    }
+
+    setErrores(nuevosErrores);
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        text: "Por favor, completa todos los campos correctamente.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/Doctor/guardar-datos-sistema", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          intDoctor, 
+          strUsuario: form4.strUsuario,
+          strPassword: form4.strPassword,
+          strRol: form4.strRol,
+          strEstadoUsuario: form4.strEstadoUsuario
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "¡Registro Completado!",
+          text: "El doctor ha sido registrado exitosamente en el sistema.",
+        });
+
+        setTabsCompletados((prev) => ({
+          ...prev,
+          uSistema: true,
+        }));
+
+        return true; // Indica que se completó exitosamente
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error al guardar datos",
+          text: data.message || "Ocurrió un error al crear el usuario.",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Error al guardar usuario del sistema", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al conectar con el servidor.",
+      });
+      return false;
+    }
+  };
+
   return {
     tabsCompletados,
     setTabsCompletados,
@@ -332,6 +483,8 @@ const handleTabChange = (nextTab: string) => {
     setErrores,
     handleSubmitDatosPersonales,
     handleSubmitDatosProfesionales,
+    handleSubmitHorarios,
+    handleSubmitUsuarioSistema,
     handleTabChange,
     activeTab, setActiveTab,
     handleChangeCampo,

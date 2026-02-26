@@ -1,7 +1,7 @@
 // src/components/forms/FormularioDoctor.tsx
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Button } from "../../components/ui/button/button";
@@ -10,6 +10,7 @@ import { useRegistroDoctor } from "../../hooks/useRegistroDoctor";
 import { Label } from "../../components/ui/label/label";
 import { Input } from "../../components/ui/input/input";
 import { Textarea } from "../../components/ui/textarea/textarea";
+import AutocompleteGenerico from "../../components/ui/autocomplete/autocomplete-generico";
 import { User, Briefcase, Clock, CheckCircle,UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -33,34 +34,109 @@ export default function FormularioDoctor() {
     errores,
     handleSubmitDatosPersonales,
     handleSubmitDatosProfesionales,
+    handleSubmitHorarios,
+    handleSubmitUsuarioSistema,
     form4,
     setForm4,
+    intDoctor,
   } = useRegistroDoctor();
 
   const [pasoActual, setPasoActual] = useState(0);
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
   const [completado, setCompletado] = useState<boolean[]>(Array(pasos.length).fill(false));
   const [finalizado, setFinalizado] = useState(false);
+  const [especialidades, setEspecialidades] = useState<{ data: any[] } | null>(null);
+
+  useEffect(() => {
+    const fetchEspecialidades = async () => {
+      try {
+        const response = await fetch("/api/especialidades");
+        if (response.ok) {
+          const data = await response.json();
+          setEspecialidades(data);
+        } else {
+          console.error("Error al cargar especialidades");
+        }
+      } catch (error) {
+        console.error("Error al cargar especialidades", error);
+      }
+    };
+
+    fetchEspecialidades();
+  }, []);
 
   const siguientePaso = async () => {
-    let exito = true;
+    var exito = true;
+    
+    // Ejecutar el submit correspondiente según el paso actual
+    if (pasoActual === 0) {
+      // Paso 0: Datos Personales
+       await handleSubmitDatosPersonales();
+       exito = true; // Continuar al siguiente paso incluso si el doctor ya existe, para permitir editar datos profesionales y horarios
+    } else if (pasoActual === 1) {
+      // Paso 1: Datos Profesionales
+      if (!intDoctor) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, completa primero los datos personales.",
+        });
+        return;
+      }
+       await handleSubmitDatosProfesionales();
+       exito = true;
+    } else if (pasoActual === 2) {
+      // Paso 2: Horarios
+      if (!intDoctor) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, completa primero los pasos anteriores.",
+        });
+        return;
+      }
+      await handleSubmitHorarios();
+      exito = true; // Continuar al siguiente paso
+    } else if (pasoActual === 3) {
+      // Paso 3: Usuario del Sistema (último paso)
+      if (!intDoctor) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, completa primero los pasos anteriores.",
+        });
+        return;
+      }
+      const resultado = await handleSubmitUsuarioSistema();
+      if (resultado) {
+        // Registro completado exitosamente
+        setFinalizado(true);
+        const nuevosCompletados = [...completado];
+        nuevosCompletados[pasoActual] = true;
+        setCompletado(nuevosCompletados);
+        
+        Swal.fire({
+          icon: "success",
+          title: "¡Registro Completado!",
+          text: "El doctor ha sido registrado exitosamente en el sistema.",
+          confirmButtonColor: "#10B981",
+        }).then(() => {
+          router.push("/medicos/lista-medicos");
+        });
+        return;
+      } else {
+        return; // No avanzar si hubo error
+      }
+    }
+
     if (!exito) return;
 
     const nuevosCompletados = [...completado];
     nuevosCompletados[pasoActual] = true;
     setCompletado(nuevosCompletados);
 
-    if (pasoActual === pasos.length - 1) {
-      setFinalizado(true);
-      Swal.fire({
-        icon: "success",
-        title: "¡Guardado exitosamente!",
-        text: "El formulario ha sido completado.",
-        confirmButtonColor: "#10B981",
-      }).then(() => {
-        router.push("/dashboard/doctores");
-      });
-    } else {
+    // Avanzar al siguiente paso si no es el último
+    if (pasoActual < pasos.length - 1) {
       setPasoActual((prev) => prev + 1);
     }
   };
@@ -179,19 +255,25 @@ export default function FormularioDoctor() {
               </div>
               <div>
                 <Label className="mb-3">Estado</Label>
-                <Input
+                <AutocompleteGenerico
                   value={form.strEstado}
-                  onChange={(e: any) => setForm({ ...form, strEstado: e.target.value })}
-                  onBlur={() => setTouched({ ...touched, strEstado: true })}
+                  onChange={(value) => {
+                    setForm({ ...form, strEstado: value, strCiudad: '' }); // Limpiar ciudad al cambiar estado
+                  }}
+                  placeholder="Escribe el nombre del estado..."
+                  endpoint="/api/estados"
                   className={getInputValidationClasses(form.strEstado, touched.strEstado, { minLength: 3 })}
                 />
               </div>
               <div>
                 <Label className="mb-3">Ciudad</Label>
-                <Input
+                <AutocompleteGenerico
                   value={form.strCiudad}
-                  onChange={(e: any) => setForm({ ...form, strCiudad: e.target.value })}
-                  onBlur={() => setTouched({ ...touched, strCiudad: true })}
+                  onChange={(value) => setForm({ ...form, strCiudad: value })}
+                  placeholder={form.strEstado ? "Escribe el nombre de la ciudad..." : "Selecciona un estado primero"}
+                  endpoint="/api/ciudades"
+                  parametrosAdicionales={{ estado: form.strEstado }}
+                  deshabilitado={!form.strEstado}
                   className={getInputValidationClasses(form.strCiudad, touched.strCiudad, { minLength: 3 })}
                 />
               </div>
@@ -229,13 +311,16 @@ export default function FormularioDoctor() {
                 <div>
                 <Label className="mb-3">Especialidad</Label>
                 <select
-                    value={String(form2.idEspecialidad)}
-                    onChange={(e) => setForm2({ ...form2, idEspecialidad: Number(e.target.value) })}
+                    value={String(form2.intEspecialidad)}
+                    onChange={(e) => setForm2({ ...form2, intEspecialidad: Number(e.target.value) })}
                     className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 >
-                    <option value="">Selecciona una especialidad</option>
-                    <option value="1">Cardiología</option>
-                    <option value="2">Pediatría</option>
+                    <option value="0">Seleccionar especialidad</option>
+                    {especialidades?.data.map((esp: any) => (  
+                    <option key={esp.id} value={esp.id}>
+                        {esp.nombre}
+                    </option>
+                    ))}
                     {/* Agrega más especialidades si es necesario */}
                 </select>
                 </div>
@@ -243,10 +328,10 @@ export default function FormularioDoctor() {
                 <div>
                 <Label className="mb-3">Cédula Profesional</Label>
                 <Input
-                    value={form2.strCedulaP}
-                    onChange={(e) => setForm2({ ...form2, strCedulaP: e.target.value })}
+                    value={form2.strCedulaProfesional}
+                    onChange={(e) => setForm2({ ...form2, strCedulaProfesional: e.target.value })}
                     onBlur={() => setTouched({ ...touched, strCedulaP: true })}
-                    className={getInputValidationClasses(form2.strCedulaP, touched.strCedulaP, { minLength: 5 })}
+                    className={getInputValidationClasses(form2.strCedulaProfesional, touched.strCedulaP, { minLength: 5 })}
                 />
                 </div>
 

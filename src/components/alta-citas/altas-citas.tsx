@@ -17,10 +17,37 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 import  BreadcrumbSteps   from '@/components/ui/breadcrum-step/BreadcrumbSteps';
 import { agendarCita } from '@/app/citas/alta-citas/agendarCita';
+import AutocompletePacientes from '@/components/ui/autocomplete/autocomplete-pacientes';
+
+interface PacienteExistente {
+  intPaciente: number;
+  strNombre: string;
+  strApellidoPaterno: string | null;
+  strApellidoMaterno: string | null;
+  strEmail: string;
+  strTelefono: string;
+  strGenero: string;
+  datFechaNacimiento: string;
+}
 
 export default function altaCitas () {
   const [especialidades, setEspecialidades] = useState<any[]>([]);
   const [doctores, setDoctores] = useState<any[]>([]);
+  const [pacienteExistente, setPacienteExistente] = useState<PacienteExistente | null>(null);
+
+  // Función para calcular edad desde fecha de nacimiento
+  const calcularEdad = (fechaNacimiento: string): number => {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    
+    return edad;
+  };
 
 
     const {
@@ -75,12 +102,33 @@ export default function altaCitas () {
         <div className="space-y-4">
           <div>
             <Label className='mb-2'>Nombre completo</Label>
-            <Input
+            <AutocompletePacientes
               value={form.strNombrePaciente}
-              onChange={(e) => handleChangeCampo('strNombrePaciente', e.target.value)}
-              className={errores.nombre ? 'border-red-500 overflow-auto' : ''}
+              onChange={(value) => handleChangeCampo('strNombrePaciente', value)}
+              onSelectPaciente={(paciente) => {
+                setPacienteExistente(paciente);
+                if (paciente) {
+                  // Auto-completar campos con datos del paciente existente
+                  const edad = calcularEdad(paciente.datFechaNacimiento);
+                  setForm({
+                    ...form,
+                    intPaciente: paciente.intPaciente,
+                    strNombrePaciente: `${paciente.strNombre} ${paciente.strApellidoPaterno || ''} ${paciente.strApellidoMaterno || ''}`.trim(),
+                    strCorreoPaciente: paciente.strEmail,
+                    strTelefonoPaciente: paciente.strTelefono,
+                    intEdad: edad,
+                    strGenero: paciente.strGenero,
+                  });
+                } else {
+                  // Si se deselecciona, limpiar el intPaciente
+                  setForm({
+                    ...form,
+                    intPaciente: 0,
+                  });
+                }
+              }}
+              error={errores.strNombrePaciente}
             />
-            {errores.nombre && <p className="text-red-500 text-sm">{errores.nombre}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -90,6 +138,7 @@ export default function altaCitas () {
                 value={form.intEdad}
                 onChange={(e) => handleChangeCampo('intEdad', e.target.value)}
                 className={errores.edad ? 'border-red-500 overflow-auto' : ''}
+                disabled={!!pacienteExistente}
               />
               {errores.edad && <p className="text-red-500 text-sm">{errores.edad}</p>}
             </div>
@@ -98,7 +147,8 @@ export default function altaCitas () {
               <select
                 onChange={(e) => handleChangeCampo('strGenero', e.target.value)}
                 value={form.strGenero}
-                className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer ${errores.sexo ? 'border-red-500' : ''}`}
+                className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer ${errores.sexo ? 'border-red-500' : ''} ${pacienteExistente ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                disabled={!!pacienteExistente}
               >
                 <option value="">Selecciona género</option>
                 <option value="Masculino">Masculino</option>
@@ -114,6 +164,7 @@ export default function altaCitas () {
                 value={form.strTelefonoPaciente}
                 onChange={(e) => handleChangeCampo('strTelefonoPaciente', e.target.value)}
                 className={errores.strTelefonoPaciente ? 'border-red-500 overflow-auto' : ''}
+                disabled={!!pacienteExistente}
               />
               {errores.strTelefonoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strTelefonoPaciente}</p>}
             </div>
@@ -124,6 +175,7 @@ export default function altaCitas () {
                 value={form.strCorreoPaciente}
                 onChange={(e) => handleChangeCampo('strCorreoPaciente', e.target.value)}
                 className={errores.correo ? 'border-red-500' : ''}
+                disabled={!!pacienteExistente}
               />
               {errores.strCorreoPaciente && <p className="text-red-500 text-sm overflow-auto">{errores.strCorreoPaciente}</p>}
             </div>
