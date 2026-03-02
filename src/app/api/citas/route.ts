@@ -85,3 +85,31 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return new NextResponse('Error al crear la cita', { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest): Promise<NextResponse> {
+  try {
+    const { intCita, strEstado } = await req.json();
+
+    if (!intCita || !strEstado) {
+      return NextResponse.json(
+        { success: false, error: 'ID de cita y estado son requeridos' },
+        { status: 400 }
+      );
+    }
+
+    const query = `UPDATE tbcitas SET strEstado = ? WHERE intCita = ?`;
+    await db.query(query, [strEstado, intCita]);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Estado actualizado exitosamente'
+    });
+
+  } catch (error: any) {
+    console.error("Error al actualizar estado:", error);
+    return NextResponse.json(
+      { success: false, error: 'Error al actualizar estado', details: error.message },
+      { status: 500 }
+    );
+  }
+}

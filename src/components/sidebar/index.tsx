@@ -30,7 +30,8 @@ const routes = [
       { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={18} /> },
     ]
   },
-  { name: 'Especialidades', path: '/especialidad', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
+  { name: 'Especialidades', path: '/especialidades', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
+  { name: 'Agenda', path: '/agenda', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
   { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
   {
     name: 'Contabilidad',

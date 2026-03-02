@@ -102,12 +102,14 @@ export async function GET(req: NextRequest) {
           COUNT(c.intCita) as totalCitas,
           MAX(c.datFecha) as ultimaCita
         FROM tbpacientes p
-        LEFT JOIN tbcitas c ON p.intPaciente = c.intPaciente
+        INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente
         WHERE p.intPaciente = ?
         GROUP BY p.intPaciente
       `;
 
       const [paciente]: any = await db.query(query, [idPaciente]);
+
+      //console.log('Paciente encontrado:', paciente);
 
       if (!paciente || paciente.length === 0) {
         return NextResponse.json(
@@ -124,10 +126,11 @@ export async function GET(req: NextRequest) {
           c.intHora,
           c.strMotivo,
           d.strNombre,
+          c.strEstatusCita,
           e.strNombreEspecialidad
         FROM tbcitas c
-        LEFT JOIN tbdoctores d ON c.intDoctor = d.intDoctor
-        LEFT JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
+        INNER JOIN tbdoctores d ON c.intDoctor = d.intDoctor
+        INNER JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
         WHERE c.intPaciente = ?
         ORDER BY c.datFecha DESC, c.intHora DESC
         LIMIT 10
@@ -135,6 +138,7 @@ export async function GET(req: NextRequest) {
 
       const [citas] = await db.query(citasQuery, [idPaciente]);
 
+      console.log('Citas del paciente:', citas);
       return NextResponse.json({
         success: true,
         data: {

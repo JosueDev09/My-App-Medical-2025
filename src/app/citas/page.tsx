@@ -117,12 +117,12 @@ export default function CitasPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Pencil className="w-4 h-4 cursor-pointer" />
+                        <Pencil className="w-4 h-4 cursor-pointer text-blue-500 hover:text-blue-700" />
                          <a onClick={() => handleEliminarCita(cita.strFolio)}> 
-                          <Trash2 className="w-4 h-4 cursor-pointer" />
+                          <Trash2 className="w-4 h-4 cursor-pointer text-red-500 hover:text-red-700" />
                          </a>
                         <a onClick={() => handleVerCita(cita.strFolio)}>
-                         <Eye className="w-4 h-4 cursor-pointer"  />
+                         <Eye className="w-4 h-4 cursor-pointer text-green-500 hover:text-green-700"  />
                         </a>   
 
                       </div>

@@ -151,7 +151,7 @@ return (
                   <TableCell>
                     <div className="flex gap-2">
                       <Pencil className="w-4 h-4 cursor-pointer text-blue-500 hover:text-blue-700" />
-                      <Trash2 className="w-4 h-4 cursor-pointer text-red-500 hover:text-red-700" />
+                      <Trash2 className="w-4 h-4 cursor-not-allowed text-red-500 hover:text-red-700 "/>
                       <Eye 
                         className="w-4 h-4 cursor-pointer text-green-500 hover:text-green-700" 
                         onClick={() => handleVerDetalle(paciente.intPaciente)}
@@ -394,12 +394,12 @@ return (
                             </p>
                           </div>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            cita.strEstado === 'CONFIRMADA' ? 'bg-green-100 text-green-700' :
-                            cita.strEstado === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' :
-                            cita.strEstado === 'CANCELADA' ? 'bg-red-100 text-red-700' :
+                            cita.strEstatusCita === 'CONFIRMADA' ? 'bg-green-100 text-green-700' :
+                            cita.strEstatusCita === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' :
+                            cita.strEstatusCita === 'CANCELADA' ? 'bg-red-100 text-red-700' :
                             'bg-gray-100 text-gray-700'
                           }`}>
-                            {cita.strEstado}
+                            {cita.strEstatusCita}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
