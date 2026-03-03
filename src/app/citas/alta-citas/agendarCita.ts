@@ -27,7 +27,7 @@ export function agendarCita() {
     strGenero:'' ,
     strCorreoPaciente:'' ,
     strTelefonoPaciente:'' ,
-    idEspecialidad: 0 ,
+    intEspecialidad: 0 ,
     intDoctor: 0 ,
     datFecha:'' ,
     intHora: '0' ,
@@ -45,7 +45,7 @@ export function agendarCita() {
     if (!form.strGenero.trim()) nuevosErrores.strGenero = 'Sexo requerido';
     if (!form.strTelefonoPaciente.trim() || form.strTelefonoPaciente.length < 10) nuevosErrores.strTelefonoPaciente = 'Teléfono inválido';
     if (!form.strCorreoPaciente.trim() || !/\S+@\S+\.\S+/.test(form.strCorreoPaciente)) nuevosErrores.strCorreoPaciente = 'Correo inválido';
-    if (!form.idEspecialidad) nuevosErrores.idEspecialidad = 'Especialidad requerida';
+    if (!form.intEspecialidad) nuevosErrores.intEspecialidad = 'Especialidad requerida';
     if (!form.datFecha) nuevosErrores.datFecha = 'Fecha requerida';
     if (!form.intHora) nuevosErrores.intHora = 'Hora requerida';
     if (!form.strMotivo.trim()) nuevosErrores.strMotivo = 'Motivo requerido';
@@ -85,7 +85,7 @@ export function agendarCita() {
           strGenero: '0',
           strTelefonoPaciente: '0',
           strCorreoPaciente: '0',
-          idEspecialidad: 0,
+          intEspecialidad: 0,
           intDoctor: 0,
           datFecha: '0',
           intHora: '0',

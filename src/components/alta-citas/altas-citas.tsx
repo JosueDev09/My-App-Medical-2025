@@ -76,10 +76,10 @@ export default function altaCitas () {
 
           useEffect(() => {
             const cargarDoctores = async () => {
-              if (!form.idEspecialidad) return;
+              if (!form.intEspecialidad) return;
           
               try {
-                const res = await fetch(`/api/citas?tipo=doctores&idEspecialidad=${form.idEspecialidad}`);
+                const res = await fetch(`/api/citas?tipo=doctores&intEspecialidad=${form.intEspecialidad}`);
                 if (!res.ok) throw new Error('Error al cargar doctores');
                 const data = await res.json();
                 setDoctores(data);
@@ -89,7 +89,7 @@ export default function altaCitas () {
             };
           
             cargarDoctores();
-          }, [form.idEspecialidad]);
+          }, [form.intEspecialidad]);
   
   return (
   <div className="flex flex-col items-center justify-center min-h-screen ">
@@ -186,14 +186,14 @@ export default function altaCitas () {
           <div>
             <Label className='mb-2'>Especialidad</Label>
             <select
-              onChange={(e) => handleChangeCampo('idEspecialidad', e.target.value)}
-              value={form.idEspecialidad.toString()}
+              onChange={(e) => handleChangeCampo('intEspecialidad', e.target.value)}
+              value={form.intEspecialidad}
               className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer ${errores.idEspecialidad ? 'border-red-500' : ''}`}
             >
               <option value="0">Selecciona una especialidad</option>
               {especialidades.map((esp: any) => (
-                <option key={esp.idEspecialidad} value={esp.idEspecialidad.toString()}>
-                  {esp.idEspecialidad} - {esp.strNombreEspecialidad}
+                <option key={esp.intEspecialidad} value={esp.intEspecialidad}>
+                  {esp.intEspecialidad} - {esp.strNombreEspecialidad}
                 </option>
               ))}
             </select>
@@ -202,7 +202,7 @@ export default function altaCitas () {
           <div>
             <Label className='mb-2'>Médico</Label>
             <select
-              disabled={!form.idEspecialidad}
+              disabled={!form.intEspecialidad}
               onChange={(e) => handleChangeCampo('intDoctor', e.target.value)}
               value={form.intDoctor ? form.intDoctor.toString() : ''}
               className={`w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed ${errores.intDoctor ? 'border-red-500' : ''}`}
@@ -210,7 +210,7 @@ export default function altaCitas () {
               <option value="">Selecciona a tu médico</option>
               {doctores.map((doct: any) => (
                 <option key={doct.intDoctor} value={doct.intDoctor.toString()}>
-                  {doct.strNombreDoctor}
+                  {doct.strNombre} {doct.strApellidos}
                 </option>
               ))}
             </select>

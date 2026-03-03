@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from '@/lib/db';
+import { auth } from '@/auth';
 
 // GET - Obtener citas para la agenda
 export async function GET(req: NextRequest) {
@@ -8,6 +9,33 @@ export async function GET(req: NextRequest) {
     const fecha = searchParams.get("fecha");
     const idDoctor = searchParams.get("idDoctor");
     const estado = searchParams.get("estado");
+
+    // Obtener sesión del usuario
+    const session = await auth();
+    const email = session?.user?.email;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
+      );
+    }
+
+    // Obtener información del usuario
+    const [userRows]: any = await db.query(
+      'SELECT strRol, intDoctor FROM tbusuarios WHERE strCorreo = ?',
+      [email]
+    );
+
+    if (!userRows || userRows.length === 0) {
+      return NextResponse.json(
+        { error: "Usuario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const user = userRows[0];
+    const rol = user.strRol?.toLowerCase();
 
     let query = `
       SELECT 
@@ -22,7 +50,7 @@ export async function GET(req: NextRequest) {
         p.intEdad,
         p.strGenero,
         CONCAT(d.strNombre, ' ', d.strApellidoPaterno, ' ', d.strApellidoMaterno) as strNombreDoctor,
-        e.strNombreEspecialidad as strNombreEspecialidad
+        e.strNombreEspecialidad
       FROM tbcitas c
       INNER JOIN tbpacientes p ON c.intIdPaciente = p.intIdPaciente
       INNER JOIN tbdoctores d ON c.intIdDoctor = d.intDoctor
@@ -32,16 +60,37 @@ export async function GET(req: NextRequest) {
 
     const params: any[] = [];
 
+    // Si es doctor, solo puede ver sus propias citas
+    if (rol === 'doctor') {
+      const doctorId = user.intDoctor;
+      if (!doctorId) {
+        return NextResponse.json(
+          { error: "Doctor no asociado al usuario" },
+          { status: 400 }
+        );
+      }
+      query += ` AND c.intIdDoctor = ?`;
+      params.push(doctorId);
+    } 
+    // Si es admin o recepción, puede filtrar por doctor
+    else if (rol === 'superadmin' || rol === 'recepcion') {
+      if (idDoctor) {
+        query += ` AND c.intIdDoctor = ?`;
+        params.push(parseInt(idDoctor));
+      }
+    } 
+    // Rol no autorizado
+    else {
+      return NextResponse.json(
+        { error: "Rol no autorizado" },
+        { status: 403 }
+      );
+    }
+
     // Filtrar por fecha si se proporciona
     if (fecha) {
       query += ` AND DATE(c.datFecha) = ?`;
       params.push(fecha);
-    }
-
-    // Filtrar por doctor si se proporciona
-    if (idDoctor) {
-      query += ` AND c.intIdDoctor = ?`;
-      params.push(idDoctor);
     }
 
     // Filtrar por estado si se proporciona
@@ -50,7 +99,7 @@ export async function GET(req: NextRequest) {
       params.push(estado);
     }
 
-    query += ` ORDER BY c.datFecha, c.intHora`;
+    query += ` ORDER BY c.datFecha DESC, c.intHora`;
 
     const [rows] = await db.query(query, params);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   Calendar,
   Clock,
@@ -31,6 +32,7 @@ import { Input } from "@/components/ui/input/input";
 import { Label } from "@/components/ui/label/label";
 import { Textarea } from "@/components/ui/textarea/textarea";
 
+
 interface Cita {
   intCita: number;
   strNombrePaciente: string;
@@ -41,7 +43,7 @@ interface Cita {
   datFecha: string;
   intHora: string;
   strMotivo: string;
-  strEstado: string;
+  strEstadoCita: string;
   intEdad: number;
   strGenero: string;
 }
@@ -54,7 +56,19 @@ interface ConsultaData {
   strSignosVitales: string;
 }
 
+interface Especialidad {
+  intEspecialidad: number;
+  strNombreEspecialidad: string;
+}
+
+interface Doctor {
+  intDoctor: number;
+  strNombre: string;
+  strApellidos: string;
+}
+
 export default function AgendaPage() {
+  const { data: session } = useSession();
   const [citas, setCitas] = useState<Cita[]>([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
@@ -69,11 +83,83 @@ export default function AgendaPage() {
     strSignosVitales: ""
   });
 
+  // Estados para filtros de admin/recepción
+  const [rol, setRol] = useState<string>("");
+  const [especialidades, setEspecialidades] = useState<Especialidad[]>([]);
+  const [doctores, setDoctores] = useState<Doctor[]>([]);
+  const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState<string>("todos");
+  const [doctorSeleccionado, setDoctorSeleccionado] = useState<string>("todos");
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+
+
+  // Obtener rol del usuario
+ useEffect(() => {
+    if (session?.user?.rol) {
+      setUserRole(session.user.rol.toLowerCase());
+    } else {
+      const roleMatch = document.cookie.match(/(^| )role=([^;]+)/);
+      const role = roleMatch?.[2];
+      if (role) {
+        setUserRole(role.toLowerCase());
+      } else {
+        console.warn("No se encontró cookie 'role'");
+      }
+    }
+
+    // Obtener el nombre del usuario
+    if (session?.user?.username) {
+      setUserName(session.user.username);
+    } else {
+      const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
+      const cookieUsername = usernameMatch?.[2];
+      if (cookieUsername) {
+        setUserName(decodeURIComponent(cookieUsername));
+      }
+    }
+    
+  }, [session]);
+
+
+  // Cargar especialidades
+  useEffect(() => {
+  const fetchEspecialidades = async () => {
+    try {
+      const response = await fetch("/api/citas?tipo=especialidades");
+      if (!response.ok) throw new Error("Error al cargar especialidades");
+      const data = await response.json();
+      setEspecialidades(data[0] || []);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+    fetchEspecialidades();
+    }, []);
+
+  // Cargar doctores por especialidad
+  const fetchDoctores = async (idEspecialidad: string) => {
+    try {
+      const response = await fetch(`/api/citas?tipo=doctores&intEspecialidad=${idEspecialidad}`);
+      if (!response.ok) throw new Error("Error al cargar doctores");
+      const data = await response.json();
+      setDoctores(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   // Cargar citas
   const fetchCitas = async () => {
     setCargando(true);
     try {
-      const response = await fetch("/api/citas?tipo=lista-citas-admin");
+      let url = "/api/agenda";
+      
+      // Si hay un doctor seleccionado y no es "todos", agregarlo al filtro
+      if (doctorSeleccionado && doctorSeleccionado !== "todos") {
+        url += `?idDoctor=${doctorSeleccionado}`;
+      }
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Error al cargar citas");
       
       const data = await response.json();
@@ -86,8 +172,10 @@ export default function AgendaPage() {
   };
 
   useEffect(() => {
-    fetchCitas();
-  }, []);
+    if (userRole === "superadmin" || userRole === "recepcion") {
+      fetchCitas();
+    }
+  }, [userRole, doctorSeleccionado]);
 
   // Filtrar citas por fecha seleccionada
   const citasDia = citas.filter((cita) => {
@@ -98,7 +186,7 @@ export default function AgendaPage() {
       fechaCita.getFullYear() === fechaSeleccionada.getFullYear();
     
     if (filtroEstado === "todos") return esMismaFecha;
-    return esMismaFecha && cita.strEstado.toLowerCase() === filtroEstado.toLowerCase();
+    return esMismaFecha && cita.strEstadoCita === filtroEstado;
   }).sort((a, b) => a.intHora.localeCompare(b.intHora));
 
   // Cambiar fecha
@@ -115,7 +203,7 @@ export default function AgendaPage() {
   // Cambiar estado de cita
   const cambiarEstado = async (intCita: number, nuevoEstado: string) => {
     try {
-      const response = await fetch("/api/citas", {
+      const response = await fetch("/api/agenda", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ intCita, strEstado: nuevoEstado })
@@ -161,18 +249,18 @@ export default function AgendaPage() {
   // Estadísticas del día
   const estadisticas = {
     total: citasDia.length,
-    pendientes: citasDia.filter(c => c.strEstado.toLowerCase() === "pendiente").length,
-    enEspera: citasDia.filter(c => c.strEstado.toLowerCase() === "en espera").length,
-    enConsulta: citasDia.filter(c => c.strEstado.toLowerCase() === "en consulta").length,
-    finalizadas: citasDia.filter(c => c.strEstado.toLowerCase() === "finalizada").length,
-    canceladas: citasDia.filter(c => c.strEstado.toLowerCase() === "cancelada").length,
+    pendientes: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "pendiente").length,
+    enEspera: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "en espera").length,
+    enConsulta: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "en consulta").length,
+    finalizadas: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "finalizada").length,
+    canceladas: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "cancelada").length,
   };
 
   // Obtener próxima cita
   const horaActual = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
   const proximaCita = citasDia.find(cita => 
     cita.intHora > horaActual && 
-    (cita.strEstado.toLowerCase() === "confirmada" || cita.strEstado.toLowerCase() === "pendiente" || cita.strEstado.toLowerCase() === "en espera")
+    (cita.strEstadoCita.toLowerCase() === "confirmada" || cita.strEstadoCita.toLowerCase() === "pendiente" || cita.strEstadoCita.toLowerCase() === "en espera")
   );
 
   // Función para obtener el color según el estado
@@ -210,6 +298,53 @@ export default function AgendaPage() {
             Hoy
           </Button>
         </div>
+
+        {/* Filtros para Admin/Recepción */}
+        {(userRole === "superadmin" || userRole === "recepcion") && (
+          <div className="mb-4 grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
+            <div>
+              <Label>Especialidad</Label>
+              <select
+                value={especialidadSeleccionada}
+                onChange={(e) => {
+                  const value = e.target.value; 
+                  setEspecialidadSeleccionada(value);
+                  setDoctorSeleccionado("todos");
+                
+                  setDoctores([]);
+                  if (value && value !== "todos") {
+                    fetchDoctores(value);
+                  }
+                }}
+              >
+                <option value="todos">Todas las especialidades</option>
+                {especialidades.map((esp) => (
+                    <option key={esp.intEspecialidad} value={esp.intEspecialidad.toString()}>
+                        {esp.strNombreEspecialidad}
+                    </option>
+                ))}
+                
+             
+              </select>
+            </div>
+
+            <div>
+              <Label>Doctor</Label>
+              <select
+                value={doctorSeleccionado}
+                onChange={(e) => setDoctorSeleccionado(e.target.value) }
+                disabled={!especialidadSeleccionada || especialidadSeleccionada === "todos"}
+              >
+                <option value="todos">Todos los doctores</option>
+                {doctores.map((doc) => (
+                    <option key={doc.intDoctor} value={doc.intDoctor.toString()}>
+                        {doc.strNombre} {doc.strApellidos}
+                    </option>   
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-4">
           <Button
@@ -352,7 +487,7 @@ export default function AgendaPage() {
           </div>
         ) : citasDia.length > 0 ? (
           citasDia.map((cita) => {
-            const estadoColor = getEstadoColor(cita.strEstado);
+            const estadoColor = getEstadoColor(cita.strEstadoCita);
             const IconoEstado = estadoColor.icon;
             const esPasada = cita.intHora < horaActual;
 
@@ -380,7 +515,7 @@ export default function AgendaPage() {
                         {cita.strNombrePaciente}
                       </h3>
                       <span className={`px-4 py-1 rounded-full text-sm font-semibold ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
-                        {cita.strEstado}
+                        {cita.strEstadoCita}
                       </span>
                     </div>
 
@@ -420,7 +555,7 @@ export default function AgendaPage() {
 
                     {/* Botones de acción según el estado */}
                     <div className="mt-4 flex gap-2">
-                      {(cita.strEstado.toLowerCase() === "pendiente" || cita.strEstado.toLowerCase() === "confirmada") && (
+                      {(cita.strEstadoCita  === "pendiente" || cita.strEstadoCita  === "confirmada") && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -432,7 +567,7 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {cita.strEstado.toLowerCase() === "en espera" && (
+                      {cita.strEstadoCita  === "en espera" && (
                         <Button
                           size="sm"
                           onClick={() => iniciarConsulta(cita)}
@@ -443,7 +578,7 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {cita.strEstado.toLowerCase() === "en consulta" && (
+                      {cita.strEstadoCita  === "en consulta" && (
                         <Button
                           size="sm"
                           onClick={() => {
@@ -464,9 +599,9 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {(cita.strEstado.toLowerCase() === "pendiente" || 
-                        cita.strEstado.toLowerCase() === "confirmada" || 
-                        cita.strEstado.toLowerCase() === "en espera") && (
+                      {(cita.strEstadoCita  === "pendiente" || 
+                        cita.strEstadoCita  === "confirmada" || 
+                        cita.strEstadoCita  === "en espera") && (
                         <Button
                           variant="outline"
                           size="sm"
