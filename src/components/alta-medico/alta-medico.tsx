@@ -46,6 +46,8 @@ export default function FormularioDoctor() {
   const [completado, setCompletado] = useState<boolean[]>(Array(pasos.length).fill(false));
   const [finalizado, setFinalizado] = useState(false);
   const [especialidades, setEspecialidades] = useState<{ data: any[] } | null>(null);
+  const [roles, setRoles] = useState<{ data: any[] } | null>(null);
+ 
 
   useEffect(() => {
     const fetchEspecialidades = async () => {
@@ -64,6 +66,24 @@ export default function FormularioDoctor() {
 
     fetchEspecialidades();
   }, []);
+
+  useEffect(() => {
+    const fetchRoles =async () => {
+      try {
+        const response = await fetch("/api/roles");
+        if (response.ok) {
+          const data = await response.json();
+          setRoles(data);
+        } else {
+          console.error("Error al cargar roles");
+        }
+      } catch (error) {
+        console.error("Error al cargar roles", error);
+      }
+    };
+
+    fetchRoles();
+  },[]);
 
   const siguientePaso = async () => {
     var exito = true;
@@ -522,7 +542,11 @@ export default function FormularioDoctor() {
                         )}`}
                     >
                         <option value="">Seleccionar rol</option>
-                        <option value="doctor">Doctor</option>
+                        {roles?.data.map((rol: any) => (
+                        <option key={rol.id} value={rol.nombre}>
+                            {rol.nombre}
+                        </option>
+                        ))}
                         {/* Aquí podrías agregar más roles si deseas */}
                     </select>
                     </div>

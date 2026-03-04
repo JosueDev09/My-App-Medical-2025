@@ -27,15 +27,16 @@ const routes = [
   { name: 'Agenda', path: '/agenda', icon: <Notebook size={20} />, roles: ['doctor','SuperAdmin'] },
   { name: 'Historial Médico', path: '/historial-medico', icon: <ClipboardList size={20} />, roles: ['SuperAdmin', 'Doctor', 'Recepcion'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['SuperAdmin', 'doctor'] },
-  {
-    name: 'Doctores',
-    icon: <Stethoscope size={20} />,
-    roles: ['SuperAdmin'],
-    children: [
-      { name: 'Alta doctor', path: '/medicos/alta-medicos', icon: <Plus size={18} /> },
-      { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={18} /> },
-    ]
-  },
+  { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={20} />, roles: ['SuperAdmin'] },
+  // {
+  //   name: 'Doctores',
+  //   icon: <Stethoscope size={20} />,
+  //   roles: ['SuperAdmin'],
+  //   children: [
+  //     { name: 'Alta doctor', path: '/medicos/alta-medicos', icon: <Plus size={18} /> },
+  //     { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={18} /> },
+  //   ]
+  // },
   { name: 'Especialidades', path: '/especialidades', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
 
   // { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },

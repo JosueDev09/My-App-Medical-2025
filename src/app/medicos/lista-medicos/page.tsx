@@ -1,6 +1,7 @@
 "use client";
 import { useState,useEffect } from "react";
 import { Medico } from "@/types/medicos";   
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -16,12 +17,14 @@ import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity,PhoneCal
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import formatearFechaLarga from "@/lib/formatterFecha";
+import { Button } from "@/components/ui/button/button";
 
 export default function MedicosPage() {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [medicoSeleccionado, setMedicoSeleccionado] = useState<any>(null);
+  const router = useRouter();
 
   /* ---------- Cargar citas al montar ---------- */
   useEffect(() => {
@@ -38,6 +41,10 @@ export default function MedicosPage() {
     }
     fetchMedicos();
   }, []);
+
+    const handleAgregarDoctor = async () => {
+    router.push("/medicos/alta-medicos");
+  };
 
   
   /* ---------- Cargar detalle del medico ---------- */
@@ -75,7 +82,7 @@ return (
     <h1 className="text-2xl font-semibold mb-6">👨‍⚕️ Medicos</h1>
     <div className="w-full overflow-x-auto">
 
-   
+    <Button variant="outline" onClick={handleAgregarDoctor} className="mb-4 cursor-pointer bg-blue-500 text-white hover:bg-blue-400 hover:text-white">Agregar Doctor </Button> 
     <div className="rounded-xl border shadow-sm overflow-hidden  border-gray-200">
       <Table>
         <TableHeader>
@@ -143,7 +150,7 @@ return (
                     {medico.strNombreEspecialidad}
                   </TableCell>
                   <TableCell className="border-r border-gray-200 text-center">
-                    {medico.strEstadoUsuario == 'activo' ? (
+                    {medico.strEstadoUsuario == 'Activo' || medico.strEstadoUsuario == 'ACTIVO' ? (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
                         ACTIVO
                         </span>
