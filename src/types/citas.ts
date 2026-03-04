@@ -8,7 +8,7 @@ export interface Cita {
     idEspecialidad: '0' ,
     intDoctor: '0' ,
     strNombreEspecialidad: '' ,
-    strNombreDoctor: '' ,
+    strNombre: '' ,
     datFecha:'' ,
     intHora:'' ,
    // dblTotal:'',

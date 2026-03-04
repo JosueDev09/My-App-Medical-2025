@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from '@/lib/db';
-import { auth } from '@/auth';
+import { getAuthenticatedUser, hasRole } from '@/lib/auth-helper';
 
 // GET - Obtener citas para la agenda
 export async function GET(req: NextRequest) {
@@ -10,32 +10,18 @@ export async function GET(req: NextRequest) {
     const idDoctor = searchParams.get("idDoctor");
     const estado = searchParams.get("estado");
 
-    // Obtener sesión del usuario
-    const session = await auth();
-    const email = session?.user?.email;
-
-    if (!email) {
+    // Obtener usuario autenticado
+    let user;
+    try {
+      user = await getAuthenticatedUser();
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Usuario no autenticado" },
+        { error: error.message },
         { status: 401 }
       );
     }
 
-    // Obtener información del usuario
-    const [userRows]: any = await db.query(
-      'SELECT strRol, intDoctor FROM tbusuarios WHERE strCorreo = ?',
-      [email]
-    );
-
-    if (!userRows || userRows.length === 0) {
-      return NextResponse.json(
-        { error: "Usuario no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    const user = userRows[0];
-    const rol = user.strRol?.toLowerCase();
+   // console.log("Usuario autenticado:", user.email, "Rol:", user.rol);
 
     let query = `
       SELECT 
@@ -43,39 +29,38 @@ export async function GET(req: NextRequest) {
         c.datFecha,
         c.intHora,
         c.strMotivo,
-        c.strEstado,
+        c.strEstatuscita,
         p.strNombre as strNombrePaciente,
         p.strTelefono as strTelefonoPaciente,
-        p.strCorreo as strCorreoPaciente,
-        p.intEdad,
+        p.strEmail as strCorreoPaciente,
         p.strGenero,
-        CONCAT(d.strNombre, ' ', d.strApellidoPaterno, ' ', d.strApellidoMaterno) as strNombreDoctor,
+        CONCAT(d.strNombre, ' ', d.strApellidos) as strNombreDoctor,
         e.strNombreEspecialidad
       FROM tbcitas c
-      INNER JOIN tbpacientes p ON c.intIdPaciente = p.intIdPaciente
-      INNER JOIN tbdoctores d ON c.intIdDoctor = d.intDoctor
+      INNER JOIN tbpacientes p ON c.intPaciente = p.intPaciente
+      INNER JOIN tbdoctores d ON c.intDoctor = d.intDoctor
       INNER JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
       WHERE 1=1
     `;
 
     const params: any[] = [];
-
+    
     // Si es doctor, solo puede ver sus propias citas
-    if (rol === 'doctor') {
-      const doctorId = user.intDoctor;
-      if (!doctorId) {
+    if (user.rol === 'doctor') {
+      if (!user.intDoctor) {
         return NextResponse.json(
           { error: "Doctor no asociado al usuario" },
           { status: 400 }
         );
       }
-      query += ` AND c.intIdDoctor = ?`;
-      params.push(doctorId);
+      query += ` AND c.intDoctor = ?`;
+      params.push(user.intDoctor);
     } 
     // Si es admin o recepción, puede filtrar por doctor
-    else if (rol === 'superadmin' || rol === 'recepcion') {
+    else if (hasRole(user, ['superadmin', 'recepcion'])) {
+        
       if (idDoctor) {
-        query += ` AND c.intIdDoctor = ?`;
+        query += ` AND c.intDoctor = ?`;
         params.push(parseInt(idDoctor));
       }
     } 
@@ -88,20 +73,22 @@ export async function GET(req: NextRequest) {
     }
 
     // Filtrar por fecha si se proporciona
-    if (fecha) {
-      query += ` AND DATE(c.datFecha) = ?`;
-      params.push(fecha);
-    }
+    // if (fecha) {
+    //   query += ` AND DATE(c.datFecha) = ?`;
+    //   params.push(fecha);
+    // }
 
     // Filtrar por estado si se proporciona
     if (estado && estado !== "todos") {
-      query += ` AND c.strEstado = ?`;
+      query += ` AND c.strEstatuscita = ?`;
       params.push(estado);
     }
 
     query += ` ORDER BY c.datFecha DESC, c.intHora`;
 
     const [rows] = await db.query(query, params);
+
+    //console.log("Citas obtenidas:", [rows]);
 
     return NextResponse.json(rows, { status: 200 });
   } catch (error) {
@@ -128,7 +115,7 @@ export async function PUT(req: NextRequest) {
 
     const query = `
       UPDATE tbcitas 
-      SET strEstado = ?
+      SET strEstatuscita = ?
       WHERE intCita = ?
     `;
 

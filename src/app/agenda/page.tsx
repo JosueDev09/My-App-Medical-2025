@@ -43,7 +43,7 @@ interface Cita {
   datFecha: string;
   intHora: string;
   strMotivo: string;
-  strEstadoCita: string;
+   strEstatuscita: string;
   intEdad: number;
   strGenero: string;
 }
@@ -96,12 +96,13 @@ export default function AgendaPage() {
   // Obtener rol del usuario
  useEffect(() => {
     if (session?.user?.rol) {
-      setUserRole(session.user.rol.toLowerCase());
+      setUserRole(session.user.rol);
+      //console.log("Rol del usuario:", session.user.rol);
     } else {
       const roleMatch = document.cookie.match(/(^| )role=([^;]+)/);
       const role = roleMatch?.[2];
       if (role) {
-        setUserRole(role.toLowerCase());
+        setUserRole(role);
       } else {
         console.warn("No se encontró cookie 'role'");
       }
@@ -153,6 +154,8 @@ export default function AgendaPage() {
     setCargando(true);
     try {
       let url = "/api/agenda";
+      //console.log("Sesión en cliente:", session);
+      console.log("Doctor seleccionado:", doctorSeleccionado);
       
       // Si hay un doctor seleccionado y no es "todos", agregarlo al filtro
       if (doctorSeleccionado && doctorSeleccionado !== "todos") {
@@ -160,7 +163,14 @@ export default function AgendaPage() {
       }
 
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Error al cargar citas");
+      
+      //console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error del servidor:", errorData);
+        throw new Error("Error al cargar citas");
+      }
       
       const data = await response.json();
       setCitas(data || []);
@@ -172,9 +182,11 @@ export default function AgendaPage() {
   };
 
   useEffect(() => {
-    if (userRole === "superadmin" || userRole === "recepcion") {
+    
+    if (userRole === "SuperAdmin" || userRole === "Recepcion") {
       fetchCitas();
     }
+    //console.log("Rol del usuario en useEffect:", userRole);
   }, [userRole, doctorSeleccionado]);
 
   // Filtrar citas por fecha seleccionada
@@ -186,7 +198,7 @@ export default function AgendaPage() {
       fechaCita.getFullYear() === fechaSeleccionada.getFullYear();
     
     if (filtroEstado === "todos") return esMismaFecha;
-    return esMismaFecha && cita.strEstadoCita === filtroEstado;
+    return esMismaFecha && cita. strEstatuscita === filtroEstado;
   }).sort((a, b) => a.intHora.localeCompare(b.intHora));
 
   // Cambiar fecha
@@ -195,6 +207,8 @@ export default function AgendaPage() {
     nuevaFecha.setDate(nuevaFecha.getDate() + dias);
     setFechaSeleccionada(nuevaFecha);
   };
+
+  //console.log("Citas del día:", citasDia);
 
   const irHoy = () => {
     setFechaSeleccionada(new Date());
@@ -249,35 +263,37 @@ export default function AgendaPage() {
   // Estadísticas del día
   const estadisticas = {
     total: citasDia.length,
-    pendientes: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "pendiente").length,
-    enEspera: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "en espera").length,
-    enConsulta: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "en consulta").length,
-    finalizadas: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "finalizada").length,
-    canceladas: citasDia.filter(c => c.strEstadoCita.toLowerCase() === "cancelada").length,
+    pendientes: citasDia.filter(c => c.strEstatuscita === "PENDIENTE").length,
+    enEspera: citasDia.filter(c => c.strEstatuscita === "EN ESPERA").length,
+    enConsulta: citasDia.filter(c => c.strEstatuscita === "EN CONSULTA").length,
+    finalizadas: citasDia.filter(c => c.strEstatuscita === "FINALIZADA").length,
+    canceladas: citasDia.filter(c => c.strEstatuscita === "CANCELADA").length,
   };
 
   // Obtener próxima cita
   const horaActual = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
   const proximaCita = citasDia.find(cita => 
     cita.intHora > horaActual && 
-    (cita.strEstadoCita.toLowerCase() === "confirmada" || cita.strEstadoCita.toLowerCase() === "pendiente" || cita.strEstadoCita.toLowerCase() === "en espera")
+    (cita.strEstatuscita === "CONFIRMADA" || cita.strEstatuscita === "PENDIENTE" || cita.strEstatuscita === "EN ESPERA")
   );
+
+  //console.log("Próxima cita:", proximaCita);
 
   // Función para obtener el color según el estado
   const getEstadoColor = (estado: string) => {
-    switch (estado.toLowerCase()) {
-      case "pendiente":
+    //console.log("Obteniendo color para estado:", estado);
+    switch (estado) {
+      case "PENDIENTE":
         return { bg: "bg-yellow-50", border: "border-yellow-300", text: "text-yellow-700", icon: Circle };
-      case "confirmada":
+      case "CONFIRMADA":
         return { bg: "bg-blue-50", border: "border-blue-300", text: "text-blue-700", icon: PlayCircle };
-      case "en espera":
+      case "EN ESPERA":
         return { bg: "bg-orange-50", border: "border-orange-300", text: "text-orange-700", icon: UserCheck };
-      case "en consulta":
+      case "EN CONSULTA":
         return { bg: "bg-purple-50", border: "border-purple-300", text: "text-purple-700", icon: Stethoscope };
-      case "completada":
-      case "finalizada":
+      case "FINALIZADA":
         return { bg: "bg-green-50", border: "border-green-300", text: "text-green-700", icon: CheckCircle2 };
-      case "cancelada":
+      case "CANCELADA":
         return { bg: "bg-red-50", border: "border-red-300", text: "text-red-700", icon: XCircle };
       default:
         return { bg: "bg-gray-50", border: "border-gray-300", text: "text-gray-700", icon: Circle };
@@ -300,10 +316,10 @@ export default function AgendaPage() {
         </div>
 
         {/* Filtros para Admin/Recepción */}
-        {(userRole === "superadmin" || userRole === "recepcion") && (
+        {(userRole === "SuperAdmin" || userRole === "Recepcion") && (
           <div className="mb-4 grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
             <div>
-              <Label>Especialidad</Label>
+              <Label className="text-sm font-semibold text-gray-700">Especialidad</Label>
               <select
                 value={especialidadSeleccionada}
                 onChange={(e) => {
@@ -316,10 +332,17 @@ export default function AgendaPage() {
                     fetchDoctores(value);
                   }
                 }}
+                className="mt-1.5 w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer text-gray-700 font-medium"
               >
-                <option value="todos">Todas las especialidades</option>
+                <option value="todos" className="font-semibold py-3">
+                  Todas las especialidades
+                </option>
                 {especialidades.map((esp) => (
-                    <option key={esp.intEspecialidad} value={esp.intEspecialidad.toString()}>
+                    <option 
+                      key={esp.intEspecialidad} 
+                      value={esp.intEspecialidad.toString()}
+                      className="py-3"
+                    >
                         {esp.strNombreEspecialidad}
                     </option>
                 ))}
@@ -329,15 +352,22 @@ export default function AgendaPage() {
             </div>
 
             <div>
-              <Label>Doctor</Label>
+              <Label className="text-sm font-semibold text-gray-700">Doctor</Label>
               <select
                 value={doctorSeleccionado}
                 onChange={(e) => setDoctorSeleccionado(e.target.value) }
                 disabled={!especialidadSeleccionada || especialidadSeleccionada === "todos"}
+                className="mt-1.5 w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer text-gray-700 font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed disabled:border-gray-200 disabled:hover:border-gray-200 disabled:hover:shadow-sm"
               >
-                <option value="todos">Todos los doctores</option>
+                <option value="todos" className="font-semibold py-3">
+                  Todos los doctores
+                </option>
                 {doctores.map((doc) => (
-                    <option key={doc.intDoctor} value={doc.intDoctor.toString()}>
+                    <option 
+                      key={doc.intDoctor} 
+                      value={doc.intDoctor.toString()}
+                      className="py-3"
+                    >
                         {doc.strNombre} {doc.strApellidos}
                     </option>   
                 ))}
@@ -378,60 +408,90 @@ export default function AgendaPage() {
 
       {/* Estadísticas del día */}
       <div className="grid grid-cols-6 gap-3 mb-6">
-        <div className="bg-white p-3 rounded-lg border-2 border-gray-200 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("todos")}
+          className={`bg-white p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "todos" ? "border-gray-500 ring-2 ring-gray-400" : "border-gray-200"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Total</p>
+              <p className="text-xs text-gray-600 font-semibold">Total</p>
               <p className="text-2xl font-bold">{estadisticas.total}</p>
             </div>
             <Activity className="w-6 h-6 text-gray-500" />
           </div>
         </div>
         
-        <div className="bg-yellow-50 p-3 rounded-lg border-2 border-yellow-300 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("PENDIENTE")}
+          className={`bg-yellow-50 p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "PENDIENTE" ? "border-yellow-500 ring-2 ring-yellow-400" : "border-yellow-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-yellow-700">Pendientes</p>
+              <p className="text-xs text-yellow-700 font-semibold">Pendientes</p>
               <p className="text-2xl font-bold text-yellow-700">{estadisticas.pendientes}</p>
             </div>
             <Circle className="w-6 h-6 text-yellow-600" />
           </div>
         </div>
 
-        <div className="bg-orange-50 p-3 rounded-lg border-2 border-orange-300 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("EN ESPERA")}
+          className={`bg-orange-50 p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "EN ESPERA" ? "border-orange-500 ring-2 ring-orange-400" : "border-orange-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-orange-700">En Espera</p>
+              <p className="text-xs text-orange-700 font-semibold">En Espera</p>
               <p className="text-2xl font-bold text-orange-700">{estadisticas.enEspera}</p>
             </div>
             <UserCheck className="w-6 h-6 text-orange-600" />
           </div>
         </div>
 
-        <div className="bg-purple-50 p-3 rounded-lg border-2 border-purple-300 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("EN CONSULTA")}
+          className={`bg-purple-50 p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "EN CONSULTA" ? "border-purple-500 ring-2 ring-purple-400" : "border-purple-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-purple-700">En Consulta</p>
+              <p className="text-xs text-purple-700 font-semibold">En Consulta</p>
               <p className="text-2xl font-bold text-purple-700">{estadisticas.enConsulta}</p>
             </div>
             <Stethoscope className="w-6 h-6 text-purple-600" />
           </div>
         </div>
 
-        <div className="bg-green-50 p-3 rounded-lg border-2 border-green-300 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("FINALIZADA")}
+          className={`bg-green-50 p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "FINALIZADA" ? "border-green-500 ring-2 ring-green-400" : "border-green-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-green-700">Finalizadas</p>
+              <p className="text-xs text-green-700 font-semibold">Finalizadas</p>
               <p className="text-2xl font-bold text-green-700">{estadisticas.finalizadas}</p>
             </div>
             <CheckCircle2 className="w-6 h-6 text-green-600" />
           </div>
         </div>
 
-        <div className="bg-red-50 p-3 rounded-lg border-2 border-red-300 shadow-sm">
+        <div 
+          onClick={() => setFiltroEstado("CANCELADA")}
+          className={`bg-red-50 p-3 rounded-xl border-2 shadow-sm cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+            filtroEstado === "CANCELADA" ? "border-red-500 ring-2 ring-red-400" : "border-red-300"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-red-700">Canceladas</p>
+              <p className="text-xs text-red-700 font-semibold">Canceladas</p>
               <p className="text-2xl font-bold text-red-700">{estadisticas.canceladas}</p>
             </div>
             <XCircle className="w-6 h-6 text-red-600" />
@@ -463,22 +523,6 @@ export default function AgendaPage() {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="mb-4 flex items-center gap-2 flex-wrap">
-        <Filter className="w-4 h-4 text-gray-600" />
-        <span className="text-sm font-medium text-gray-600">Filtrar:</span>
-        {["todos", "pendiente", "en espera", "en consulta", "finalizada", "cancelada"].map((estado) => (
-          <Button
-            key={estado}
-            variant={filtroEstado === estado ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFiltroEstado(estado)}
-          >
-            {estado.charAt(0).toUpperCase() + estado.slice(1)}
-          </Button>
-        ))}
-      </div>
-
       {/* Timeline de citas */}
       <div className="space-y-4">
         {cargando ? (
@@ -487,7 +531,7 @@ export default function AgendaPage() {
           </div>
         ) : citasDia.length > 0 ? (
           citasDia.map((cita) => {
-            const estadoColor = getEstadoColor(cita.strEstadoCita);
+            const estadoColor = getEstadoColor(cita.strEstatuscita);
             const IconoEstado = estadoColor.icon;
             const esPasada = cita.intHora < horaActual;
 
@@ -515,7 +559,7 @@ export default function AgendaPage() {
                         {cita.strNombrePaciente}
                       </h3>
                       <span className={`px-4 py-1 rounded-full text-sm font-semibold ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
-                        {cita.strEstadoCita}
+                        {cita.strEstatuscita}
                       </span>
                     </div>
 
@@ -555,7 +599,7 @@ export default function AgendaPage() {
 
                     {/* Botones de acción según el estado */}
                     <div className="mt-4 flex gap-2">
-                      {(cita.strEstadoCita  === "pendiente" || cita.strEstadoCita  === "confirmada") && (
+                      {(cita. strEstatuscita  === "PENDIENTE" || cita. strEstatuscita  === "CONFIRMADA") && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -567,7 +611,7 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {cita.strEstadoCita  === "en espera" && (
+                      {cita. strEstatuscita  === "EN ESPERA" && (
                         <Button
                           size="sm"
                           onClick={() => iniciarConsulta(cita)}
@@ -578,7 +622,7 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {cita.strEstadoCita  === "en consulta" && (
+                      {cita. strEstatuscita  === "EN CONSULTA" && (
                         <Button
                           size="sm"
                           onClick={() => {
@@ -599,9 +643,9 @@ export default function AgendaPage() {
                         </Button>
                       )}
 
-                      {(cita.strEstadoCita  === "pendiente" || 
-                        cita.strEstadoCita  === "confirmada" || 
-                        cita.strEstadoCita  === "en espera") && (
+                      {(cita. strEstatuscita  === "PENDIENTE" || 
+                        cita. strEstatuscita  === "CONFIRMADA" || 
+                        cita. strEstatuscita  === "EN ESPERA") && (
                         <Button
                           variant="outline"
                           size="sm"

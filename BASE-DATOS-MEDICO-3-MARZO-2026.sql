@@ -43,7 +43,7 @@ CREATE TABLE `tbcitas` (
   `intPaciente` int DEFAULT NULL,
   `strEstatusCita` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`intCita`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `tbcitas` (
 
 LOCK TABLES `tbcitas` WRITE;
 /*!40000 ALTER TABLE `tbcitas` DISABLE KEYS */;
-INSERT INTO `tbcitas` VALUES (1,'Josue Flores',26,'Masculino','josuecumtual2024@gmail.com','5584893998',1,1,'2025-05-23','15:00','pagado',500.00,'DP-00001','Prueba','2025-05-23 12:24:30','2026-03-02 15:49:02','Efectivo',1,'CONFIRMADA');
+INSERT INTO `tbcitas` VALUES (1,'Josue Flores',26,'Masculino','josuecumtual2024@gmail.com','5584893998',1,1,'2025-05-23','15:00','pagado',500.00,'DP-00001','Prueba','2025-05-23 12:24:30','2026-03-02 15:49:02','Efectivo',1,'CONFIRMADA'),(2,'Sarai Flores Galindo',24,'Femenino','sara@gmail.com','55848939898',1,1,'2026-03-03','17:32','pagado',500.00,'CV-00002','Congestion nasal','2026-03-03 10:51:11','2026-03-03 17:47:34','PENDIENTE',2,'FINALIZADA');
 /*!40000 ALTER TABLE `tbcitas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -284,7 +284,7 @@ CREATE TABLE `tbpacientes` (
   PRIMARY KEY (`intPaciente`),
   UNIQUE KEY `strCurp` (`strCurp`),
   UNIQUE KEY `strEmail` (`strEmail`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -293,7 +293,7 @@ CREATE TABLE `tbpacientes` (
 
 LOCK TABLES `tbpacientes` WRITE;
 /*!40000 ALTER TABLE `tbpacientes` DISABLE KEYS */;
-INSERT INTO `tbpacientes` VALUES (1,'Josue','Flores','Galindo','MASCULINO','1999-01-13',NULL,'5584893998',NULL,'josue@gmail.com','San Eduardo','Guadalupe','Nuevo Leon','67125',NULL,NULL,NULL,NULL,'ACTIVO','2026-02-25 16:45:07','2026-02-25 16:45:49',NULL,0);
+INSERT INTO `tbpacientes` VALUES (1,'Josue','Flores','Galindo','MASCULINO','1999-01-13',NULL,'5584893998',NULL,'josue@gmail.com','San Eduardo','Guadalupe','Nuevo Leon','67125',NULL,NULL,NULL,NULL,'ACTIVO','2026-02-25 16:45:07','2026-02-25 16:45:49',NULL,0),(2,'Sarai Flores Galindo',NULL,NULL,'FEMENINO','2002-03-03',NULL,'55848939898',NULL,'sara@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'ACTIVO','2026-03-03 10:51:11','2026-03-03 10:51:11',NULL,0);
 /*!40000 ALTER TABLE `tbpacientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -364,4 +364,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-02 17:30:00
+-- Dump completed on 2026-03-03 17:48:50
