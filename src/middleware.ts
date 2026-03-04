@@ -20,6 +20,8 @@ const accessControl: Record<string, string[]> = {
   '/contabilidad': ['SuperAdmin'],
   '/contabilidad/pagos': ['SuperAdmin'],
   '/contabilidad/resumen': ['SuperAdmin'],
+  '/agenda': ['Doctor','SuperAdmin','Recepcion'],
+  '/historial-medico': ['SuperAdmin', 'Doctor', 'Recepcion'],
 };
 
 
@@ -105,5 +107,7 @@ export const config = {
     '/contabilidad/:path*',
     '/contabilidad/pagos/:path*',
     '/contabilidad/resumen/:path*',
+    '/agenda/:path*',
+    '/historial-medico/:path*'
   ]
 };

@@ -176,7 +176,7 @@ const handleTabChange = (nextTab: string) => {
           title: "Error de validación",
           text: "Por favor, completa todos los campos obligatorios.",
         });                                                 
-        return;
+        return false;
       }
       const response = await fetch("/api/Doctor/guardar-doctor", {
         method: "POST",
@@ -204,6 +204,8 @@ const handleTabChange = (nextTab: string) => {
         ...prev,
         dPersonales: true,
       }));
+
+     
     } catch (error) {
       console.error("Error al guardar datos personales", error);
     }
@@ -261,7 +263,7 @@ const handleTabChange = (nextTab: string) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...form2, intDoctor }), // Aquí envías el ID del doctor
+      body: JSON.stringify({ ...form2, intDoctor: intDoctor }), // Aquí envías el ID del doctor
     });
     const data = await response.json();
     if (data.success) {

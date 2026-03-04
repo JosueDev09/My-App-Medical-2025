@@ -15,7 +15,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (rows.length === 0) {
       return new NextResponse('Cita no encontrada', { status: 404 });
     }
-
+    console.log('Cita obtenida:', rows[0]);
     return NextResponse.json(rows[0], { status: 200 });
   } catch (error) {
     console.error('Error al obtener cita por folio:', error);

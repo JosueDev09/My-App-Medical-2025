@@ -100,13 +100,13 @@ export default function CitasPage() {
             <TableHead className="text-left font-semibold border-r border-gray-200">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-muted-foreground" />
-                 Fecha
+                 Fecha de cita
             </div>
             </TableHead>
             <TableHead className="text-left font-semibold border-r border-gray-200">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
-                 Hora
+                 Hora de cita
             </div>
             </TableHead>
             <TableHead className="text-left font-semibold border-r border-gray-200">
@@ -125,6 +125,12 @@ export default function CitasPage() {
             <div className="flex items-center gap-2">
               <Eye  className="w-4 h-4 text-muted-foreground" />
                  Estatus de pago
+            </div>
+            </TableHead>
+            <TableHead className="text-left font-semibold border-r border-gray-200">
+            <div className="flex items-center gap-2">
+              <Eye  className="w-4 h-4 text-muted-foreground" />
+                 Estatus de cita
             </div>
             </TableHead>
               <TableHead className="text-left font-semibold">Acciones</TableHead>
@@ -163,6 +169,23 @@ export default function CitasPage() {
                         }`}
                       >
                         {cita.strEstatusPago}
+                      </span>
+                    </TableCell>
+                     <TableCell className="border-r border-gray-200">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full uppercase ${
+                          cita.strEstatusCita === "CONFIRMADA"
+                            ? "bg-blue-100 text-blue-700"
+                            : cita.strEstatusCita === "PENDIENTE"
+                            ? "bg-red-100 text-yellow-700"
+                            : cita.strEstatusCita === "FINALIZADA"
+                            ? "bg-green-100 text-green-700"
+                            :  cita.strEstatusCita === "CANCELADA"
+                            ? "bg-red-100 text-red-700"
+                            : ""
+                        }`}
+                      >
+                        {cita.strEstatusCita}
                       </span>
                     </TableCell>
                     <TableCell>

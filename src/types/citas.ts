@@ -15,4 +15,5 @@ export interface Cita {
     strFolio:'' ,
     strMotivo:'' ,
     strEstatusPago:string
+    strEstatusCita:string
   }

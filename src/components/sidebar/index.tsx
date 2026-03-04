@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import NavLink from './nav-link';
 import { 
   LayoutDashboard, 
@@ -13,13 +13,19 @@ import {
   ClipboardList, 
   Plus,
   ChevronDown,
-  X
+  X,
+  Notebook,
+  CalendarPlus,
+  LogOut
 } from "lucide-react";
 import { useSession } from 'next-auth/react';
+import Swal from 'sweetalert2';
 
 const routes = [
   { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
-  { name: 'Citas', path: '/citas', icon: <Calendar size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
+  { name: 'Citas', path: '/citas', icon: <CalendarPlus size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
+  { name: 'Agenda', path: '/agenda', icon: <Notebook size={20} />, roles: ['doctor','SuperAdmin'] },
+  { name: 'Historial Médico', path: '/historial-medico', icon: <ClipboardList size={20} />, roles: ['SuperAdmin', 'Doctor', 'Recepcion'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['SuperAdmin', 'doctor'] },
   {
     name: 'Doctores',
@@ -31,8 +37,8 @@ const routes = [
     ]
   },
   { name: 'Especialidades', path: '/especialidades', icon: <Activity size={20} />, roles: ['SuperAdmin'] },
-  { name: 'Agenda', path: '/agenda', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
-  { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
+
+  // { name: 'Calendario', path: '/calendario-doctor', icon: <Calendar size={20} />, roles: ['doctor','SuperAdmin'] },
   {
     name: 'Contabilidad',
     icon: <Wallet size={20} />,
@@ -54,10 +60,12 @@ export default function Sidebar({
   sidebarRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [openMenus, setOpenMenus] = useState<string[]>([]);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     if (session?.user?.rol) {
@@ -103,6 +111,43 @@ export default function Sidebar({
         ? prev.filter(name => name !== menuName)
         : [...prev, menuName]
     );
+  };
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar sesión?',
+      text: '¿Estás seguro de que deseas cerrar sesión?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Llamar al endpoint de logout para eliminar las cookies del servidor
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          // Redirigir al login
+          window.location.href = '/login';
+        } else {
+          throw new Error('Error al cerrar sesión');
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un error al cerrar sesión'
+        });
+      }
+    }
   };
 
   const filteredRoutes = routes.filter(route =>
@@ -217,21 +262,40 @@ export default function Sidebar({
         </nav>
 
         {/* Footer - Info de usuario */}
-        <div className="p-4 border-t border-slate-800">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/50">
+        <div className="p-4 border-t border-slate-800 relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
+          >
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
               {userName ? userName[0].toUpperCase() : 'U'}
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-white truncate">
-               
-               {userName || 'Usuario'}
+                {userName || 'Usuario'}
               </p>
               <p className="text-xs text-slate-400 truncate capitalize">
                 {userRole || 'Cargando...'}
               </p>
             </div>
-          </div>
+            <ChevronDown 
+              size={18} 
+              className={`text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {/* Menú desplegable */}
+          {showUserMenu && (
+            <div className="absolute bottom-full left-4 right-4 mb-2 bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-sm font-medium"
+              >
+                <LogOut size={18} />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

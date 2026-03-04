@@ -75,6 +75,7 @@ export default function FormularioDoctor() {
        exito = true; // Continuar al siguiente paso incluso si el doctor ya existe, para permitir editar datos profesionales y horarios
     } else if (pasoActual === 1) {
       // Paso 1: Datos Profesionales
+      console.log("intDoctor antes de profesionales:", intDoctor);
       if (!intDoctor) {
         Swal.fire({
           icon: "error",
