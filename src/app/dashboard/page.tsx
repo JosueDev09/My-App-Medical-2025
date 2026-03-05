@@ -24,6 +24,8 @@ const Dashboard: React.FC = () => {
   const [numPacientes, setNumPacientes] = useState<number>(0);
   const [numConsultasMes, setNumConsultasMes] = useState<number>(0);
   const [calificacion, setCalificacion] = useState<number>(0);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   
   useEffect(() => {
     console.log("Sesión actual:", session);
@@ -51,33 +53,91 @@ const Dashboard: React.FC = () => {
     }
   }, [session]);
 
+  const fetchDashboardData = async () => {
+    try {
+      // Citas de hoy
+      const resCitasHoy = await fetch("/api/dashboard?tipo=citas-hoy");
+      if (resCitasHoy.ok) {
+        const data = await resCitasHoy.json();
+        setNumCitasHoy(data.count);
+      }
+
+      // Pacientes totales
+      const resPacientes = await fetch("/api/dashboard?tipo=pacientes-total");
+      if (resPacientes.ok) {
+        const data = await resPacientes.json();
+        setNumPacientes(data.count);
+      }
+
+      // Consultas del mes
+      const resConsultas = await fetch("/api/dashboard?tipo=consultas-mes");
+      if (resConsultas.ok) {
+        const data = await resConsultas.json();
+        setNumConsultasMes(data.count);
+      }
+
+      // Calificación
+      const resCalificacion = await fetch("/api/dashboard?tipo=calificacion");
+      if (resCalificacion.ok) {
+        const data = await resCalificacion.json();
+        setCalificacion(data.calificacion);
+      }
+
+      // Citas próximas de hoy
+      const resCitasProximas = await fetch("/api/dashboard?tipo=citas-proximas");
+      if (resCitasProximas.ok) {
+        const data = await resCitasProximas.json();
+        const formattedData = data.map((cita: any) => ({
+          id: cita.intCita,
+          patient: cita.paciente,
+          time: cita.intHora,
+          type: cita.strMotivo,
+          status: cita.strEstatuscita === 'CONFIRMADA' ? 'confirmed' : 'pending'
+        }));
+        setUpcomingAppointments(formattedData);
+      }
+
+      // Notificaciones en tiempo real
+      const resNotificaciones = await fetch("/api/dashboard?tipo=notificaciones");
+      if (resNotificaciones.ok) {
+        const data = await resNotificaciones.json();
+        setNotifications(data);
+      }
+    } catch (error) {
+      console.error("Error al obtener datos del dashboard:", error);
+    }
+  };
+
   useEffect(() => {
-    // Simular la obtención de datos para el dashboard
-    setNumCitasHoy(12);
-    setNumPacientes(120);
-    setNumConsultasMes(45);
-    setCalificacion(4.8);
+    fetchDashboardData();
+    
+    // Actualizar datos cada 30 segundos para efecto en tiempo real
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
   // Datos de ejemplo - Estos vendrían de tu API
   const stats = [
     { 
       label: "Citas Hoy", 
       value: numCitasHoy.toString(), 
-      change: "+12%", 
+      //change: "+12%", 
       icon: <Calendar className="text-blue-500" size={24} />,
       bgColor: "bg-blue-50"
     },
     { 
       label: "Pacientes Totales", 
       value: numPacientes.toString(), 
-      change: "+8%", 
+      //change: "+8%", 
       icon: <Users className="text-green-500" size={24} />,
       bgColor: "bg-green-50"
     },
     { 
       label: "Consultas Mes", 
       value: numConsultasMes.toString(), 
-      change: "+23%", 
+      //change: "+23%", 
       icon: <Activity className="text-purple-500" size={24} />,
       bgColor: "bg-purple-50"
     },
@@ -88,18 +148,6 @@ const Dashboard: React.FC = () => {
       icon: <Star className="text-amber-500" size={24} />,
       bgColor: "bg-amber-50"
     },
-  ];
-
-  const upcomingAppointments = [
-    { id: 1, patient: "María González", time: "10:00 AM", type: "Consulta General", status: "confirmed" },
-    { id: 2, patient: "Carlos Ruiz", time: "11:30 AM", type: "Seguimiento", status: "pending" },
-    { id: 3, patient: "Ana Martínez", time: "02:00 PM", type: "Primera Consulta", status: "confirmed" },
-  ];
-
-  const notifications = [
-    { id: 1, message: "Nueva cita agendada para mañana", time: "Hace 5 min", type: "info" },
-    { id: 2, message: "Recordatorio: Actualizar horarios", time: "Hace 1 hora", type: "warning" },
-    { id: 3, message: "Paciente canceló cita del viernes", time: "Hace 2 horas", type: "alert" },
   ];
 
   return (
@@ -173,7 +221,7 @@ const Dashboard: React.FC = () => {
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                          {appointment.patient.split(' ').map(n => n[0]).join('')}
+                          {appointment.patient.split(' ').map((n: string) => n[0]).join('')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-slate-900 truncate">{appointment.patient}</p>

@@ -182,7 +182,6 @@ export default function AgendaPage() {
   };
 
   useEffect(() => {
-    
     if (userRole === "SuperAdmin" || userRole === "Recepcion") {
       fetchCitas();
     }

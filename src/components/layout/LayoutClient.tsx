@@ -50,7 +50,7 @@ export default function LayoutClient({ children }: LayoutClientProps) {
       <div className={`transition-all duration-300 ${!hideLayout ? 'md:ml-72' : ''}`}>
         {/* Topbar + botón hamburguesa */}
         {!hideLayout && (
-          <div className="sticky top-0 z-40 bg-white flex items-center justify-between px-4 py-2 border-b">
+          <div className="md:hidden sticky top-0 z-40 bg-white flex items-center justify-between px-4 py-2 border-b">
             {/* Botón hamburger en móviles */}
             <button
               className="md:hidden p-2 rounded bg-gray-100 hover:bg-gray-200 print:hidden"
