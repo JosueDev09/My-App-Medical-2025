@@ -12,6 +12,11 @@ export async function GET(request: Request) {
     const today = new Date().toISOString().split('T')[0];
 
     if (tipo === "citas-hoy") {
+
+      const session = await getAuthenticatedUser();
+      const email = session?.email;
+
+    
       let query = `
         SELECT COUNT(*) as count
         FROM tbcitas
@@ -20,7 +25,7 @@ export async function GET(request: Request) {
       const params: any[] = [today];
 
       // Si es doctor, filtrar solo sus citas
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         query += ` AND intDoctor = ?`;
         params.push(user.intDoctor);
       }
@@ -38,7 +43,7 @@ export async function GET(request: Request) {
       const params: any[] = [];
 
       // Si es doctor, contar solo sus pacientes
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         query += ` AND intDoctor = ?`;
         params.push(user.intDoctor);
       }
@@ -59,7 +64,7 @@ export async function GET(request: Request) {
       const params: any[] = [firstDayOfMonth];
 
       // Si es doctor, filtrar solo sus consultas
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         query += ` AND intDoctor = ?`;
         params.push(user.intDoctor);
       }
@@ -90,7 +95,7 @@ export async function GET(request: Request) {
       const params: any[] = [today];
 
       // Si es doctor, filtrar solo sus citas
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         query += ` AND c.intDoctor = ?`;
         params.push(user.intDoctor);
       }
@@ -113,7 +118,7 @@ export async function GET(request: Request) {
           AND DATE(datFecha) >= CURDATE()
       `;
       
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         queryCitasPendientes += ` AND intDoctor = ?`;
         params.push(user.intDoctor);
       }
@@ -139,7 +144,7 @@ export async function GET(request: Request) {
       `;
       const params2: any[] = [];
       
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         queryCitasProximas += ` AND intDoctor = ?`;
         params2.push(user.intDoctor);
       }
@@ -163,7 +168,7 @@ export async function GET(request: Request) {
       `;
       const params3: any[] = [];
       
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         queryCitasCanceladas += ` AND intDoctor = ?`;
         params3.push(user.intDoctor);
       }

@@ -9,6 +9,7 @@ export interface Cita {
     intDoctor: '0' ,
     strNombreEspecialidad: '' ,
     strNombre: '' ,
+    strApellidos: '' ,
     datFecha:'' ,
     intHora:'' ,
    // dblTotal:'',

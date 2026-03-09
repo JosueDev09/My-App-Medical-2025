@@ -1,6 +1,7 @@
 export interface Medico {
     intDoctor: string | number;
     strNombre: string;
+    strApellidos: string;
     strTelefono: string;
     strEmail: string;
     strDireccion: string;

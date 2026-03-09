@@ -42,7 +42,7 @@ export async function getAuthenticatedUser(): Promise<AuthUser> {
 
   // Obtener información adicional del usuario desde la base de datos
   const [userRows]: any = await db.query(
-    'SELECT r.strRol FROM tbusuarios u INNER JOIN tbroles r ON u.intRol = r.intRol WHERE u.strCorreo = ?',
+    'SELECT r.strRol, d.intDoctor FROM tbusuarios u INNER JOIN tbroles r ON u.intRol = r.intRol INNER JOIN tbDoctores d ON u.id = d.intUsuario WHERE u.strCorreo = ?',
     [email]
   );
 
@@ -52,14 +52,14 @@ export async function getAuthenticatedUser(): Promise<AuthUser> {
 
   const dbUser = userRows[0];
 
-  console.log("Usuario autenticado:", email, "Rol:", dbUser.strRol);
+  //console.log("Usuario autenticado:", email, "Rol:", dbUser.strRol);
   return {
     id: userData.id,
     email: userData.email,
     rol: (dbUser.strRol || userData.rol).toLowerCase(),
     username: userData.username,
     authType: userData.authType,
-    intDoctor: userData.intDoctor
+    intDoctor: dbUser.intDoctor
   };
 }
 

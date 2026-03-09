@@ -87,14 +87,14 @@ return (
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 ">
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
+          <TableHead className="text-right font-semibold border-r border-gray-200 ">
+          <div className="flex items-center gap-2 ">
             <User className="w-4 h-4 text-muted-foreground" />
                Doctor
           </div>
           </TableHead>
 
-          <TableHead className="text-left font-semibold border-r border-gray-200">
+          <TableHead className="text-center font-semibold border-r border-gray-200">
           <div className="flex items-center gap-2">
             <PhoneCallIcon className="w-4 h-4 text-muted-foreground" />
                Telefono
@@ -135,19 +135,19 @@ return (
                   className="hover:bg-muted/10 transition border-gray-200"
                 >
                   <TableCell className="font-medium border-r border-gray-200">
-                    {medico.strNombre}
+                    {medico.strNombre} {medico.strApellidos}
                   </TableCell>
-                  <TableCell className="border-r border-gray-200">
+                  <TableCell className="border-r border-gray-200 text-center">
                     {medico.strTelefono}
                   </TableCell>
-                  <TableCell className="border-r border-gray-200">
+                  <TableCell className="border-r border-gray-200 text-center">
                     {medico.strEmail}
                   </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {medico.strDireccion}
+                  <TableCell className="border-r border-gray-200 text-center">
+                    {medico.strDireccion || 'N/A'}
                   </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {medico.strNombreEspecialidad}
+                  <TableCell className="border-r border-gray-200 text-center">
+                    {medico.strNombreEspecialidad || 'N/A'}
                   </TableCell>
                   <TableCell className="border-r border-gray-200 text-center">
                     {medico.strEstadoUsuario == 'Activo' || medico.strEstadoUsuario == 'ACTIVO' ? (
@@ -222,7 +222,7 @@ return (
                   <div>
                     <p className="text-sm text-gray-600">Nombre completo</p>
                     <p className="font-semibold">
-                      {medicoSeleccionado.strNombre} {medicoSeleccionado.strApellidoPaterno} {medicoSeleccionado.strApellidoMaterno}
+                      {medicoSeleccionado.strNombre} {medicoSeleccionado.strApellidos}
                     </p>
                   </div>
                   <div>

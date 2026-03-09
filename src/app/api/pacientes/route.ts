@@ -16,8 +16,6 @@ export async function GET(req: NextRequest) {
         SELECT 
           p.intPaciente,
           p.strNombre,
-          p.strApellidoPaterno,
-          p.strApellidoMaterno,
           p.strEmail,
           p.strTelefono,
           p.strGenero,
@@ -163,8 +161,6 @@ export async function GET(req: NextRequest) {
         SELECT 
           intPaciente,
           strNombre,
-          strApellidoPaterno,
-          strApellidoMaterno,
           strEmail,
           strTelefono,
           strGenero,
@@ -172,10 +168,7 @@ export async function GET(req: NextRequest) {
           strDireccion,
           strEstado
         FROM tbpacientes
-        WHERE (strNombre LIKE ? 
-          OR strApellidoPaterno LIKE ? 
-          OR strApellidoMaterno LIKE ?
-          OR CONCAT(strNombre, ' ', strApellidoPaterno, ' ', strApellidoMaterno) LIKE ?)
+        WHERE (strNombre LIKE ?)
           AND isEliminado = 0
           AND strEstatus = 'ACTIVO'
         ORDER BY strNombre ASC

@@ -123,7 +123,7 @@ export default function CitasPage() {
             </TableHead>
             <TableHead className="text-left font-semibold border-r border-gray-200">
             <div className="flex items-center gap-2">
-              <Eye  className="w-4 h-4 text-muted-foreground" />
+              <DollarSign  className="w-4 h-4 text-muted-foreground" />
                  Estatus de pago
             </div>
             </TableHead>
@@ -153,12 +153,12 @@ export default function CitasPage() {
                       {cita.intHora}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
-                      {cita.strNombre}
+                      {cita.strNombre} {cita.strApellidos}
                     </TableCell>
                     <TableCell className="border-r border-gray-200">
                       {cita.strNombreEspecialidad}
                     </TableCell>
-                    <TableCell className="border-r border-gray-200">
+                    <TableCell className="border-r border-gray-200 text-center">
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full uppercase ${
                           cita.strEstatusPago === "pagado"
@@ -171,7 +171,7 @@ export default function CitasPage() {
                         {cita.strEstatusPago}
                       </span>
                     </TableCell>
-                     <TableCell className="border-r border-gray-200">
+                     <TableCell className="border-r border-gray-200 text-center">
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full uppercase ${
                           cita.strEstatusCita === "CONFIRMADA"
