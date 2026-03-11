@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getAuthenticatedUser } from '@/lib/auth-helper';
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,6 +13,9 @@ export async function GET(req: NextRequest) {
 
     // Si se solicita obtener todos los pacientes
     if (tipo === 'todos' || !tipo) {
+      const session = await getAuthenticatedUser();
+      const doctor = session?.intDoctor;
+      //console.log("Usuario en GET de pacientes:", session?.intDoctor, "Rol:", session?.rol);
       let query = `
         SELECT 
           p.intPaciente,
@@ -26,11 +30,14 @@ export async function GET(req: NextRequest) {
           p.strCiudad,
           COUNT(c.intCita) as totalCitas
         FROM tbpacientes p
-        LEFT JOIN tbcitas c ON p.intPaciente = c.intPaciente
+        INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente
       `;
 
       const params: any[] = [];
-
+      if(session.rol === 'doctor') {
+        query += ` WHERE c.intDoctor = ?`;
+        params.push(doctor);
+      }
       // Si hay búsqueda, agregar filtro
       if (search) {
         query += ` WHERE 
@@ -58,8 +65,13 @@ export async function GET(req: NextRequest) {
       const [pacientes] = await db.query(query, params);
 
       // Obtener total de pacientes para paginación
+     
       let countQuery = `SELECT COUNT(*) as total FROM tbpacientes p`;
       const countParams: any[] = [];
+       if(session.rol === 'Doctor') {
+        countQuery += ` WHERE c.intDoctor = ?`;
+        countParams.push(doctor);
+      }
 
       if (search) {
         countQuery += ` WHERE 
@@ -82,6 +94,9 @@ export async function GET(req: NextRequest) {
         offset: offset ? parseInt(offset) : null,
       });
     }
+
+    // Si se solicita obtener todos los pacientes por doctor
+  
 
     // Si se solicita un paciente específico por ID
     if (tipo === 'detalle') {

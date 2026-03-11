@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const idDoctor = searchParams.get("idDoctor");
     const estado = searchParams.get("estado");
 
+    //console.log("Parámetros recibidos - fecha:", fecha, "idDoctor:", idDoctor, "estado:", estado);
     // Obtener usuario autenticado
     let user;
     try {
@@ -26,6 +27,8 @@ export async function GET(req: NextRequest) {
     let query = `
       SELECT 
         c.intCita,
+        c.intPaciente,
+        c.intDoctor,
         c.datFecha,
         c.intHora,
         c.strMotivo,
@@ -34,6 +37,7 @@ export async function GET(req: NextRequest) {
         p.strTelefono as strTelefonoPaciente,
         p.strEmail as strCorreoPaciente,
         p.strGenero,
+        TIMESTAMPDIFF(YEAR, p.datFechaNacimiento, CURDATE()) as intEdad,
         CONCAT(d.strNombre, ' ', d.strApellidos) as strNombreDoctor,
         e.strNombreEspecialidad
       FROM tbcitas c
@@ -46,13 +50,16 @@ export async function GET(req: NextRequest) {
     const params: any[] = [];
     
     // Si es doctor, solo puede ver sus propias citas
+   
     if (user.rol === 'doctor') {
+       
       if (!user.intDoctor) {
         return NextResponse.json(
           { error: "Doctor no asociado al usuario" },
           { status: 400 }
         );
       }
+
       query += ` AND c.intDoctor = ?`;
       params.push(user.intDoctor);
     } 
@@ -87,6 +94,8 @@ export async function GET(req: NextRequest) {
     query += ` ORDER BY c.datFecha DESC, c.intHora`;
 
     const [rows] = await db.query(query, params);
+
+    //console.log("Citas obtenidas:", rows);
 
     //console.log("Citas obtenidas:", [rows]);
 

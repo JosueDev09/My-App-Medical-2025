@@ -36,7 +36,7 @@ interface HistorialConsulta {
   strEstatuscita: string;
   strNotasConsulta: string;
   strDiagnostico: string;
-  strReceta: string;
+  strTratamiento: string;
   strSignosVitales: string;
   strNombrePaciente: string;
   intEdad: number;
@@ -47,6 +47,9 @@ interface HistorialConsulta {
   strNombreEspecialidad: string;
   intPaciente: number;
   intDoctor: number;
+  dblPeso: number;
+  dblTalla: number;
+  dblTemperatura: number;
 }
 
 interface Paciente {
@@ -176,7 +179,7 @@ export default function HistorialMedicoPage() {
     );
   });
 
-  console.log("Historiales obtenidos:", historiales);
+  //console.log("Historiales obtenidos:", historiales);
 
   // Toggle expand/collapse
   const toggleExpanded = (id: number) => {
@@ -389,13 +392,13 @@ export default function HistorialMedicoPage() {
                     )}
 
                     {/* Receta */}
-                    {consulta.strReceta && (
+                    {consulta.strTratamiento && (
                       <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
                         <p className="text-xs font-semibold text-orange-700 mb-1 flex items-center gap-2">
                           <Pill className="w-4 h-4" />
                           Tratamiento / Receta:
                         </p>
-                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{consulta.strReceta}</p>
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{consulta.strTratamiento}</p>
                       </div>
                     )}
                   </div>
@@ -480,14 +483,17 @@ export default function HistorialMedicoPage() {
               </div>
 
               {/* Signos Vitales */}
-              {consultaSeleccionada.strSignosVitales && (
+              {consultaSeleccionada && (
                 <div>
                   <Label className="font-bold flex items-center gap-2">
                     <Activity className="w-4 h-4" />
                     Signos Vitales
                   </Label>
                   <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-gray-800">{consultaSeleccionada.strSignosVitales}</p>
+                    <p className="text-black-800 font-bold">Peso: <span className="text-black-800">{consultaSeleccionada.dblPeso}</span> kg</p>
+                    <p className="text-black-800 font-bold">Talla: <span className="text-black-800">{consultaSeleccionada.dblTalla}</span> cm</p>
+                    <p className="text-black-800 font-bold">Temperatura: <span className="text-black-800">{consultaSeleccionada.dblTemperatura}</span> °C</p>
+                  
                   </div>
                 </div>
               )}
@@ -516,14 +522,14 @@ export default function HistorialMedicoPage() {
               )}
 
               {/* Receta */}
-              {consultaSeleccionada.strReceta && (
+              {consultaSeleccionada.strTratamiento && (
                 <div>
                   <Label className="font-bold flex items-center gap-2">
                     <Pill className="w-4 h-4" />
                     Tratamiento / Receta
                   </Label>
                   <div className="mt-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    <p className="text-gray-800 whitespace-pre-wrap">{consultaSeleccionada.strReceta}</p>
+                    <p className="text-gray-800 whitespace-pre-wrap">{consultaSeleccionada.strTratamiento}</p>
                   </div>
                 </div>
               )}

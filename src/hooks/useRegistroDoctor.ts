@@ -76,7 +76,8 @@ export function useRegistroDoctor() {
     strCiudad: "",
     strEstado: "",
     strSexo: "",
-    strDireccion: "",
+    strDireccion: ""
+  
 
     // Otros campos...
   });
@@ -164,7 +165,7 @@ const handleTabChange = (nextTab: string) => {
       ];
       const nuevosErrores: Errores = {};
       camposObligatorios.forEach((campo) => {
-        if (!form[campo] || form[campo].trim() === "") {
+        if (!form[campo] || form[campo].toString().trim() === "") {
           nuevosErrores[campo] = "Este campo es obligatorio";
         }
       });

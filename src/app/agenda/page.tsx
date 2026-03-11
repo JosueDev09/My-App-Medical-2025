@@ -31,10 +31,13 @@ import {
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@/components/ui/label/label";
 import { Textarea } from "@/components/ui/textarea/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 
 
 interface Cita {
   intCita: number;
+  intPaciente?: number;
+  intDoctor?: number;
   strNombrePaciente: string;
   strTelefonoPaciente: string;
   strCorreoPaciente: string;
@@ -50,10 +53,26 @@ interface Cita {
 
 interface ConsultaData {
   intCita: number;
+  strMotivoConsulta: string;
+  strPadecimientoActual: string;
+  strExploracionFisica: string;
   strNotasConsulta: string;
   strDiagnostico: string;
-  strReceta: string;
-  strSignosVitales: string;
+  strTratamiento: string;
+  strIndicaciones: string;
+  strPronostico: string;
+}
+
+interface SignosVitalesData {
+  dblPeso: string;
+  dblTalla: string;
+  dblIMC: string;
+  strPresionArterial: string;
+  intFrecuenciaCardiaca: string;
+  intFrecuenciaRespiratoria: string;
+  dblTemperatura: string;
+  dblGlucosa: string;
+  dblSaturacionOxigeno: string;
 }
 
 interface Especialidad {
@@ -77,11 +96,27 @@ export default function AgendaPage() {
   const [citaActual, setCitaActual] = useState<Cita | null>(null);
   const [consultaData, setConsultaData] = useState<ConsultaData>({
     intCita: 0,
+    strMotivoConsulta: "",
+    strPadecimientoActual: "",
+    strExploracionFisica: "",
     strNotasConsulta: "",
     strDiagnostico: "",
-    strReceta: "",
-    strSignosVitales: ""
+    strTratamiento: "",
+    strIndicaciones: "",
+    strPronostico: ""
   });
+  const [signosVitalesData, setSignosVitalesData] = useState<SignosVitalesData>({
+    dblPeso: "",
+    dblTalla: "",
+    dblIMC: "",
+    strPresionArterial: "",
+    intFrecuenciaCardiaca: "",
+    intFrecuenciaRespiratoria: "",
+    dblTemperatura: "",
+    dblGlucosa: "",
+    dblSaturacionOxigeno: ""
+  });
+  const [tabActual, setTabActual] = useState("consulta");
 
   // Estados para filtros de admin/recepción
   const [rol, setRol] = useState<string>("");
@@ -181,9 +216,38 @@ export default function AgendaPage() {
     }
   };
 
+   // Cargar citas
+  const fetchCitasDoctor = async () => {
+    setCargando(true);
+    try {
+      let url = "/api/agenda";
+      
+
+      const response = await fetch(url);
+      
+      //console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error del servidor:", errorData);
+        throw new Error("Error al cargar citas");
+      }
+      
+      const data = await response.json();
+      setCitas(data || []);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
   useEffect(() => {
+    console.log("Rol del usuario en useEffect para cargar citas:", userRole);
     if (userRole === "SuperAdmin" || userRole === "Recepcion") {
       fetchCitas();
+    } else if (userRole === "Doctor") {
+      fetchCitasDoctor();
     }
     //console.log("Rol del usuario en useEffect:", userRole);
   }, [userRole, doctorSeleccionado]);
@@ -236,23 +300,75 @@ export default function AgendaPage() {
     setCitaActual(cita);
     setConsultaData({
       intCita: cita.intCita,
+      strMotivoConsulta: cita.strMotivo || "",
+      strPadecimientoActual: "",
+      strExploracionFisica: "",
       strNotasConsulta: "",
       strDiagnostico: "",
-      strReceta: "",
-      strSignosVitales: ""
+      strTratamiento: "",
+      strIndicaciones: "",
+      strPronostico: ""
     });
+    setSignosVitalesData({
+      dblPeso: "",
+      dblTalla: "",
+      dblIMC: "",
+      strPresionArterial: "",
+      intFrecuenciaCardiaca: "",
+      intFrecuenciaRespiratoria: "",
+      dblTemperatura: "",
+      dblGlucosa: "",
+      dblSaturacionOxigeno: ""
+    });
+    setTabActual("consulta");
     cambiarEstado(cita.intCita, "EN CONSULTA");
     setModalConsulta(true);
+  };
+
+  // Calcular IMC automáticamente
+  const calcularIMC = (peso: string, talla: string) => {
+    const pesoNum = parseFloat(peso);
+    const tallaNum = parseFloat(talla);
+    if (pesoNum > 0 && tallaNum > 0) {
+      const imc = pesoNum / (tallaNum * tallaNum);
+      return imc.toFixed(2);
+    }
+    return "";
   };
 
   // Finalizar consulta
   const finalizarConsulta = async () => {
     try {
-      // Aquí puedes guardar los datos de la consulta en una tabla de expedientes médicos
-      // Por ahora solo cambiamos el estado
-      await cambiarEstado(consultaData.intCita, "FINALIZADA");
-      setModalConsulta(false);
-      setCitaActual(null);
+      if (!citaActual) return;
+
+      // Guardar la consulta y signos vitales
+      const response = await fetch("/api/consultas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intPaciente: citaActual.intPaciente,
+          intDoctor: citaActual.intDoctor,
+          intCita: citaActual.intCita,
+          consulta: consultaData,
+          signosVitales: signosVitalesData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al guardar la consulta");
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Cambiar estado de la cita
+        await cambiarEstado(consultaData.intCita, "FINALIZADA");
+        setModalConsulta(false);
+        setCitaActual(null);
+        alert("Consulta finalizada y guardada exitosamente");
+      } else {
+        alert(data.message || "Error al guardar la consulta");
+      }
     } catch (error) {
       console.error("Error:", error);
       alert("Error al finalizar la consulta");
@@ -624,17 +740,7 @@ export default function AgendaPage() {
                       {cita. strEstatuscita  === "EN CONSULTA" && (
                         <Button
                           size="sm"
-                          onClick={() => {
-                            setCitaActual(cita);
-                            setConsultaData({
-                              intCita: cita.intCita,
-                              strNotasConsulta: "",
-                              strDiagnostico: "",
-                              strReceta: "",
-                              strSignosVitales: ""
-                            });
-                            setModalConsulta(true);
-                          }}
+                        onClick={() => iniciarConsulta(cita)}
                           className="bg-purple-600 hover:bg-purple-700 text-white"
                         >
                           <Stethoscope className="w-4 h-4 mr-2" />
@@ -672,7 +778,7 @@ export default function AgendaPage() {
 
       {/* Modal de Consulta */}
       <Dialog open={modalConsulta} onOpenChange={setModalConsulta}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
               <Stethoscope className="w-6 h-6 text-purple-600" />
@@ -707,55 +813,236 @@ export default function AgendaPage() {
                 </div>
               </div>
 
-              {/* Signos Vitales */}
-              <div>
-                <Label htmlFor="signos">Signos Vitales</Label>
-                <Input
-                  id="signos"
-                  placeholder="Ej: Presión: 120/80, Temp: 36.5°C, FC: 72, FR: 18"
-                  value={consultaData.strSignosVitales}
-                  onChange={(e) => setConsultaData({...consultaData, strSignosVitales: e.target.value})}
-                />
-              </div>
+              {/* Tabs para Datos de Consulta y Signos Vitales */}
+              <Tabs value={tabActual} onValueChange={setTabActual} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="consulta">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Datos de Consulta
+                  </TabsTrigger>
+                  <TabsTrigger value="signos">
+                    <Activity className="w-4 h-4 mr-2" />
+                    Signos Vitales
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Notas de Consulta */}
-              <div>
-                <Label htmlFor="notas">Notas de la Consulta</Label>
-                <Textarea
-                  id="notas"
-                  rows={4}
-                  placeholder="Describe los síntomas, examen físico, antecedentes relevantes..."
-                  value={consultaData.strNotasConsulta}
-                  onChange={(e) => setConsultaData({...consultaData, strNotasConsulta: e.target.value})}
-                />
-              </div>
+                {/* Tab Datos de Consulta */}
+                <TabsContent value="consulta" className="space-y-4 mt-4">
+                  <div>
+                    <Label htmlFor="motivo">Motivo de Consulta</Label>
+                    <Input
+                      id="motivo"
+                      placeholder="Motivo de la consulta..."
+                      value={consultaData.strMotivoConsulta}
+                      onChange={(e) => setConsultaData({...consultaData, strMotivoConsulta: e.target.value})}
+                    />
+                  </div>
 
-              {/* Diagnóstico */}
-              <div>
-                <Label htmlFor="diagnostico">Diagnóstico</Label>
-                <Textarea
-                  id="diagnostico"
-                  rows={3}
-                  placeholder="Diagnóstico médico..."
-                  value={consultaData.strDiagnostico}
-                  onChange={(e) => setConsultaData({...consultaData, strDiagnostico: e.target.value})}
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="padecimiento">Padecimiento Actual</Label>
+                    <Textarea
+                      id="padecimiento"
+                      rows={3}
+                      placeholder="Describe el padecimiento actual del paciente..."
+                      value={consultaData.strPadecimientoActual}
+                      onChange={(e) => setConsultaData({...consultaData, strPadecimientoActual: e.target.value})}
+                    />
+                  </div>
 
-              {/* Receta */}
-              <div>
-                <Label htmlFor="receta">Tratamiento / Receta</Label>
-                <Textarea
-                  id="receta"
-                  rows={4}
-                  placeholder="Medicamentos, dosis, frecuencia, duración..."
-                  value={consultaData.strReceta}
-                  onChange={(e) => setConsultaData({...consultaData, strReceta: e.target.value})}
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="exploracion">Exploración Física</Label>
+                    <Textarea
+                      id="exploracion"
+                      rows={3}
+                      placeholder="Resultados de la exploración física..."
+                      value={consultaData.strExploracionFisica}
+                      onChange={(e) => setConsultaData({...consultaData, strExploracionFisica: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="notas">Notas de la Consulta</Label>
+                    <Textarea
+                      id="notas"
+                      rows={3}
+                      placeholder="Notas adicionales, observaciones..."
+                      value={consultaData.strNotasConsulta}
+                      onChange={(e) => setConsultaData({...consultaData, strNotasConsulta: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="diagnostico">Diagnóstico</Label>
+                    <Textarea
+                      id="diagnostico"
+                      rows={3}
+                      placeholder="Diagnóstico médico..."
+                      value={consultaData.strDiagnostico}
+                      onChange={(e) => setConsultaData({...consultaData, strDiagnostico: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tratamiento">Tratamiento / Receta</Label>
+                    <Textarea
+                      id="tratamiento"
+                      rows={3}
+                      placeholder="Medicamentos, dosis, frecuencia, duración..."
+                      value={consultaData.strTratamiento}
+                      onChange={(e) => setConsultaData({...consultaData, strTratamiento: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="indicaciones">Indicaciones</Label>
+                    <Textarea
+                      id="indicaciones"
+                      rows={2}
+                      placeholder="Indicaciones para el paciente..."
+                      value={consultaData.strIndicaciones}
+                      onChange={(e) => setConsultaData({...consultaData, strIndicaciones: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="pronostico">Pronóstico</Label>
+                    <Textarea
+                      id="pronostico"
+                      rows={2}
+                      placeholder="Pronóstico del paciente..."
+                      value={consultaData.strPronostico}
+                      onChange={(e) => setConsultaData({...consultaData, strPronostico: e.target.value})}
+                    />
+                  </div>
+                </TabsContent>
+
+                {/* Tab Signos Vitales */}
+                <TabsContent value="signos" className="space-y-4 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="peso">Peso (kg)</Label>
+                      <Input
+                        id="peso"
+                        type="number"
+                        step="0.01"
+                        placeholder="70.5"
+                        value={signosVitalesData.dblPeso}
+                        onChange={(e) => {
+                          const peso = e.target.value;
+                          setSignosVitalesData({
+                            ...signosVitalesData, 
+                            dblPeso: peso,
+                            dblIMC: calcularIMC(peso, signosVitalesData.dblTalla)
+                          });
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="talla">Talla (m)</Label>
+                      <Input
+                        id="talla"
+                        type="number"
+                        step="0.01"
+                        placeholder="1.75"
+                        value={signosVitalesData.dblTalla}
+                        onChange={(e) => {
+                          const talla = e.target.value;
+                          setSignosVitalesData({
+                            ...signosVitalesData, 
+                            dblTalla: talla,
+                            dblIMC: calcularIMC(signosVitalesData.dblPeso, talla)
+                          });
+                        }}
+                      />
+                    </div>
+
+                    {/* <div>
+                      <Label htmlFor="imc">IMC (kg/m²)</Label>
+                      <Input
+                        id="imc"
+                        type="number"
+                        step="0.01"
+                        placeholder="Calculado automáticamente"
+                        value={signosVitalesData.dblIMC}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div> */}
+
+                    {/* <div>
+                      <Label htmlFor="presion">Presión Arterial</Label>
+                      <Input
+                        id="presion"
+                        placeholder="120/80"
+                        value={signosVitalesData.strPresionArterial}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, strPresionArterial: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="fc">Frecuencia Cardíaca (lpm)</Label>
+                      <Input
+                        id="fc"
+                        type="number"
+                        placeholder="72"
+                        value={signosVitalesData.intFrecuenciaCardiaca}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, intFrecuenciaCardiaca: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="fr">Frecuencia Respiratoria (rpm)</Label>
+                      <Input
+                        id="fr"
+                        type="number"
+                        placeholder="18"
+                        value={signosVitalesData.intFrecuenciaRespiratoria}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, intFrecuenciaRespiratoria: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="temperatura">Temperatura (°C)</Label>
+                      <Input
+                        id="temperatura"
+                        type="number"
+                        step="0.1"
+                        placeholder="36.5"
+                        value={signosVitalesData.dblTemperatura}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, dblTemperatura: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="glucosa">Glucosa (mg/dL)</Label>
+                      <Input
+                        id="glucosa"
+                        type="number"
+                        step="0.1"
+                        placeholder="100"
+                        value={signosVitalesData.dblGlucosa}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, dblGlucosa: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="saturacion">Saturación de O₂ (%)</Label>
+                      <Input
+                        id="saturacion"
+                        type="number"
+                        step="0.1"
+                        placeholder="98"
+                        value={signosVitalesData.dblSaturacionOxigeno}
+                        onChange={(e) => setSignosVitalesData({...signosVitalesData, dblSaturacionOxigeno: e.target.value})}
+                      />
+                    </div> */}
+                  </div>
+                </TabsContent>
+              </Tabs>
 
               {/* Botones */}
-              <div className="flex gap-3 justify-end">
+              <div className="flex gap-3 justify-end pt-4 border-t">
                 <Button
                   variant="outline"
                   onClick={() => setModalConsulta(false)}

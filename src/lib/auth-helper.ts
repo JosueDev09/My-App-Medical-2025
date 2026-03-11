@@ -39,10 +39,10 @@ export async function getAuthenticatedUser(): Promise<AuthUser> {
   if (!email) {
     throw new Error('Email no encontrado en el token');
   }
-
+ // console.log(userData)
   // Obtener información adicional del usuario desde la base de datos
   const [userRows]: any = await db.query(
-    'SELECT r.strRol, d.intDoctor FROM tbusuarios u INNER JOIN tbroles r ON u.intRol = r.intRol INNER JOIN tbDoctores d ON u.id = d.intUsuario WHERE u.strCorreo = ?',
+    'SELECT r.strRol, d.intDoctor FROM tbusuarios u INNER JOIN tbroles r ON u.intRol = r.intRol LEFT JOIN tbDoctores d ON u.id = d.intUsuario WHERE u.strCorreo = ?',
     [email]
   );
 

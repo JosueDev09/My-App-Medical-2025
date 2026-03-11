@@ -29,21 +29,37 @@ export async function GET(request: Request) {
         CONCAT(d.strNombre, ' ', d.strApellidos) AS strNombreDoctor,
         e.strNombreEspecialidad,
         c.intPaciente,
-        c.intDoctor
+        c.intDoctor,
+        co.intConsulta,
+        co.strMotivoConsulta,
+        co.strPadecimientoActual,
+        co.strExploracionFisica,
+        co.strDiagnostico,
+        co.strNotasConsulta,
+        co.strTratamiento,
+        co.strIndicaciones,
+        csv.dblPeso,
+        csv.dblTalla,
+        csv.dblTemperatura,
+        csv.dblGlucosa,
+        csv.dblSaturacionOxigeno
+
       FROM tbcitas c
       INNER JOIN tbpacientes p ON c.intPaciente = p.intPaciente
       INNER JOIN tbdoctores d ON c.intDoctor = d.intDoctor
       INNER JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
+      INNER JOIN tbConsultas co ON c.intCita = co.intCita
+      INNER JOIN tbConsultaSignosVitales csv ON co.intConsulta = csv.intConsulta
       WHERE c.strEstatuscita = 'FINALIZADA'
-      
+ 
     `;
 
     const params: any[] = [];
 
     
-
+   // console.log("Usuario autenticado en GET de historial médico:", user.email, "Rol:", user.rol);
     // Filtrar según el rol del usuario
-    if (user.rol === "Doctor" && user.intDoctor) {
+    if (user.rol === "doctor" && user.intDoctor) {
       // Doctor solo ve sus propias consultas
       query += ` AND c.intDoctor = ?`;
       params.push(user.intDoctor);
@@ -66,7 +82,7 @@ export async function GET(request: Request) {
 
     const [historiales]: any = await db.query(query, params);
 
-    //console.log("Historiales obtenidos:", historiales);
+    console.log("Historiales obtenidos:", historiales);
 
     return NextResponse.json(historiales);
   } catch (error: any) {
@@ -98,7 +114,7 @@ export async function POST(request: Request) {
       let query = `
         SELECT 
           p.intPaciente,
-          CONCAT(p.strNombre, ' ', p.strApellidoPaterno, ' ', p.strApellidoMaterno) AS strNombreCompleto
+          CONCAT(p.strNombre) AS strNombreCompleto
         FROM tbpacientes p
         INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente
         WHERE c.strEstatuscita = 'FINALIZADA'
@@ -111,15 +127,18 @@ export async function POST(request: Request) {
         params.push(user.intDoctor);
       }
 
-      query += ` ORDER BY p.strNombre, p.strApellidoPaterno, p.strApellidoMaterno`;
+      query += ` ORDER BY p.strNombre`;
 
       const [pacientes]: any = await db.query(query, params);
       return NextResponse.json(pacientes);
     }
 
     if (tipo === "doctores") {
+
+     
       // Solo admin y recepción pueden obtener lista de doctores
-      if (user.rol !== "SuperAdmin" && user.rol !== "Recepcion") {
+      //console.log("Usuario en POST de historial médico para doctores:", user.email, "Rol:", user.rol);
+      if (user.rol !== "superadmin" && user.rol !== "recepcion") {
         return NextResponse.json(
           { error: "No tiene permisos" },
           { status: 403 }
@@ -127,7 +146,7 @@ export async function POST(request: Request) {
       }
 
       const query = `
-        SELECT DISTINCT
+        SELECT
           d.intDoctor,
           CONCAT(d.strNombre, ' ', d.strApellidos) AS strNombreCompleto
         FROM tbdoctores d
