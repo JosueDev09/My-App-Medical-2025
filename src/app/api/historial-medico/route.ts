@@ -48,8 +48,8 @@ export async function GET(request: Request) {
       INNER JOIN tbpacientes p ON c.intPaciente = p.intPaciente
       INNER JOIN tbdoctores d ON c.intDoctor = d.intDoctor
       INNER JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
-      INNER JOIN tbConsultas co ON c.intCita = co.intCita
-      INNER JOIN tbConsultaSignosVitales csv ON co.intConsulta = csv.intConsulta
+      LEFT JOIN tbConsultas co ON c.intCita = co.intCita
+      LEFT JOIN tbConsultaSignosVitales csv ON co.intConsulta = csv.intConsulta
       WHERE c.strEstatuscita = 'FINALIZADA'
  
     `;
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
     const params: any[] = [];
 
     
-   // console.log("Usuario autenticado en GET de historial médico:", user.email, "Rol:", user.rol);
+    console.log("Usuario autenticado en GET de historial médico:", user.email, "Rol:", user.rol);
     // Filtrar según el rol del usuario
     if (user.rol === "doctor" && user.intDoctor) {
       // Doctor solo ve sus propias consultas
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
       params.push(intPaciente);
     }
 
-    if (intDoctor && (user.rol === "SuperAdmin" || user.rol === "Recepcion")) {
+    if (intDoctor && (user.rol === "superdmin" || user.rol === "recepcion")) {
       query += ` AND c.intDoctor = ?`;
       params.push(intDoctor);
     }
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
 
     const [historiales]: any = await db.query(query, params);
 
-    console.log("Historiales obtenidos:", historiales);
+   // console.log("Historiales obtenidos:", historiales);
 
     return NextResponse.json(historiales);
   } catch (error: any) {
@@ -112,9 +112,9 @@ export async function POST(request: Request) {
     if (tipo === "pacientes") {
       // Obtener lista de pacientes con consultas finalizadas
       let query = `
-        SELECT 
+        SELECT DISTINCT
           p.intPaciente,
-          CONCAT(p.strNombre) AS strNombreCompleto
+         p.strNombre AS strNombreCompleto
         FROM tbpacientes p
         INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente
         WHERE c.strEstatuscita = 'FINALIZADA'
@@ -146,13 +146,13 @@ export async function POST(request: Request) {
       }
 
       const query = `
-        SELECT
+        SELECT DISTINCT
           d.intDoctor,
           CONCAT(d.strNombre, ' ', d.strApellidos) AS strNombreCompleto
         FROM tbdoctores d
         INNER JOIN tbcitas c ON d.intDoctor = c.intDoctor
         WHERE c.strEstatuscita = 'FINALIZADA'
-        ORDER BY d.strNombre, d.strApellidos
+        
       `;
 
       const [doctores]: any = await db.query(query);

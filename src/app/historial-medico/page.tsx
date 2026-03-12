@@ -283,12 +283,12 @@ export default function HistorialMedicoPage() {
             <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
           </div>
         ) : historialesFiltrados.length > 0 ? (
-          historialesFiltrados.map((consulta) => {
+          historialesFiltrados.map((consulta, index) => {
             const isExpanded = expandedIds.includes(consulta.intCita);
             
             return (
               <div
-                key={consulta.intCita}
+                key={`historial-${consulta.intCita}-${index}`}
                 className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 {/* Header de la consulta */}
