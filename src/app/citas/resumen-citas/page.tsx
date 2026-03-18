@@ -26,7 +26,8 @@ interface ResumenCitaProps {
    // dblTotal:'',
    // strFolio:'' ,
     strMotivo:'' ,
-    strEstatusPago:string
+    strEstatusPago:string,
+    dblPrecioConsulta: string,
   };
   onPagoCompletado: () => void;
 }
@@ -45,6 +46,7 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
     strMotivo: string;
     strEstatusPago: string;
     strFolio:string;
+    dblPrecioConsulta: string;
   }>(null);
   const searchParams = useSearchParams();
   const folio = searchParams?.get('folio');
@@ -95,16 +97,16 @@ export default function ResumenCita({ onPagoCompletado }: ResumenCitaProps) {
 
       {!pagoRealizado ? (
         <div className="pt-4">
-          <h3 className="text-md font-semibold mb-2 text-gray-800">Pagar consulta ($500 MXN)</h3>
+          <h3 className="text-md font-semibold mb-2 text-gray-800">Pagar consulta {cita.dblPrecioConsulta }</h3>
           <div className="border rounded-lg p-4 shadow-sm">
          
             <Button className="w-full mb-4 bg-green-500 text-white cursor-pointer  text-[20px] hover:bg-green-300 hover:text-white" variant="outline" onClick={handlePago}>
             <DollarSignIcon className="w-6 h-" /> Efectivo
             </Button>
             {/* Componente de pago PayPal */}
-            <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
+            {/* <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!, currency: 'MXN' }}>
                 <BotonPaypal folio={cita.strFolio} onPagoVerificado={handlePago} />
-            </PayPalScriptProvider>
+            </PayPalScriptProvider> */}
           </div>
         </div>
         ) : (

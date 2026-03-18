@@ -17,4 +17,5 @@ export interface ReciboPagoProps {
     strMotivo:'' ,
     strEstatusPago:string,
     strMetodoPago: string
+    dblPrecioConsulta: string,
   }

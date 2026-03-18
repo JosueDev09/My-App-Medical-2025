@@ -160,13 +160,13 @@ export function FormLogin(){
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-200"></div>
         </div>
-        <div className="relative flex justify-center text-xs">
+        {/* <div className="relative flex justify-center text-xs">
           <span className="px-3 bg-white text-slate-500">O continúa con</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Google Sign In */}
-      <SignIn />
+      {/* <SignIn /> */}
     </form>
   );
 }

@@ -64,7 +64,7 @@ export default function ReciboPago({}: ReciboPagoProps) {
         const data = await res.json();
         setDatosCita(data[0]);
         
-       // console.log('Datos de la cita:', data);
+        console.log('Datos de la cita:', data);
       }
     };
 
@@ -113,7 +113,7 @@ export default function ReciboPago({}: ReciboPagoProps) {
                 {datosCita.strEstatusPago === 'pagado' ? 'Pagado' : 'Pendiente'}
               </span>
             </p>
-            <p><span className="font-semibold">Total pagado:</span> ${Number(datosCita.dblTotal || 0).toFixed(2)} MXN</p>
+            <p><span className="font-semibold">Total pagado:</span> ${Number(datosCita.dblPrecioConsulta || 0).toFixed(2)} MXN</p>
           </div>
 
           <Separator />

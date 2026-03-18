@@ -64,12 +64,12 @@ export default function LoginPage() {
               <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-white">
                 <h1 className="text-2xl font-bold mb-4 text-center">Iniciar sesión</h1>
                 <FormLogin/>
-                <button
+                {/* <button
                   className="mt-4 text-sm text-blue-800 underline cursor-pointer"
                   onClick={() => setIsLogin(false)}
                 >
                   ¿No tienes cuenta? Regístrate
-                </button>
+                </button> */}
               </div>
 
               {/* Formulario de Registro */}

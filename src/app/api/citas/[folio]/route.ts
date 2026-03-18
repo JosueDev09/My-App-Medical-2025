@@ -15,7 +15,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (rows.length === 0) {
       return new NextResponse('Cita no encontrada', { status: 404 });
     }
-    console.log('Cita obtenida:', rows[0]);
+   // console.log('Cita obtenida:', rows[0]);
     return NextResponse.json(rows[0], { status: 200 });
   } catch (error) {
     console.error('Error al obtener cita por folio:', error);
@@ -27,11 +27,11 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     const folio = req.nextUrl.pathname.split('/').pop();
 
-     console.log('Folio recibido para eliminar:', folio);
+     // console.log('Folio recibido para eliminar:', folio);
 
     const [result]: any = await db.query('DELETE FROM tbCitas WHERE strFolio = ?', [folio]);
 
-    console.log('Resultado de la consulta:', result);
+    // console.log('Resultado de la consulta:', result);
     if (result.affectedRows === 0) {
       return new NextResponse('Cita no encontrada o ya eliminada', { status: 404 });
     }

@@ -16,7 +16,7 @@ export async function PUT(request: Request) {
 
     // Actualizar el estatus de pago en la base de datos
     const [result]: any = await db.query(
-      "UPDATE tbcitas SET strEstatusPago = ? WHERE strFolio = ?",
+      "UPDATE tbcitas SET strEstatusPago = ?, strMetodoPago = 'EFECTIVO' WHERE strFolio = ?",
       [strEstatusPago, strFolio]
     );
 

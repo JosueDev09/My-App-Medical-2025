@@ -191,20 +191,23 @@ export default function CitasPage() {
                     <TableCell>
                       <div className="flex gap-2">
                         {cita.strEstatusPago !== "pagado" && (
-                          <a 
+                          <button 
                             onClick={() => handleCambiarEstatusPago(cita.strFolio, cita.strEstatusPago)}
                             title="Marcar como pagado"
                           >
                             <DollarSign className="w-4 h-4 cursor-pointer text-green-500 hover:text-green-700" />
-                          </a>
+                          </button>
                         )}
-                        <Pencil className="w-4 h-4 cursor-pointer text-blue-500 hover:text-blue-700" />
-                         <a onClick={() => handleEliminarCita(cita.strFolio)}> 
-                          <Trash2 className="w-4 h-4 cursor-pointer text-red-500 hover:text-red-700" />
-                         </a>
-                        <a onClick={() => handleVerCita(cita.strFolio)}>
+                        {/* <Pencil className="w-4 h-4 cursor-pointer text-blue-500 hover:text-blue-700" /> */}
+                        { cita.strEstatusCita == "FINALIZADA" && (
+                           <button onClick={() => handleEliminarCita(cita.strFolio)} disabled > 
+                          <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700 " />
+                         </button>
+                        )}
+                        
+                        <button onClick={() => handleVerCita(cita.strFolio)}>
                          <Eye className="w-4 h-4 cursor-pointer text-green-500 hover:text-green-700"  />
-                        </a>   
+                        </button>   
 
                       </div>
                     </TableCell>
