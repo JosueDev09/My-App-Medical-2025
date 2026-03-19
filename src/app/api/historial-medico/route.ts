@@ -110,6 +110,7 @@ export async function POST(request: Request) {
     const { tipo } = body;
 
     if (tipo === "pacientes") {
+     
       // Obtener lista de pacientes con consultas finalizadas
       let query = `
         SELECT DISTINCT
@@ -117,12 +118,14 @@ export async function POST(request: Request) {
          p.strNombre AS strNombreCompleto
         FROM tbpacientes p
         INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente
-        WHERE c.strEstatuscita = 'FINALIZADA'
+        WHERE c.strEstatuscita = 'FINALIZADA' 
+
       `;
+      
       
       const params: any[] = [];
 
-      if (user.rol === "Doctor" && user.intDoctor) {
+      if (user.rol === "doctor" && user.intDoctor) {
         query += ` AND c.intDoctor = ?`;
         params.push(user.intDoctor);
       }

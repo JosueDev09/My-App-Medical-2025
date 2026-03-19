@@ -8,16 +8,33 @@ const pasos = ['Datos del paciente', 'Pago','Recibo de pago'];
 
 export default function BreadcrumbSteps({ pasoActual }: StepProps) {
   return (
-    <div className="flex justify-center items-center mb-3 gap-4">
+    <div className="flex justify-center items-center mb-3 gap-2 sm:gap-4">
       {pasos.map((paso, index) => {
         const isActive = index === pasoActual;
         const isCompleted = index < pasoActual;
 
         return (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className="flex items-center gap-1 sm:gap-2">
+            {/* Versión móvil: solo número sin círculo */}
+            <div className="flex sm:hidden items-center">
+              <span
+                className={cn(
+                  'text-xs font-bold px-1',
+                  isCompleted
+                    ? 'text-green-500'
+                    : isActive
+                    ? 'text-primary'
+                    : 'text-gray-400'
+                )}
+              >
+                {index + 1}
+              </span>
+            </div>
+            
+            {/* Versión desktop: círculo completo */}
             <div
               className={cn(
-                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white',
+                'hidden sm:flex w-8 h-8 rounded-full items-center justify-center text-sm font-bold text-white',
                 isCompleted
                   ? 'bg-green-500'
                   : isActive
@@ -27,9 +44,10 @@ export default function BreadcrumbSteps({ pasoActual }: StepProps) {
             >
               {index + 1}
             </div>
+            
             <span
               className={cn(
-                'text-sm',
+                'text-xs sm:text-sm',
                 isActive
                   ? 'text-primary font-semibold'
                   : isCompleted
@@ -39,7 +57,7 @@ export default function BreadcrumbSteps({ pasoActual }: StepProps) {
             >
               {paso}
             </span>
-            {index < pasos.length - 1 && <div className="w-8 h-px bg-gray-300 mx-2"></div>}
+            {index < pasos.length - 1 && <div className="w-4 sm:w-8 h-px bg-gray-300 mx-1 sm:mx-2"></div>}
           </div>
         );
       })}

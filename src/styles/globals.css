@@ -203,3 +203,53 @@ section {
   background: rgba(148, 163, 184, 0.8);
 }
 
+/* Estilos de impresión para recetas médicas */
+@media print {
+  /* Ocultar elementos innecesarios */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostrar solo el contenido del modal de receta */
+  [role="dialog"], [role="dialog"] * {
+    visibility: visible;
+  }
+  
+  /* Ajustar el modal para impresión */
+  [role="dialog"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background: white;
+  }
+  
+  /* Asegurar que el texto sea negro */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+  
+  /* Forzar saltos de página apropiados */
+  .print\:page-break-after {
+    page-break-after: always;
+  }
+  
+  /* Optimizar el tamaño de fuente para impresión */
+  body {
+    font-size: 12pt;
+  }
+  
+  /* Asegurar que los bordes se impriman correctamente */
+  .print\:border-black {
+    border-color: #000 !important;
+  }
+  
+  /* Mantener la marca de agua visible pero sutil */
+  .opacity-5 {
+    opacity: 0.05 !important;
+  }
+}

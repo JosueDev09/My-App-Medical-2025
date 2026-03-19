@@ -126,8 +126,49 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const intPaciente = searchParams.get("intPaciente");
     const intConsulta = searchParams.get("intConsulta");
+    const intCita = searchParams.get("intCita");
 
-    if (intConsulta) {
+    if (intCita) {
+      // Obtener una consulta por su cita
+      const queryConsulta = `
+        SELECT 
+          c.*,
+          p.strNombre as strNombrePaciente,
+          d.strNombre as strNombreDoctor,
+          d.strApellidos as strApellidosDoctor,
+          e.strNombreEspecialidad,
+          d.strCedulaProfesional
+        FROM tbConsultas c
+        INNER JOIN tbPacientes p ON c.intPaciente = p.intPaciente
+        INNER JOIN tbDoctores d ON c.intDoctor = d.intDoctor
+        LEFT JOIN tbEspecialidades e ON d.intEspecialidad = e.intEspecialidad
+        WHERE c.intCita = ? AND c.isEliminado = 0
+      `;
+
+      const [consultas]: any = await db.query(queryConsulta, [intCita]);
+
+      if (consultas.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Consulta no encontrada" },
+          { status: 404 }
+        );
+      }
+
+      // Obtener signos vitales
+      const querySignos = `
+        SELECT * FROM tbConsultaSignosVitales 
+        WHERE intConsulta = ?
+      `;
+
+      const [signosVitales]: any = await db.query(querySignos, [consultas[0].intConsulta]);
+
+      return NextResponse.json({
+        success: true,
+        consulta: consultas[0],
+        signosVitales: signosVitales[0] || null
+      });
+
+    } else if (intConsulta) {
       // Obtener una consulta específica con sus signos vitales
       const queryConsulta = `
         SELECT 

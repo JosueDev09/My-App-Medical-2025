@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Calendar, 
   Bell, 
@@ -25,6 +26,7 @@ const Dashboard: React.FC = () => {
   const [numConsultasMes, setNumConsultasMes] = useState<number>(0);
   const [calificacion, setCalificacion] = useState<number>(0);
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const router = useRouter();
   const [notifications, setNotifications] = useState<any[]>([]);
   
   useEffect(() => {
@@ -59,6 +61,7 @@ const Dashboard: React.FC = () => {
       const resCitasHoy = await fetch("/api/dashboard?tipo=citas-hoy");
       if (resCitasHoy.ok) {
         const data = await resCitasHoy.json();
+        
         setNumCitasHoy(data.count);
       }
 
@@ -94,6 +97,7 @@ const Dashboard: React.FC = () => {
           type: cita.strMotivo,
           status: cita.strEstatuscita === 'CONFIRMADA' ? 'confirmed' : 'pending'
         }));
+        console.log("Citas próximas formateadas:", formattedData);
         setUpcomingAppointments(formattedData);
       }
 
@@ -158,11 +162,9 @@ const Dashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                Bienvenido, {userName}
+                Bienvenido, {userName?.toUpperCase()}
               </h1>
-              <p className="text-slate-600 mt-1 text-sm sm:text-base capitalize">
-                Dashboard del {userRole || "Cargando..."}
-              </p>
+              
             </div>
             <div className="flex items-center gap-3">
               <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700">
@@ -205,7 +207,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <h2 className="text-lg font-semibold text-slate-900">Citas de Hoy</h2>
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1" onClick={() => router.push('/citas')}>
                   Ver todas
                   <ChevronRight size={16} />
                 </button>
@@ -358,7 +360,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <FloatingChat />
+      {/* <FloatingChat /> */}
     </div>
   );
 };

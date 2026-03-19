@@ -139,6 +139,7 @@ export async function GET(req: NextRequest) {
           c.intHora,
           c.strMotivo,
           d.strNombre,
+          d.strApellidos,
           c.strEstatusCita,
           e.strNombreEspecialidad
         FROM tbcitas c
@@ -151,7 +152,7 @@ export async function GET(req: NextRequest) {
 
       const [citas] = await db.query(citasQuery, [idPaciente]);
 
-      console.log('Citas del paciente:', citas);
+   //   console.log('Citas del paciente:', citas);
       return NextResponse.json({
         success: true,
         data: {

@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { getAuthenticatedUser } from '@/lib/auth-helper';
 import { db } from '@/lib/db'; // Asegúrate de que la ruta sea correcta
+import { sendDoctorAppointmentNotification } from '@/lib/mailer';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Ajusta esta ruta según tu proyecto
@@ -123,10 +124,52 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       intHora || '',
       strMotivo || '',
     ]
-    //console.log('Parámetros enviados:', parametros.length, parametros);
-   // console.log('Parámetros enviados:', parametros.length, parametros);
+    
+    // Crear la cita
     const [rows]: any = await db.query('CALL sp_tbCitas_Save(?,?,?,?,?,?,?,?,?,?)',parametros);
     const cita = rows[0][0];
+
+    // Obtener información del doctor y especialidad para enviar correo
+    try {
+      const [doctorData]: any = await db.query(
+        `SELECT 
+          d.strEmail, 
+          d.strNombre, 
+          d.strApellidos,
+          e.strNombreEspecialidad
+        FROM tbdoctores d
+        LEFT JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
+        WHERE d.intDoctor = ?`,
+        [parseInt(intDoctor)]
+      );
+
+      if (doctorData && doctorData.length > 0) {
+        const doctor = doctorData[0];
+        
+        // Enviar correo de notificación al doctor
+        await sendDoctorAppointmentNotification(
+          doctor.strEmail,
+          `${doctor.strNombre} ${doctor.strApellidos}`,
+          {
+            nombrePaciente: strNombrePaciente,
+            fecha: datFecha,
+            hora: intHora,
+            motivo: strMotivo,
+            telefono: strTelefonoPaciente,
+            correo: strCorreoPaciente,
+            edad: parseInt(intEdad),
+            genero: strGenero,
+            especialidad: doctor.strNombreEspecialidad || 'Medicina General'
+          }
+        );
+        
+        console.log(`Correo de notificación enviado al Dr(a). ${doctor.strNombre} ${doctor.strApellidos}`);
+      }
+    } catch (emailError) {
+      // Si falla el correo, no afecta la creación de la cita
+      console.error("Error al enviar correo al doctor:", emailError);
+    }
+
     return NextResponse.json(cita, { status: 200 });
 
   } catch (error) {

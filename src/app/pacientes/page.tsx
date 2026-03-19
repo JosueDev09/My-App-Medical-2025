@@ -390,7 +390,7 @@ return (
                               {cita.strNombreEspecialidad}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Dr. {cita.strNombreDoctor}
+                              Dr. {cita.strNombre} {cita.strApellidos}
                             </p>
                           </div>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${

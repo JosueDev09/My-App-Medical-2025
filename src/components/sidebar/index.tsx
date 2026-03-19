@@ -273,7 +273,7 @@ export default function Sidebar({
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-white truncate">
-                {userName || 'Usuario'}
+                {userName ? userName.toUpperCase() : 'USUARIO'}
               </p>
               <p className="text-xs text-slate-400 truncate capitalize">
                 {userRole || 'Cargando...'}

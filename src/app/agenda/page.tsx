@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import {
   Calendar,
@@ -19,7 +19,9 @@ import {
   Activity,
   UserCheck,
   Stethoscope,
-  Save
+  Save,
+  FileCheck,
+  Printer
 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import {
@@ -117,6 +119,30 @@ export default function AgendaPage() {
     dblSaturacionOxigeno: ""
   });
   const [tabActual, setTabActual] = useState("consulta");
+
+  // Estados para receta médica
+  const [modalReceta, setModalReceta] = useState(false);
+  const [consultaFinalizada, setConsultaFinalizada] = useState<any>(null);
+  const [cargandoReceta, setCargandoReceta] = useState(false);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
+  const recetaRef = useRef<HTMLDivElement>(null);
+  
+  // Estados editables para la receta
+  const [recetaEditable, setRecetaEditable] = useState<{
+    strDiagnostico: string;
+    strTratamiento: string;
+    strPresionArterial: string;
+    dblTemperatura: string;
+    dblPeso: string;
+    dblTalla: string;
+  }>({
+    strDiagnostico: "",
+    strTratamiento: "",
+    strPresionArterial: "",
+    dblTemperatura: "",
+    dblPeso: "",
+    dblTalla: ""
+  });
 
   // Estados para filtros de admin/recepción
   const [rol, setRol] = useState<string>("");
@@ -372,6 +398,175 @@ export default function AgendaPage() {
     } catch (error) {
       console.error("Error:", error);
       alert("Error al finalizar la consulta");
+    }
+  };
+
+  // Obtener y mostrar receta de consulta finalizada
+  const verReceta = async (intCita: number) => {
+    setCargandoReceta(true);
+    try {
+      const response = await fetch(`/api/consultas?intCita=${intCita}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setConsultaFinalizada(data);
+        
+        // Inicializar valores editables
+        setRecetaEditable({
+          strDiagnostico: data.consulta.strDiagnostico || "",
+          strTratamiento: data.consulta.strTratamiento || "",
+          strPresionArterial: data.signosVitales?.strPresionArterial || "",
+          dblTemperatura: data.signosVitales?.dblTemperatura || "",
+          dblPeso: data.signosVitales?.dblPeso || "",
+          dblTalla: data.signosVitales?.dblTalla || ""
+        });
+        
+        setModalReceta(true);
+      } else {
+        alert("No se pudo cargar la receta");
+      }
+    } catch (error) {
+      console.error("Error al obtener receta:", error);
+      alert("Error al cargar la receta");
+    } finally {
+      setCargandoReceta(false);
+    }
+  };
+
+  // Imprimir receta - Generar PDF con datos editables
+  const imprimirReceta = async () => {
+    if (!consultaFinalizada) return;
+    
+    try {
+      // Crear contenido HTML para el PDF usando los valores editables
+      const contenidoPDF = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              color: #000;
+            }
+            .header {
+              border-bottom: 2px solid #000;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+              text-align: center;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 24px;
+              font-weight: bold;
+            }
+            .header h2 {
+              margin: 5px 0;
+              font-size: 18px;
+            }
+            .header p {
+              margin: 3px 0;
+              font-size: 14px;
+            }
+            .info-paciente {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 15px;
+              margin-bottom: 30px;
+              padding: 15px;
+              background: #f9f9f9;
+              border: 1px solid #ddd;
+            }
+            .info-item {
+              font-size: 14px;
+            }
+            .info-item strong {
+              font-weight: bold;
+            }
+            .seccion {
+              margin-bottom: 25px;
+            }
+            .seccion h3 {
+              font-size: 16px;
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: #000;
+            }
+            .seccion p {
+              font-size: 14px;
+              line-height: 1.6;
+              white-space: pre-wrap;
+            }
+            .footer {
+              border-top: 2px solid #000;
+              padding-top: 20px;
+              margin-top: 40px;
+              text-align: center;
+            }
+            .footer p {
+              margin: 5px 0;
+              font-size: 13px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>CONSULTORIO MÉDICO</h1>
+            <h2>DR(A). ${consultaFinalizada.consulta.strNombreDoctor.toUpperCase()} ${consultaFinalizada.consulta.strApellidosDoctor.toUpperCase()}</h2>
+            ${consultaFinalizada.consulta.strNombreEspecialidad ? `<p>${consultaFinalizada.consulta.strNombreEspecialidad}</p>` : ''}
+            ${consultaFinalizada.consulta.strCedulaProfesional ? `<p>Cédula Profesional: ${consultaFinalizada.consulta.strCedulaProfesional}</p>` : ''}
+          </div>
+
+          <div class="info-paciente">
+            <div class="info-item">
+              <strong>Paciente:</strong> ${consultaFinalizada.consulta.strNombrePaciente} ${consultaFinalizada.consulta.strApellidosPaciente}
+            </div>
+            <div class="info-item">
+              <strong>Fecha:</strong> ${new Date(consultaFinalizada.consulta.datFechaConsulta).toLocaleDateString('es-MX')}
+            </div>
+            ${recetaEditable.strPresionArterial ? `<div class="info-item"><strong>TA:</strong> ${recetaEditable.strPresionArterial}</div>` : ''}
+            ${recetaEditable.dblTemperatura ? `<div class="info-item"><strong>Temp:</strong> ${recetaEditable.dblTemperatura} °C</div>` : ''}
+            ${recetaEditable.dblPeso ? `<div class="info-item"><strong>Peso:</strong> ${recetaEditable.dblPeso} kg</div>` : ''}
+            ${recetaEditable.dblTalla ? `<div class="info-item"><strong>Talla:</strong> ${recetaEditable.dblTalla} m</div>` : ''}
+          </div>
+
+          ${recetaEditable.strDiagnostico ? `
+          <div class="seccion">
+            <h3>Diagnóstico:</h3>
+            <p>${recetaEditable.strDiagnostico}</p>
+          </div>` : ''}
+
+          ${recetaEditable.strTratamiento ? `
+          <div class="seccion">
+            <h3>Tratamiento:</h3>
+            <p>${recetaEditable.strTratamiento}</p>
+          </div>` : ''}
+
+          <div class="footer">
+            <p><strong>${consultaFinalizada.consulta.strNombreDoctor} ${consultaFinalizada.consulta.strApellidosDoctor}</strong></p>
+            <p>${consultaFinalizada.consulta.strNombreEspecialidad || 'Medicina General'}</p>
+            <p>Consultorio Médico</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Crear un blob con el contenido HTML
+      const blob = new Blob([contenidoPDF], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // Abrir en una nueva ventana para imprimir
+      const ventanaImpresion = window.open(url, '_blank');
+      if (ventanaImpresion) {
+        ventanaImpresion.onload = () => {
+          ventanaImpresion.print();
+          URL.revokeObjectURL(url);
+        };
+      }
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      alert("Error al generar la receta");
     }
   };
 
@@ -761,6 +956,18 @@ export default function AgendaPage() {
                           Cancelar
                         </Button>
                       )}
+
+                      {cita. strEstatuscita  === "FINALIZADA" && (
+                        <Button
+                          size="sm"
+                          onClick={() => verReceta(cita.intCita)}
+                          disabled={cargandoReceta}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <FileCheck className="w-4 h-4 mr-2" />
+                          {cargandoReceta ? "Cargando..." : "Ver Receta"}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1055,6 +1262,215 @@ export default function AgendaPage() {
                 >
                   <Save className="w-4 h-4 mr-2" />
                   FINALIZAR CONSULTA
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Receta Médica */}
+      <Dialog open={modalReceta} onOpenChange={setModalReceta}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto print:max-w-full">
+          <DialogHeader className="print:hidden">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <FileCheck className="w-6 h-6 text-green-600" />
+              Receta Médica
+            </DialogTitle>
+          </DialogHeader>
+
+          {consultaFinalizada && (
+            <div className="print:text-black">
+              {/* Formato de Receta Profesional */}
+              <div className="bg-white p-6 sm:p-8 print:p-8">
+                
+                {/* Encabezado con logos y título */}
+                <div className="border-b-2 border-gray-800 pb-4 mb-6 print:border-black">
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Logo izquierdo - Placeholder */}
+                    <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 border-2 border-gray-800 rounded flex items-center justify-center print:border-black">
+                      <Stethoscope className="w-8 h-8 sm:w-10 sm:h-10 text-gray-700" />
+                    </div>
+
+                    {/* Información central */}
+                    <div className="flex-1 text-center">
+                      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">CONSULTORIO MÉDICO</h1>
+                      <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
+                        DR(A). {consultaFinalizada.consulta.strNombreDoctor.toUpperCase()} {consultaFinalizada.consulta.strApellidosDoctor.toUpperCase()}
+                      </h2>
+                      {consultaFinalizada.consulta.strNombreEspecialidad && (
+                        <p className="text-xs sm:text-sm text-gray-700">
+                          {consultaFinalizada.consulta.strNombreEspecialidad}
+                        </p>
+                      )}
+                      <p className="mr-[190px] mt-[15px] text-xs sm:text-sm text-black font-bold">
+                          Cedula profesional: <span className="text-black font-light"> {consultaFinalizada.consulta.strCedulaProfesional} </span>
+
+
+                        </p>
+                    </div>
+                   {/* Información cedulas */}
+                    {/* <div className="flex-1 text-left">                    
+                      {consultaFinalizada.consulta.strNombreEspecialidad && (
+                        <p className="text-xs sm:text-sm text-gray-700">
+                          {consultaFinalizada.consulta.strNombreEspecialidad}
+                        </p>
+                      )}
+                    </div> */}
+
+                    {/* Logo derecho - Caduceo médico */}
+                    <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                      <Activity className="w-10 h-10 sm:w-12 sm:h-12 text-gray-700" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información del paciente y signos vitales en línea */}
+                {/* <div className="mb-6 border-b border-gray-400 pb-4 print:border-gray-600"> */}
+               
+                {/* </div> */}
+
+                {/* Sección R.P. (Receta/Prescripción) */}
+                <div className="mb-6">
+                  <div className="flex items-center mb-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">Receta Medica</h3>
+                  </div>
+
+                  {/* Área de la receta con marca de agua */}
+                  <div className="relative min-h-[300px] sm:min-h-[400px] border border-gray-300 p-4 sm:p-6 rounded print:border-gray-600">
+                    {/* Marca de agua de fondo */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none print:opacity-10">
+                      <Activity className="w-48 h-48 sm:w-64 sm:h-64 text-gray-400 transform rotate-12" />
+                    </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 text-xs sm:text-sm mb-[50px]">
+                    <div className="lg:col-span-2">
+                      <span className="text-lg font-bold">Nombre:</span> <span className="text-lg">{consultaFinalizada.consulta.strNombrePaciente} {consultaFinalizada.consulta.strApellidosPaciente}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold whitespace-nowrap">TA:</span> 
+                      <Input
+                        value={recetaEditable.strPresionArterial}
+                        onChange={(e) => setRecetaEditable({...recetaEditable, strPresionArterial: e.target.value})}
+                        placeholder="120/80"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold whitespace-nowrap">Temp:</span> 
+                      <Input
+                        value={recetaEditable.dblTemperatura}
+                        onChange={(e) => setRecetaEditable({...recetaEditable, dblTemperatura: e.target.value})}
+                        placeholder="36.5"
+                        className="h-8 text-sm"
+                        type="number"
+                        step="0.1"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold whitespace-nowrap">Peso:</span> 
+                      <Input
+                        value={recetaEditable.dblPeso}
+                        onChange={(e) => setRecetaEditable({...recetaEditable, dblPeso: e.target.value})}
+                        placeholder="70"
+                        className="h-8 text-sm"
+                        type="number"
+                        step="0.1"
+                      />
+                    </div>
+                    <div>
+                      <span className="font-bold">Fecha:</span> <span className="text-lg">{new Date(consultaFinalizada.consulta.datFechaConsulta).toLocaleDateString('es-MX')}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold whitespace-nowrap">Talla:</span> 
+                      <Input
+                        value={recetaEditable.dblTalla}
+                        onChange={(e) => setRecetaEditable({...recetaEditable, dblTalla: e.target.value})}
+                        placeholder="1.75"
+                        className="h-8 text-sm"
+                        type="number"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                    {/* Contenido de la receta */}
+                    <div className="relative z-10">
+                      {/* Diagnóstico */}
+                      <div className="mb-4">
+                        <p className="font-bold text-gray-900 mb-1">Diagnóstico:</p>
+                        <Textarea
+                          value={recetaEditable.strDiagnostico}
+                          onChange={(e) => setRecetaEditable({...recetaEditable, strDiagnostico: e.target.value})}
+                          placeholder="Escriba el diagnóstico..."
+                          className="min-h-[100px] text-sm sm:text-base"
+                        />
+                      </div>
+
+                      {/* Tratamiento/Receta */}
+                      <div className="mb-4">
+                        <p className="font-bold text-gray-900 mb-1">Tratamiento:</p>
+                        <Textarea
+                          value={recetaEditable.strTratamiento}
+                          onChange={(e) => setRecetaEditable({...recetaEditable, strTratamiento: e.target.value})}
+                          placeholder="Escriba el tratamiento..."
+                          className="min-h-[150px] text-sm sm:text-base"
+                        />
+                      </div>
+
+                      {/* Indicaciones */}
+                      {/* {consultaFinalizada.consulta.strIndicaciones && (
+                        <div className="mb-4">
+                          <p className="font-bold text-gray-900 mb-1">Indicaciones:</p>
+                          <p className="text-gray-800 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
+                            {consultaFinalizada.consulta.strIndicaciones}
+                          </p>
+                        </div>
+                      )} */}
+
+                      {/* Pronóstico */}
+                      {/* {consultaFinalizada.consulta.strPronostico && (
+                        <div>
+                          <p className="font-bold text-gray-900 mb-1">Pronóstico:</p>
+                          <p className="text-gray-800 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">
+                            {consultaFinalizada.consulta.strPronostico}
+                          </p>
+                        </div>
+                      )} */}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pie de página con información del médico */}
+                <div className="border-t-2 border-gray-800 pt-4 mt-8 print:border-black">
+                  <div className="text-xs sm:text-sm text-gray-700 text-center">
+                    <p className="font-bold mb-1">
+                      {consultaFinalizada.consulta.strNombreDoctor} {consultaFinalizada.consulta.strApellidosDoctor}
+                    </p>
+                    <p className="text-gray-600">
+                      {consultaFinalizada.consulta.strNombreEspecialidad || 'Medicina General'}
+                    </p>
+                    <p className="text-gray-600 mt-1">
+                      Consultorio Médico • Teléfono: [Contacto] • Email: [Correo]
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones - Solo visible en pantalla */}
+              <div className="flex gap-3 justify-end pt-4 border-t print:hidden">
+                <Button
+                  variant="outline"
+                  onClick={() => setModalReceta(false)}
+                >
+                  Cerrar
+                </Button>
+                <Button
+                  onClick={imprimirReceta}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Imprimir Receta
                 </Button>
               </div>
             </div>
