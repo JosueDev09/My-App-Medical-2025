@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { SignIn } from "../ui/signin-google/signin-google";
+import { signIn } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -36,41 +36,37 @@ export function FormLogin(){
     if (hasError) return;
   
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ strUsuario, strContra })
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        setErrorContra(errorData.error || 'Error al iniciar sesión');
-        return;
-      }
-  
-      const data = await res.json();
-
-      if (data.error) {
-        setErrorContra(data.error);
-        return;
-      } 
-      
       Swal.fire({
         title: "Autenticando datos...",
         allowOutsideClick: false,
         showConfirmButton: false,
-        timer: 3000,
         timerProgressBar: true,
         didOpen: () => {
           Swal.showLoading();
         },
-      }); 
-      
-      await esperar(3000);
-      router.push("/dashboard");
-    
+      });
+
+      const result = await signIn("credentials", {
+        username: strUsuario,
+        password: strContra,
+        redirect: false,
+        callbackUrl: '/dashboard',
+      });
+
+      console.log("Resultado de signIn:", result);
+
+      if (result?.error) {
+        Swal.close();
+        setErrorContra('Usuario o contraseña incorrectos');
+        return;
+      }
+
+      if (result?.ok) {
+        await esperar(1000);
+        Swal.close();
+        // Usar window.location para forzar recarga completa y actualización de sesión
+        window.location.href = '/dashboard';
+      }
     } catch (err) {
       console.error("Error al hacer login:", err);
       Swal.close();
@@ -84,6 +80,32 @@ export function FormLogin(){
 
   return (
     <form onSubmit={handleLogin} className="w-full mx-auto space-y-5">
+      {/* Logo y título */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 backdrop-blur-sm">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="32" 
+            height="32" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="text-white" 
+            aria-hidden="true"
+          >
+            <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
+          </svg>
+        </div>
+        <h1 className="text-5xl font-bold mb-4 leading-tight text-gray-900 dark:text-white">
+          Bienvenido
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Ingresa tus credenciales para acceder al sistema
+        </p>
+      </div>
       {/* Campo Usuario */}
       <div className="space-y-2">
         <label htmlFor="strUsuario" className="text-xs font-medium text-slate-600 uppercase tracking-wide">
@@ -154,19 +176,6 @@ export function FormLogin(){
       >
         Iniciar Sesión
       </button>
-
-      {/* Divider */}
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200"></div>
-        </div>
-        {/* <div className="relative flex justify-center text-xs">
-          <span className="px-3 bg-white text-slate-500">O continúa con</span>
-        </div> */}
-      </div>
-
-      {/* Google Sign In */}
-      {/* <SignIn /> */}
     </form>
   );
 }

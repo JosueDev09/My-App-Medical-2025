@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
-      <body className="min-h-screen w-full bg-gray-100 lg:overflow-auto sm:overflow-auto">
+    <html lang="es" className="h-full w-full">
+      <body className="w-full h-full bg-gray-100">
         <LayoutClient>{children}</LayoutClient>
       </body>
     </html>

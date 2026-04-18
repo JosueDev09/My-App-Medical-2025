@@ -5,21 +5,24 @@ declare module "next-auth" {
   interface User {
     id: number;
     rol: string;
+    intDoctor?: number;
   }
 
   interface Session {
     user: {
       id: number;
       rol: string;
-      username?: string | null;
+      intDoctor?: number;
+      name?: string | null;
       email?: string | null;
       image?: string | null;
-      authType?: string; // 'credenciales' o 'google'
     };
   }
 
   interface JWT {
     id: number;
     rol: string;
+    intDoctor?: number;
+    username?: string;
   }
 }

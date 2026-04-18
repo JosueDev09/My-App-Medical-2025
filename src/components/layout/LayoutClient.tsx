@@ -37,6 +37,7 @@ export default function LayoutClient({ children }: LayoutClientProps) {
 
   return (
     <SessionProvider>
+      <div className="h-full w-full">
       {/* Sidebar */}
       {!hideLayout && (
         <Sidebar
@@ -47,7 +48,7 @@ export default function LayoutClient({ children }: LayoutClientProps) {
       )}
 
       {/* Contenedor de contenido */}
-      <div className={`transition-all duration-300 ${!hideLayout ? 'md:ml-72' : ''}`}>
+      <div className={`${!hideLayout ? 'transition-all duration-300 md:ml-72 h-full' : 'w-full h-full'}`}>
         {/* Topbar + botón hamburguesa */}
         {!hideLayout && (
           <div className="md:hidden sticky top-0 z-40 bg-white flex items-center justify-between px-4 py-2 border-b">
@@ -62,12 +63,15 @@ export default function LayoutClient({ children }: LayoutClientProps) {
         )}
         
         <main
-          className={`min-h-screen w-full ${
-            hideLayout ? 'flex justify-center items-center' : 'p-6 md:p-8 overflow-auto'
+          className={`w-full ${
+            hideLayout 
+              ? 'h-screen overflow-hidden' 
+              : 'min-h-screen p-6 md:p-8 overflow-auto'
           }`}
         >
           {children}
         </main>
+      </div>
       </div>
     </SessionProvider>
   );

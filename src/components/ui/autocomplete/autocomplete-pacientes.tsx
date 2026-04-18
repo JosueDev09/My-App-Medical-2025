@@ -7,8 +7,6 @@ import { Label } from '@/components/ui/label/label';
 interface Paciente {
   intPaciente: number;
   strNombre: string;
-  strApellidoPaterno: string | null;
-  strApellidoMaterno: string | null;
   strEmail: string;
   strTelefono: string;
   strGenero: string;
@@ -81,7 +79,7 @@ export default function AutocompletePacientes({
   }, [value]);
 
   const handleSelectPaciente = (paciente: Paciente) => {
-    const nombreCompleto = `${paciente.strNombre} ${paciente.strApellidoPaterno || ''} ${paciente.strApellidoMaterno || ''}`.trim();
+    const nombreCompleto = paciente.strNombre;
     onChange(nombreCompleto);
     setPacienteSeleccionado(paciente);
     setMostrarSugerencias(false);
@@ -138,7 +136,7 @@ export default function AutocompletePacientes({
       {mostrarSugerencias && sugerencias.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
           {sugerencias.map((paciente) => {
-            const nombreCompleto = `${paciente.strNombre} ${paciente.strApellidoPaterno || ''} ${paciente.strApellidoMaterno || ''}`.trim();
+            const nombreCompleto = paciente.strNombre;
             const edad = calcularEdad(paciente.datFechaNacimiento);
             
             return (

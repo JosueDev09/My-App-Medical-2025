@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - bcrypt
+  - canvas
+  - core-js
+  - esbuild
+  - sharp
+  - unrs-resolver

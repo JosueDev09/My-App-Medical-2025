@@ -16,7 +16,10 @@ import {
   X,
   Notebook,
   CalendarPlus,
-  LogOut
+  LogOut,
+  FileText,
+  FolderOpen,
+  FlaskConical
 } from "lucide-react";
 import { useSession } from 'next-auth/react';
 import Swal from 'sweetalert2';
@@ -26,6 +29,7 @@ const routes = [
   { name: 'Citas', path: '/citas', icon: <CalendarPlus size={20} />, roles: ['SuperAdmin', 'doctor','Paciente'] },
   { name: 'Agenda', path: '/agenda', icon: <Notebook size={20} />, roles: ['doctor','SuperAdmin'] },
   { name: 'Historial Médico', path: '/historial-medico', icon: <ClipboardList size={20} />, roles: ['SuperAdmin', 'Doctor', 'Recepcion'] },
+  { name: 'Diagnósticos CIE-10', path: '/diagnosticos', icon: <FlaskConical size={20} />, roles: ['SuperAdmin', 'Doctor'] },
   { name: 'Pacientes', path: '/pacientes', icon: <Users size={20} />, roles: ['SuperAdmin', 'doctor'] },
   { name: 'Doctores', path: '/medicos/lista-medicos', icon: <Stethoscope size={20} />, roles: ['SuperAdmin'] },
   // {
@@ -49,7 +53,7 @@ const routes = [
       { name: 'Pagos', path: '/contabilidad/pagos', icon: <ClipboardList size={18} /> },
     ]
   },
-];
+];  
 
 export default function Sidebar({
   isOpen,
@@ -82,8 +86,8 @@ export default function Sidebar({
     }
 
     // Obtener el nombre del usuario
-    if (session?.user?.username) {
-      setUserName(session.user.username);
+    if (session?.user?.name) {
+      setUserName(session.user.name);
     } else {
       const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
       const cookieUsername = usernameMatch?.[2];

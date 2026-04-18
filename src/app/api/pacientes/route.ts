@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     if (tipo === 'todos' || !tipo) {
       const session = await getAuthenticatedUser();
       const doctor = session?.intDoctor;
+      //console.log("Session en GET de pacientes:", doctor);
       //console.log("Usuario en GET de pacientes:", session?.intDoctor, "Rol:", session?.rol);
       let query = `
         SELECT 
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
       `;
 
       const params: any[] = [];
-      if(session.rol === 'doctor') {
+      if(session.rol === 'Doctor') {
         query += ` WHERE c.intDoctor = ?`;
         params.push(doctor);
       }
@@ -66,7 +67,7 @@ export async function GET(req: NextRequest) {
 
       // Obtener total de pacientes para paginación
      
-      let countQuery = `SELECT COUNT(*) as total FROM tbpacientes p`;
+      let countQuery = `SELECT COUNT(*) as total FROM tbpacientes p INNER JOIN tbcitas c ON p.intPaciente = c.intPaciente`;
       const countParams: any[] = [];
        if(session.rol === 'Doctor') {
         countQuery += ` WHERE c.intDoctor = ?`;

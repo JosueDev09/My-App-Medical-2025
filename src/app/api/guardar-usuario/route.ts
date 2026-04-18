@@ -46,11 +46,24 @@ export async function POST(req: NextRequest) {
       return new Response("Usuario no encontrado", { status: 404 });
     }
 
+    // Si es un doctor, obtener también su intDoctor
+    let intDoctor = null;
+    if (user.intRol === 4) { // 4 = Doctor
+      const [doctorRows]: any = await db.query(
+        "SELECT intDoctor FROM tbdoctores WHERE intUsuario = ?",
+        [user.id]
+      );
+      if (doctorRows.length > 0) {
+        intDoctor = doctorRows[0].intDoctor;
+      }
+    }
+
     return Response.json({
       success: true,
       tipo: user.tipo,
       rol: mapRol(user.intRol), // ← para que te dé 'doctor', 'admin', etc.
       id: user.id,
+      intDoctor: intDoctor, // ← añadimos el intDoctor si es doctor
     });
   } catch (error) {
     console.error("Error en guardar-usuario:");

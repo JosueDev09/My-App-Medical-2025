@@ -27,6 +27,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
 
+  // Si es un doctor, obtener su intDoctor
+  let intDoctor = null;
+  if (user.intRol === 4) { // 4 = Doctor
+    const [doctorRows]: any = await db.query(
+      "SELECT intDoctor FROM tbdoctores WHERE intUsuario = ?",
+      [user.id]
+    );
+    if (doctorRows.length > 0) {
+      intDoctor = doctorRows[0].intDoctor;
+    }
+  }
+
   // Datos que firmaremos en el token
   const payload = {
     id: user.id,
@@ -34,6 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     username: user.strUsuario,
     email: user.strCorreo,
     authType: 'credenciales', // 👈 identificador clave
+    intDoctor: intDoctor, // 👈 agregamos intDoctor
   };
 
   // 🔐 Generar un nuevo token cada vez que inicia sesión
@@ -44,13 +57,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .sign(getJwtSecret());
 
   // 🧁 Guardar en cookie HttpOnly
-  res.setHeader('Set-Cookie', [
+  const cookies = [
     `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=7200`,
     `role=${payload.rol}; Path=/; SameSite=Strict; Max-Age=7200`,
-     `username=${encodeURIComponent(payload.username)}; Path=/; SameSite=Strict; Max-Age=7200`,
-  ]);
+    `username=${encodeURIComponent(payload.username)}; Path=/; SameSite=Strict; Max-Age=7200`,
+    `userId=${user.id}; Path=/; SameSite=Strict; Max-Age=7200`,
+  ];
+
+  // Si es un doctor, agregar intDoctor a las cookies
+  if (intDoctor !== null) {
+    cookies.push(`intDoctor=${intDoctor}; Path=/; SameSite=Strict; Max-Age=7200`);
+  }
+
+  res.setHeader('Set-Cookie', cookies);
   
-  return res.status(200).json({ success: true, token }); 
+  return res.status(200).json({ success: true, token });  
 }  
 
 

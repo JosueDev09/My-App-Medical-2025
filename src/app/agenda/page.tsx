@@ -170,8 +170,8 @@ export default function AgendaPage() {
     }
 
     // Obtener el nombre del usuario
-    if (session?.user?.username) {
-      setUserName(session.user.username);
+    if (session?.user?.name) {
+      setUserName(session.user.name);
     } else {
       const usernameMatch = document.cookie.match(/(^| )username=([^;]+)/);
       const cookieUsername = usernameMatch?.[2];

@@ -1,8 +1,6 @@
 export interface Paciente {
     intPaciente: string | number;
     strNombre: string;
-    strApellidoPaterno: string;
-    strApellidoMaterno: string;
     strTelefono: string;
     strEmail: string;
     strDireccion: string;

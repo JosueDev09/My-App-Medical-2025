@@ -1,15 +1,7 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Paciente } from "@/types/pacientes";   
 import formatearFechaLarga  from "@/lib/formatterFecha";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/table";
 import {
   Dialog,
   DialogContent,
@@ -18,30 +10,104 @@ import {
 } from "@/components/ui/dialog/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs/tabs";
 import { Button } from "@/components/ui/button/button";
-import { Pencil, Trash2,User,Calendar,Stethoscope ,Eye , Clock,Activity,Mail,PhoneCallIcon,MapPinHouseIcon, CalendarFoldIcon, Heart, Pill, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input/input";
+import { Badge } from "@/components/ui/badge/badge";
+import { 
+  Pencil, 
+  Trash2,
+  User,
+  Calendar,
+  Stethoscope,
+  Eye,
+  Clock,
+  Activity,
+  Mail,
+  PhoneCallIcon,
+  MapPinHouseIcon,
+  CalendarFoldIcon,
+  Heart,
+  Pill,
+  FileText,
+  FolderOpen,
+  Search,
+  Filter,
+  UserPlus,
+  ChevronRight,
+  ChevronLeft
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 
 export default function PacientesPage() {
+  const router = useRouter();
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [pacientesFiltrados, setPacientesFiltrados] = useState<Paciente[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState<any>(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<"TODOS" | "ACTIVO" | "INACTIVO">("TODOS");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [totalPacientes, setTotalPacientes] = useState(0);
+  const [cargando, setCargando] = useState(false);
+  const itemsPorPagina = 12;
   
-  /* ---------- Cargar citas al montar ---------- */
+  /* ---------- Cargar pacientes con paginación ---------- */
   useEffect(() => {
     async function fetchPacientes() {
+      setCargando(true);
       try {
-        const response = await fetch("/api/pacientes");
+        // Si hay búsqueda o filtro, cargar todos los pacientes
+        const usarPaginacion = !busqueda && filtroEstado === "TODOS";
+        
+        let url = "/api/pacientes";
+        if (usarPaginacion) {
+          const offset = (paginaActual - 1) * itemsPorPagina;
+          url = `/api/pacientes?limit=${itemsPorPagina}&offset=${offset}`;
+        }
+        
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Network response was not ok");
-        const data: { data: Paciente[] } = await response.json();
-       // console.log("Datos recibidos:", data.data);
+        const data: { data: Paciente[]; total: number } = await response.json();
+        
         setPacientes(data.data);
+        setTotalPacientes(data.total);
+        
+        // Aplicar filtros locales si hay búsqueda o filtro de estado
+        if (busqueda || filtroEstado !== "TODOS") {
+          let resultado = data.data;
+          
+          // Filtrar por búsqueda
+          if (busqueda.trim()) {
+            resultado = resultado.filter(p => 
+              p.strNombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+              p.strEmail?.toLowerCase().includes(busqueda.toLowerCase()) ||
+              p.strTelefono?.includes(busqueda)
+            );
+          }
+
+          // Filtrar por estado
+          if (filtroEstado !== "TODOS") {
+            resultado = resultado.filter(p => p.strEstado === filtroEstado);
+          }
+          
+          setPacientesFiltrados(resultado);
+        } else {
+          setPacientesFiltrados(data.data);
+        }
       } catch (error) {
         console.error("Error al obtener los pacientes:", error);
+      } finally {
+        setCargando(false);
       }
     }
     fetchPacientes();
-  }, []);
+  }, [paginaActual, busqueda, filtroEstado]);
+
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, filtroEstado]);
 
   /* ---------- Cargar detalle del paciente ---------- */
   const handleVerDetalle = async (idPaciente: string | number) => {
@@ -73,104 +139,312 @@ export default function PacientesPage() {
     return edad;
   };
 
+  const obtenerIniciales = (nombre: string): string => {
+    const palabras = nombre.trim().split(' ');
+    if (palabras.length >= 2) {
+      return `${palabras[0].charAt(0)}${palabras[1].charAt(0)}`.toUpperCase();
+    }
+    return nombre.substring(0, 2).toUpperCase();
+  };
+
+  const obtenerColorAvatar = (index: number): string => {
+    const colores = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-red-500",
+      "bg-yellow-500",
+      "bg-teal-500"
+    ];
+    return colores[index % colores.length];
+  };
+
 return (
-  <div className="p-6">
-    <h1 className="text-2xl font-semibold mb-6">🧑 Pacientes</h1>
-    <div className="w-full overflow-x-auto">
+  <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+    <div className="max-w-7xl mx-auto space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Pacientes</h1>
+          <p className="text-gray-600 mt-1">
+            Total: {totalPacientes} pacientes registrados
+          </p>
+        </div>
+        <Button 
+          onClick={() => router.push("/pacientes/nuevo")}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+        >
+          <UserPlus className="w-5 h-5" />
+          Nuevo Paciente
+        </Button>
+      </div>
 
-   
-    <div className="rounded-xl border shadow-sm overflow-hidden  border-gray-200">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/50 ">
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-muted-foreground" />
-               Paciente
+      {/* Barra de búsqueda y filtros */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Búsqueda */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Buscar por nombre, email, teléfono o CURP..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="pl-10 w-full"
+            />
           </div>
-          </TableHead>
 
-          <TableHead className="text-left font-semibold border-r border-gray-200">
+          {/* Filtros de estado */}
           <div className="flex items-center gap-2">
-            <PhoneCallIcon className="w-4 h-4 text-muted-foreground" />
-               Telefono
+            <Filter className="w-5 h-5 text-gray-600" />
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant={filtroEstado === "TODOS" ? "default" : "outline"}
+                onClick={() => setFiltroEstado("TODOS")}
+              >
+                Todos
+              </Button>
+              <Button
+                size="sm"
+                variant={filtroEstado === "ACTIVO" ? "default" : "outline"}
+                onClick={() => setFiltroEstado("ACTIVO")}
+                className={filtroEstado === "ACTIVO" ? "bg-green-600 hover:bg-green-700" : ""}
+              >
+                Activos
+              </Button>
+              <Button
+                size="sm"
+                variant={filtroEstado === "INACTIVO" ? "default" : "outline"}
+                onClick={() => setFiltroEstado("INACTIVO")}
+                className={filtroEstado === "INACTIVO" ? "bg-gray-600 hover:bg-gray-700" : ""}
+              >
+                Inactivos
+              </Button>
+            </div>
           </div>
-          </TableHead>
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-muted-foreground" />
-               Correo
+        </div>
+      </div>
+
+      {/* Lista de pacientes - Vista de tarjetas */}
+      {cargando ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin h-12 w-12 border-4 border-blue-500 rounded-full border-t-transparent mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando pacientes...</p>
           </div>
-          </TableHead>
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
-            <MapPinHouseIcon  className="w-4 h-4 text-muted-foreground" />
-               Direccion
-          </div>
-          </TableHead>
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
-            <CalendarFoldIcon  className="w-4 h-4 text-muted-foreground" />
-               Fecha Nacimiento
-          </div>
-          </TableHead>
-          <TableHead className="text-left font-semibold border-r border-gray-200">
-          <div className="flex items-center gap-2">
-            <Eye  className="w-4 h-4 text-muted-foreground" />
-               Estado
-          </div>
-          </TableHead>
-            <TableHead className="text-left font-semibold">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-         <TableBody>
-            {pacientes.length > 0 ? (
-              pacientes.map((paciente) => (
-                <TableRow
-                  key={`paciente-${paciente.intPaciente}`}
-                  className="hover:bg-muted/10 transition border-gray-200"
-                >
-                  <TableCell className="font-medium border-r border-gray-200">
-                    {paciente.strNombre} {paciente.strApellidoPaterno} {paciente.strApellidoMaterno}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {paciente.strTelefono}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {paciente.strEmail}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {paciente.strDireccion} - {paciente.strCiudad}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200">
-                    {formatearFechaLarga(paciente.datFechaNacimiento)}
-                  </TableCell>                
-                  <TableCell className="border-r border-gray-200">
-                    {paciente.strEstado}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Pencil className="w-4 h-4 cursor-pointer text-blue-500 hover:text-blue-700" />
-                      <Trash2 className="w-4 h-4 cursor-not-allowed text-red-500 hover:text-red-700 "/>
-                      <Eye 
-                        className="w-4 h-4 cursor-pointer text-green-500 hover:text-green-700" 
-                        onClick={() => handleVerDetalle(paciente.intPaciente)}
-                      />
+        </div>
+      ) : pacientesFiltrados.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {busqueda || filtroEstado !== "TODOS" ? "No se encontraron pacientes" : "No hay pacientes registrados"}
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {busqueda || filtroEstado !== "TODOS" 
+              ? "Intenta con otros términos de búsqueda o filtros"
+              : "Comienza agregando tu primer paciente"
+            }
+          </p>
+          {!busqueda && filtroEstado === "TODOS" && (
+            <Button 
+              onClick={() => router.push("/pacientes/nuevo")}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Agregar Paciente
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Indicador de resultados filtrados */}
+          {(busqueda || filtroEstado !== "TODOS") && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">{pacientesFiltrados.length}</span> resultado{pacientesFiltrados.length !== 1 ? 's' : ''} encontrado{pacientesFiltrados.length !== 1 ? 's' : ''}
+                {busqueda && ` para "${busqueda}"`}
+                {filtroEstado !== "TODOS" && ` con estado ${filtroEstado}`}
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setBusqueda("");
+                  setFiltroEstado("TODOS");
+                }}
+                className="text-blue-700 hover:text-blue-900 hover:bg-blue-100"
+              >
+                Limpiar filtros
+              </Button>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {pacientesFiltrados.map((paciente, index) => (
+            <div
+              key={`paciente-${paciente.intPaciente}`}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:border-blue-300 group"
+            >
+              {/* Card Header */}
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  {/* Avatar */}
+                  <div className={`flex-shrink-0 w-14 h-14 rounded-full ${obtenerColorAvatar(index)} flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                    {obtenerIniciales(paciente.strNombre)}
+                  </div>
+
+                  {/* Información principal */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                      {paciente.strNombre}
+                    </h3>
+                    <p className="text-sm text-gray-600 truncate">
+                      {calcularEdad(paciente.datFechaNacimiento)} años • {paciente.strSexo}
+                    </p>
+                    <div className="mt-2">
+                      <Badge 
+                        className={
+                          paciente.strEstado === "ACTIVO" 
+                            ? "bg-green-100 text-green-800 border-green-200"
+                            : "bg-gray-100 text-gray-800 border-gray-200"
+                        }
+                      >
+                        {paciente.strEstado}
+                      </Badge>
                     </div>
-                  </TableCell>
+                  </div>
+                </div>
 
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">
-                  No hay pacientes.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-      </Table>
-    </div>
+                {/* Información de contacto */}
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <PhoneCallIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{paciente.strTelefono}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Mail className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{paciente.strEmail}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <MapPinHouseIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{paciente.strCiudad}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Footer - Acciones */}
+              <div className="border-t border-gray-100 p-3 bg-gray-50 rounded-b-lg flex items-center justify-between">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => router.push(`/expediente/${paciente.intPaciente}`)}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  Expediente
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleVerDetalle(paciente.intPaciente)}
+                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="Ver detalles"
+                  >
+                    <Eye className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={() => router.push(`/pacientes/editar/${paciente.intPaciente}`)}
+                    className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
+                    title="Editar"
+                  >
+                    <Pencil className="w-4 h-4 text-blue-600" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        </div>
+      )}
+
+      {/* Paginación - Solo mostrar cuando no hay filtros activos */}
+      {!cargando && 
+       !busqueda && 
+       filtroEstado === "TODOS" && 
+       pacientesFiltrados.length > 0 && 
+       totalPacientes > itemsPorPagina && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Mostrando {((paginaActual - 1) * itemsPorPagina) + 1} - {Math.min(paginaActual * itemsPorPagina, totalPacientes)} de {totalPacientes} pacientes
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPaginaActual(prev => Math.max(1, prev - 1))}
+                disabled={paginaActual === 1}
+                className="flex items-center gap-1"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Anterior
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.ceil(totalPacientes / itemsPorPagina) }, (_, i) => i + 1)
+                  .filter(page => {
+                    // Mostrar solo páginas relevantes (primera, última, actual y adyacentes)
+                    const totalPages = Math.ceil(totalPacientes / itemsPorPagina);
+                    if (page === 1 || page === totalPages) return true;
+                    if (Math.abs(page - paginaActual) <= 1) return true;
+                    return false;
+                  })
+                  .map((page, index, array) => {
+                    // Añadir puntos suspensivos si hay saltos
+                    const shouldShowEllipsisBefore = index > 0 && page - array[index - 1] > 1;
+                    
+                    return (
+                      <div key={page} className="flex items-center">
+                        {shouldShowEllipsisBefore && (
+                          <span className="px-2 text-gray-400">...</span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant={paginaActual === page ? "default" : "outline"}
+                          onClick={() => setPaginaActual(page)}
+                          className={`min-w-[2.5rem] ${
+                            paginaActual === page 
+                              ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                              : ""
+                          }`}
+                        >
+                          {page}
+                        </Button>
+                      </div>
+                    );
+                  })}
+              </div>
+              
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPaginaActual(prev => Math.min(Math.ceil(totalPacientes / itemsPorPagina), prev + 1))}
+                disabled={paginaActual >= Math.ceil(totalPacientes / itemsPorPagina)}
+                className="flex items-center gap-1"
+              >
+                Siguiente
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
 
     {/* Modal de detalle del paciente */}
@@ -214,7 +488,7 @@ return (
                   <div>
                     <p className="text-sm text-gray-600">Nombre completo</p>
                     <p className="font-semibold">
-                      {pacienteSeleccionado.strNombre} {pacienteSeleccionado.strApellidoPaterno} {pacienteSeleccionado.strApellidoMaterno}
+                      {pacienteSeleccionado.strNombre}
                     </p>
                   </div>
                   <div>
@@ -230,12 +504,12 @@ return (
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Género</p>
-                    <p className="font-semibold">{pacienteSeleccionado.strGenero}</p>
+                    <p className="text-sm text-gray-600">Sexo</p>
+                    <p className="font-semibold">{pacienteSeleccionado.strSexo}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">CURP</p>
-                    <p className="font-semibold">{pacienteSeleccionado.strCurp || 'N/A'}</p>
+                    <p className="text-sm text-gray-600">ID Paciente</p>
+                    <p className="font-semibold">#{pacienteSeleccionado.intPaciente}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Tipo de sangre</p>

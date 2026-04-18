@@ -22,8 +22,6 @@ import AutocompletePacientes from '@/components/ui/autocomplete/autocomplete-pac
 interface PacienteExistente {
   intPaciente: number;
   strNombre: string;
-  strApellidoPaterno: string | null;
-  strApellidoMaterno: string | null;
   strEmail: string;
   strTelefono: string;
   strGenero: string;
@@ -113,7 +111,7 @@ export default function altaCitas () {
                   setForm({
                     ...form,
                     intPaciente: paciente.intPaciente,
-                    strNombrePaciente: `${paciente.strNombre} ${paciente.strApellidoPaterno || ''} ${paciente.strApellidoMaterno || ''}`.trim(),
+                    strNombrePaciente: paciente.strNombre,
                     strCorreoPaciente: paciente.strEmail,
                     strTelefonoPaciente: paciente.strTelefono,
                     intEdad: edad,

@@ -13,27 +13,27 @@ export async function GET(req: NextRequest) {
     if (tipo === 'todos' || !tipo) {
         let query = `
        SELECT D.*, E.strNombreEspecialidad
-       FROM tbdoctores d
-       INNER JOIN tbespecialidades e ON d.intEspecialidad = e.intEspecialidad
+       FROM tbdoctores D
+       INNER JOIN tbespecialidades E ON D.intEspecialidad = E.intEspecialidad
       `;
         const conditions: string[] = [];
         const params: any[] = [];
 
         // Filtrar por ID
         if (id) {
-            conditions.push('d.intDoctor = ?');
+            conditions.push('D.intDoctor = ?');
             params.push(id);
         }
 
         // Filtrar por especialidad
         if (especialidad) {
-            conditions.push('d.intEspecialidad = ?');
+            conditions.push('D.intEspecialidad = ?');
             params.push(especialidad);
         }
 
         // Filtrar por estatus
         if (estatus) {
-            conditions.push('d.strEstatus = ?');
+            conditions.push('D.strEstatus = ?');
             params.push(estatus);
         }
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
             query += ' WHERE ' + conditions.join(' AND ');
         }
 
-        query += ' ORDER BY d.strNombre ASC';
+        query += ' ORDER BY D.strNombre ASC';
        
         const [rows] = await db.execute(query, params);
 
